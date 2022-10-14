@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "822986831227",
+    "project_id": "stepbystep-365",
+    "storage_bucket": "stepbystep-365.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:822986831227:android:19b42b882f95d50e98f9de",
+        "android_client_info": {
+          "package_name": "com.example.stepbystep"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "822986831227-1m35lagp5cfi41fjjb945ocqukn2pjf6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAb9fi9WS5rRMpqH1jfQfclAH7k02BaUMk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "822986831227-1m35lagp5cfi41fjjb945ocqukn2pjf6.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "822986831227-o0nipi201456042ackra3r15mmq2ased.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.stepbystep"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
