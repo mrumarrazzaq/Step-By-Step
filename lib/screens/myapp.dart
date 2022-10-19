@@ -20,19 +20,21 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final _storage = const FlutterSecureStorage();
   bool _isLogin = false;
+  bool _isWaiting = true;
 
   Future<void> checkLoginStatus() async {
     String? value = await _storage.read(key: 'uid');
     if (value == null) {
       setState(() {
         _isLogin = false;
+        _isWaiting = false;
       });
-
       log('---------------');
       log('User is logIN $_isLogin');
     } else {
       setState(() {
         _isLogin = true;
+        _isWaiting = false;
       });
       log('---------------');
       log('User is logIN $_isLogin');
@@ -87,7 +89,18 @@ class _MyAppState extends State<MyApp> {
             unselectedLabelStyle: const TextStyle(fontSize: 10),
           ),
         ),
-        home: _isLogin ? const StepByStep() : const SignInScreen(),
+        home: _isWaiting
+            ? Scaffold(
+                body: Center(
+                  child: CircularProgressIndicator(
+                    color: AppColor.orange,
+                    strokeWidth: 2,
+                  ),
+                ),
+              )
+            : !_isLogin
+                ? const SignInScreen()
+                : const StepByStep(),
       ),
     );
   }

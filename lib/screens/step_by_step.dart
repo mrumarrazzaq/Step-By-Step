@@ -12,6 +12,7 @@ import 'package:stepbystep/screens/home.dart';
 import 'package:stepbystep/screens/security_section/signIn_screen.dart';
 
 import 'package:stepbystep/screens/self_task_manager/task.dart';
+import 'package:stepbystep/visualization/visualization.dart';
 
 class StepByStep extends StatefulWidget {
   const StepByStep({Key? key}) : super(key: key);
@@ -69,6 +70,18 @@ class _StepByStepState extends State<StepByStep> {
     return Scaffold(
       appBar: AppBar(
         title: Image.asset('logos/StepByStep(text).png', height: 22),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const Visualization(),
+                  ));
+            },
+            icon: const Icon(Icons.mobile_friendly),
+          ),
+        ],
       ),
       drawer: Drawer(
         child: IconButton(

@@ -312,28 +312,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             strokeWidth: 3.0,
                           ),
                         )
-                      // Row(
-                      //         mainAxisSize: MainAxisSize.min,
-                      //         children: [
-                      //           SizedBox(
-                      //             height: 30.0,
-                      //             width: 30.0,
-                      //             child: CircularProgressIndicator(
-                      //               color: whiteColor,
-                      //               strokeWidth: 2.0,
-                      //             ),
-                      //           ),
-                      //           const SizedBox(
-                      //             width: 15.0,
-                      //           ),
-                      //           Text(
-                      //             'Please Wait',
-                      //             style: TextStyle(
-                      //               color: whiteColor,
-                      //             ),
-                      //           ),
-                      //         ],
-                      //       )
                       : Text(
                           'Register',
                           style: TextStyle(

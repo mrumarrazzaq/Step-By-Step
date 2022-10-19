@@ -1,4 +1,7 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:developer';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -277,28 +280,70 @@ class _SignInScreenState extends State<SignInScreen> {
                         final provider = Provider.of<GoogleSignInProvider>(
                             context,
                             listen: false);
-                        await provider.googleLogIn();
-                        await storage.write(key: 'uid', value: 'abc...xyz');
-                        await storage.write(key: 'signInWith', value: 'GOOGLE');
+                        try {
+                          await provider.googleLogIn();
+                          await storage.write(key: 'uid', value: 'abc...xyz');
+                          await storage.write(
+                              key: 'signInWith', value: 'GOOGLE');
 
-                        await Fluttertoast.showToast(
-                          msg: 'User Login Successfully', // message
-                          toastLength: Toast.LENGTH_SHORT, // length
-                          gravity: ToastGravity.BOTTOM, // location
-                          backgroundColor: Colors.green,
-                        );
+                          await Fluttertoast.showToast(
+                            msg: 'User Login Successfully', // message
+                            toastLength: Toast.LENGTH_SHORT, // length
+                            gravity: ToastGravity.BOTTOM, // location
+                            backgroundColor: Colors.green,
+                          );
 
-                        setState(() {
-                          _isGoogleSignIn = true;
-                        });
+                          setState(() {
+                            _isGoogleSignIn = true;
+                          });
+                          final currentUser =
+                              FirebaseAuth.instance.currentUser!;
 
-                        // ignore: use_build_context_synchronously
-                        Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const StepByStep(),
-                            ),
-                            (route) => false);
+                          log(currentUser.email!);
+                          log(currentUser.displayName!);
+
+                          String googleUserEmail = '';
+                          bool isCheck = false;
+                          await FirebaseFirestore.instance
+                              .collection('User Data')
+                              .doc(currentUser.email)
+                              .get()
+                              .then((ds) {
+                            isCheck = true;
+                            googleUserEmail = ds['User Email'];
+                          });
+                          if (googleUserEmail != currentUser.email && isCheck) {
+                            final json = {
+                              'User Name': currentUser.displayName!,
+                              'User Email': currentUser.email!,
+                              'User Password': currentUser.uid,
+                            };
+                            user
+                                .collection('User Data')
+                                .doc(currentUser.email!)
+                                .set(json);
+                          }
+
+                          Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const StepByStep(),
+                              ),
+                              (route) => false);
+                        } catch (e) {
+                          await Fluttertoast.showToast(
+                            msg: 'Failed to Login Try Again', // message
+                            toastLength: Toast.LENGTH_SHORT, // length
+                            gravity: ToastGravity.BOTTOM, // location
+                            backgroundColor: Colors.grey,
+                          );
+                          Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const SignInScreen(),
+                              ),
+                              (route) => false);
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         primary: AppColor.white,
