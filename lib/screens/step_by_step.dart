@@ -11,7 +11,6 @@ import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/screens/home.dart';
 import 'package:stepbystep/screens/security_section/signIn_screen.dart';
 
-import 'package:stepbystep/screens/self_task_manager/task.dart';
 import 'package:stepbystep/visualization/visualization.dart';
 
 class StepByStep extends StatefulWidget {
@@ -131,22 +130,6 @@ class _StepByStepState extends State<StepByStep> {
             label: 'Account',
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const Task(),
-            ),
-          );
-        },
-        tooltip: 'Add',
-        child: Image.asset(
-          'assets/to-do-list.png',
-          height: 30,
-          color: AppColor.white,
-        ),
       ),
     );
   }

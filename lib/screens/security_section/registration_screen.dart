@@ -357,6 +357,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           'User Name': personName,
           'User Email': emailController.text.trim(),
           'User Password': passwordController.text.trim(),
+          'Joined Workspaces': [],
+          'Created At': DateTime.now(),
         };
 
         user.collection('User Data').doc(email).set(json);

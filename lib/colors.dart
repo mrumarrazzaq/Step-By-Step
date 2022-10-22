@@ -8,6 +8,7 @@ class AppColor {
   static Color darkGrey = const Color(0xFF636363);
   static Color red = const Color(0xFFD10000);
   static Color green = const Color(0xFF228C22);
+  static Color transparent = Colors.transparent;
 }
 
 class AppChartColor {
