@@ -114,7 +114,7 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => TaskHolder(
+                                    builder: (context) => WorkspaceTaskHolder(
                                       workspaceCode: storedWorkspaces[i]
                                           ['Workspace Code'],
                                       workspaceName: storedWorkspaces[i]

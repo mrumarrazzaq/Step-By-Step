@@ -1,184 +1,177 @@
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:stepbystep/colors.dart';
 
 class WorkspaceTaskTile extends StatelessWidget {
+  bool isOwner;
+  String workspaceTaskCode;
+  String docId;
   String title;
   String description;
   String email;
   String date;
+  int taskStatusValue;
   Color color;
-  Function() leftFunction;
-  Function() rightFunction;
   bool leftButton;
   bool rightButton;
   WorkspaceTaskTile({
     Key? key,
+    required this.isOwner,
+    required this.workspaceTaskCode,
+    required this.docId,
     required this.title,
     required this.description,
     required this.email,
     required this.date,
+    required this.taskStatusValue,
     required this.color,
-    required this.leftFunction,
-    required this.rightFunction,
     required this.leftButton,
     required this.rightButton,
   }) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(
-                  text: 'Task Title      :  ',
-                  style: TextStyle(
-                    color: AppColor.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                TextSpan(
-                  text: title,
-                  style: TextStyle(
-                    color: AppColor.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
+    return GestureDetector(
+      onLongPress: () async {
+        log(docId);
+        await FirebaseFirestore.instance
+            .collection(workspaceTaskCode)
+            .doc(docId)
+            .delete();
+        await Fluttertoast.showToast(
+          msg: 'Task Deleted Successfully', // message
+          toastLength: Toast.LENGTH_SHORT, // length
+          gravity: ToastGravity.BOTTOM, // location
+          backgroundColor: Colors.grey,
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Container(
+          width: double.infinity,
+          margin: const EdgeInsets.symmetric(horizontal: 2.5, vertical: 2.5),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          decoration: BoxDecoration(
+            color: AppColor.white,
+            borderRadius: BorderRadius.circular(10),
           ),
-          const SizedBox(height: 8),
-          Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(
-                  text: 'Assigned By :  ',
-                  style: TextStyle(
-                    color: AppColor.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                TextSpan(
-                  text: email,
-                  style: TextStyle(
-                    color: AppColor.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(
-                  text: 'Due Date       :  ',
-                  style: TextStyle(
-                    color: AppColor.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                TextSpan(
-                  text: date,
-                  style: TextStyle(
-                    color: AppColor.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Visibility(
-                visible: leftButton,
-                child: IconButton(
-                  onPressed: leftFunction,
-                  icon: const Icon(Icons.arrow_back),
+              Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'Task Title      :  ',
+                      style: TextStyle(
+                        color: AppColor.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextSpan(
+                      text: title,
+                      style: TextStyle(
+                        color: AppColor.black,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              Visibility(
-                visible: rightButton,
-                child: IconButton(
-                  onPressed: rightFunction,
-                  icon: const Icon(
-                    Icons.arrow_forward,
-                  ),
+              const SizedBox(height: 8),
+              Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'Assigned By :  ',
+                      style: TextStyle(
+                        color: AppColor.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextSpan(
+                      text: email,
+                      style: TextStyle(
+                        color: AppColor.black,
+                      ),
+                    ),
+                  ],
                 ),
+              ),
+              const SizedBox(height: 8),
+              Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'Due Date       :  ',
+                      style: TextStyle(
+                        color: AppColor.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextSpan(
+                      text: date,
+                      style: TextStyle(
+                        color: AppColor.black,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Visibility(
+                    visible: leftButton,
+                    child: IconButton(
+                      onPressed: () async {
+                        if (leftButton) {
+                          log('LB Task Status Value : ${taskStatusValue - 1}');
+                          await FirebaseFirestore.instance
+                              .collection(workspaceTaskCode)
+                              .doc(docId)
+                              .update({
+                            'Task Status': isOwner
+                                ? taskStatusValue - 2
+                                : taskStatusValue - 1,
+                          });
+                        }
+                      },
+                      icon: const Icon(Icons.arrow_back),
+                    ),
+                  ),
+                  Visibility(
+                    visible: rightButton,
+                    child: IconButton(
+                      onPressed: () async {
+                        if (rightButton) {
+                          log('RB Task Status Value : ${taskStatusValue + 1}');
+                          await FirebaseFirestore.instance
+                              .collection(workspaceTaskCode)
+                              .doc(docId)
+                              .update({
+                            'Task Status': taskStatusValue + 1,
+                          });
+                        }
+                      },
+                      icon: const Icon(
+                        Icons.arrow_forward,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
-
-    //   Card(
-    //   shape: RoundedRectangleBorder(
-    //     side: BorderSide(color: color, width: 1),
-    //     borderRadius: BorderRadius.circular(10),
-    //   ),
-    //   child: ListTile(
-    //     dense: true,
-    //     title: Text(
-    //       title,
-    //       textAlign: TextAlign.left,
-    //       style: TextStyle(
-    //         color: AppColor.darkGrey,
-    //         fontWeight: FontWeight.bold,
-    //       ),
-    //     ),
-    //     subtitle: Column(
-    //       crossAxisAlignment: CrossAxisAlignment.start,
-    //       children: [
-    //         Text(
-    //           email,
-    //           textAlign: TextAlign.left,
-    //           style: TextStyle(
-    //             color: AppColor.grey,
-    //           ),
-    //         ),
-    //         Text(
-    //           date,
-    //           textAlign: TextAlign.left,
-    //           style: TextStyle(
-    //             color: AppColor.grey,
-    //           ),
-    //         ),
-    //       ],
-    //     ),
-    //     trailing: Column(
-    //       mainAxisSize: MainAxisSize.min,
-    //       mainAxisAlignment: MainAxisAlignment.center,
-    //       children: [
-    //         Visibility(
-    //           visible: true,
-    //           child: IconButton(
-    //             onPressed: function,
-    //             icon: const Icon(
-    //               Icons.arrow_forward,
-    //             ),
-    //           ),
-    //         ),
-    //         Visibility(
-    //           visible: true,
-    //           child: IconButton(
-    //             onPressed: function,
-    //             icon: const Icon(Icons.arrow_back),
-    //           ),
-    //         ),
-    //       ],
-    //     ),
-    //   ),
-    // );
   }
 }

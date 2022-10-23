@@ -8,19 +8,19 @@ import 'package:stepbystep/screens/workspace_manager/workspace_task_tile.dart';
 class TaskView extends StatefulWidget {
   TaskView({
     Key? key,
+    required this.isOwner,
+    required this.workspaceTaskCode,
     required this.taskStatusValue,
     required this.color,
     required this.snapshot,
-    required this.leftFunction,
-    required this.rightFunction,
     required this.leftButton,
     required this.rightButton,
   }) : super(key: key);
+  bool isOwner;
+  String workspaceTaskCode;
   int taskStatusValue;
   Stream<QuerySnapshot> snapshot;
   Color color;
-  Function() leftFunction;
-  Function() rightFunction;
   bool leftButton;
   bool rightButton;
 
@@ -60,13 +60,15 @@ class _TaskViewState extends State<TaskView> {
                     if (storedData[i]['Task Status'] ==
                         widget.taskStatusValue) ...[
                       WorkspaceTaskTile(
+                        isOwner: widget.isOwner,
+                        workspaceTaskCode: widget.workspaceTaskCode,
+                        docId: storedData[i]['id'],
                         title: storedData[i]['Task Title'],
                         description: storedData[i]['Task Description'],
+                        taskStatusValue: widget.taskStatusValue,
                         email: storedData[i]['Assigned By'],
                         date: storedData[i]['Due Date'],
                         color: widget.color,
-                        leftFunction: widget.leftFunction,
-                        rightFunction: widget.rightFunction,
                         leftButton: widget.leftButton,
                         rightButton: widget.rightButton,
                       ),

@@ -30,8 +30,7 @@ class TaskAssignment extends StatefulWidget {
   _TaskAssignmentState createState() => _TaskAssignmentState();
 }
 
-class _TaskAssignmentState extends State<TaskAssignment>
-    with SingleTickerProviderStateMixin {
+class _TaskAssignmentState extends State<TaskAssignment> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late final Stream<QuerySnapshot> _assignTasksData;
   DateTime dateTime = DateTime.now();
@@ -43,9 +42,9 @@ class _TaskAssignmentState extends State<TaskAssignment>
   int currentIndex = 0;
   int taskStatusValue = 0;
   Color tileColor = AppChartColor.blue;
-  late TabController tabController;
+
   bool leftButton = false;
-  bool rightButton = true;
+  bool rightButton = false;
   List<Color> taskTabsColor = [
     AppColor.orange,
     AppColor.white,
@@ -54,27 +53,9 @@ class _TaskAssignmentState extends State<TaskAssignment>
     AppColor.white
   ];
 
-  final List<Tab> taskTabs = const [
-    Tab(
-      child: Text('TODO'),
-    ),
-    Tab(
-      child: Text('Doing'),
-    ),
-    Tab(
-      child: Text('Review'),
-    ),
-    Tab(
-      child: Text('Completed'),
-    ),
-    Tab(
-      child: Text('Expired'),
-    ),
-  ];
   @override
   void initState() {
     super.initState();
-    tabController = TabController(vsync: this, length: taskTabs.length);
     _assignTasksData = FirebaseFirestore.instance
         .collection('${widget.email} ${widget.workspaceCode}')
         .orderBy('Created At', descending: true)
@@ -86,12 +67,6 @@ class _TaskAssignmentState extends State<TaskAssignment>
           '-',
           yyyy
         ])} ${formatDate(dateTime, [hh, ':', nn, ' ', am])}';
-  }
-
-  @override
-  void dispose() {
-    tabController.dispose();
-    super.dispose();
   }
 
   @override
@@ -136,7 +111,7 @@ class _TaskAssignmentState extends State<TaskAssignment>
                           taskStatusValue = 0;
                           tileColor = AppChartColor.blue;
                           leftButton = false;
-                          rightButton = true;
+                          rightButton = false;
                           taskTabsColor[0] = AppColor.orange;
                           taskTabsColor[1] = AppColor.white;
                           taskTabsColor[2] = AppColor.white;
@@ -156,8 +131,8 @@ class _TaskAssignmentState extends State<TaskAssignment>
                         setState(() {
                           taskStatusValue = 1;
                           tileColor = AppChartColor.yellow;
-                          leftButton = true;
-                          rightButton = true;
+                          leftButton = false;
+                          rightButton = false;
                           taskTabsColor[0] = AppColor.white;
                           taskTabsColor[1] = AppColor.orange;
                           taskTabsColor[2] = AppColor.white;
@@ -254,13 +229,13 @@ class _TaskAssignmentState extends State<TaskAssignment>
         ),
       ),
       body: TaskView(
+        isOwner: true,
+        workspaceTaskCode: '${widget.email} ${widget.workspaceCode}',
         taskStatusValue: taskStatusValue,
         snapshot: _assignTasksData,
         color: tileColor,
         leftButton: leftButton,
         rightButton: rightButton,
-        leftFunction: () {},
-        rightFunction: () {},
       ),
 
       // TabBarView(
@@ -518,6 +493,22 @@ class _TaskAssignmentState extends State<TaskAssignment>
                               collection:
                                   '${widget.email} ${widget.workspaceCode}',
                               jsonData: taskJson,
+                            );
+
+                            final taskLogJson = {
+                              'Workspace Task Code':
+                                  '${widget.email} ${widget.workspaceCode}',
+                              'TODO': 0,
+                              'DOING': 0,
+                              'REVIEW': 0,
+                              'Created At': DateTime.now(),
+                            };
+
+                            await FireBaseApi.saveDataIntoFireStore(
+                              collection: 'Workspaces Task Log',
+                              document:
+                                  '${widget.email} ${widget.workspaceCode}',
+                              jsonData: taskLogJson,
                             );
                             if (mounted) {
                               titleController.clear();
