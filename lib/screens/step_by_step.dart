@@ -1,15 +1,7 @@
-import 'dart:developer';
-
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:provider/provider.dart';
-import 'package:stepbystep/authentication/authentication_with_google.dart';
 
-import 'package:stepbystep/colors.dart';
+import 'package:stepbystep/screens/drawer.dart';
 import 'package:stepbystep/screens/home.dart';
-import 'package:stepbystep/screens/security_section/signIn_screen.dart';
 
 import 'package:stepbystep/visualization/visualization.dart';
 
@@ -31,39 +23,6 @@ class _StepByStepState extends State<StepByStep> {
     Container()
   ];
 
-  final storage = const FlutterSecureStorage();
-
-  delay() async {
-    await Future.delayed(const Duration(milliseconds: 1000));
-  }
-
-  String signInWith = 'NULL';
-
-  isGoogleLogin() async {
-    String? value = await storage.read(key: 'signInWith') ?? 'NULL';
-    setState(() {
-      signInWith = value;
-    });
-    log('isGoogleLogin value is reading: $signInWith');
-  }
-
-  signOut() async {
-    await FirebaseAuth.instance.signOut();
-    await storage.delete(key: 'uid');
-  }
-
-  googleSignOut() async {
-    final provider = Provider.of<GoogleSignInProvider>(context, listen: false);
-    provider.logOut();
-    await storage.delete(key: 'uid');
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    isGoogleLogin();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,27 +41,7 @@ class _StepByStepState extends State<StepByStep> {
           ),
         ],
       ),
-      drawer: Drawer(
-        child: IconButton(
-          icon: Icon(Icons.logout, color: AppColor.black),
-          onPressed: () async {
-            signInWith == 'GOOGLE' ? googleSignOut() : signOut();
-            log('SignOut called');
-            await Fluttertoast.showToast(
-              msg: 'User Logout Successfully', // message
-              toastLength: Toast.LENGTH_SHORT, // length
-              gravity: ToastGravity.BOTTOM, // location
-              backgroundColor: Colors.green,
-            );
-            Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const SignInScreen(),
-                ),
-                (route) => false);
-          },
-        ),
-      ),
+      drawer: const AppDrawer(),
       body: screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,

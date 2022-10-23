@@ -5,8 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:stepbystep/colors.dart';
-import 'package:stepbystep/apis/notification_api.dart';
+import 'package:stepbystep/config.dart';
 import 'package:stepbystep/screens/step_by_step.dart';
+import 'package:stepbystep/apis/notification_api.dart';
 import 'package:stepbystep/screens/security_section/signIn_screen.dart';
 import 'package:stepbystep/authentication/authentication_with_google.dart';
 
@@ -43,6 +44,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
+    log('MY APP INIT RUNNING');
     checkLoginStatus();
     NotificationAPI.init(initScheduled: true);
     listenNotifications();
@@ -60,6 +62,7 @@ class _MyAppState extends State<MyApp> {
       );
   @override
   Widget build(BuildContext context) {
+    log('MY APP BUILD RUNNING');
     return ChangeNotifierProvider(
       create: (context) => GoogleSignInProvider(),
       child: MaterialApp(

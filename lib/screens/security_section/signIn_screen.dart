@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, deprecated_member_use
 
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -14,6 +14,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:stepbystep/authentication/authentication_with_google.dart';
 import 'package:stepbystep/colors.dart';
+import 'package:stepbystep/config.dart';
 import 'package:stepbystep/screens/home.dart';
 import 'package:stepbystep/screens/step_by_step.dart';
 import 'forgot_password.dart';
@@ -47,8 +48,9 @@ class _SignInScreenState extends State<SignInScreen> {
 
   @override
   void initState() {
-    super.initState();
+    log('SIGNIN INIT RUNNING');
     readEmailAndPassword();
+    super.initState();
   }
 
   @override
@@ -60,12 +62,14 @@ class _SignInScreenState extends State<SignInScreen> {
 
   @override
   Widget build(BuildContext context) {
-    log("SignInScreen Build Run");
+    log('SIGN IN BUILD RUNNING');
 
     return _isGoogleSignIn
-        ? const Scaffold(
+        ? Scaffold(
             body: Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(
+                color: AppColor.orange,
+              ),
             ),
           )
         : Scaffold(
@@ -216,7 +220,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                 email = emailController.text;
                                 password = passwordController.text;
                               });
-                              signInRegisteredUser();
+                              signInWithEmailAndPassword();
                             }
                           }
                         },
@@ -277,73 +281,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         setState(() {
                           _isGoogleSignIn = true;
                         });
-                        final provider = Provider.of<GoogleSignInProvider>(
-                            context,
-                            listen: false);
-                        try {
-                          await provider.googleLogIn();
-                          await storage.write(key: 'uid', value: 'abc...xyz');
-                          await storage.write(
-                              key: 'signInWith', value: 'GOOGLE');
-
-                          await Fluttertoast.showToast(
-                            msg: 'User Login Successfully', // message
-                            toastLength: Toast.LENGTH_SHORT, // length
-                            gravity: ToastGravity.BOTTOM, // location
-                            backgroundColor: Colors.green,
-                          );
-
-                          setState(() {
-                            _isGoogleSignIn = true;
-                          });
-                          final currentUser =
-                              FirebaseAuth.instance.currentUser!;
-
-                          log(currentUser.email!);
-                          log(currentUser.displayName!);
-
-                          String googleUserEmail = '';
-                          bool isCheck = false;
-                          await FirebaseFirestore.instance
-                              .collection('User Data')
-                              .doc(currentUser.email)
-                              .get()
-                              .then((ds) {
-                            isCheck = true;
-                            googleUserEmail = ds['User Email'];
-                          });
-                          if (googleUserEmail != currentUser.email && isCheck) {
-                            final json = {
-                              'User Name': currentUser.displayName!,
-                              'User Email': currentUser.email!,
-                              'User Password': currentUser.uid,
-                            };
-                            user
-                                .collection('User Data')
-                                .doc(currentUser.email!)
-                                .set(json);
-                          }
-
-                          Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const StepByStep(),
-                              ),
-                              (route) => false);
-                        } catch (e) {
-                          await Fluttertoast.showToast(
-                            msg: 'Failed to Login Try Again', // message
-                            toastLength: Toast.LENGTH_SHORT, // length
-                            gravity: ToastGravity.BOTTOM, // location
-                            backgroundColor: Colors.grey,
-                          );
-                          Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const SignInScreen(),
-                              ),
-                              (route) => false);
-                        }
+                        await signInWithGoogle();
                       },
                       style: ElevatedButton.styleFrom(
                         primary: AppColor.white,
@@ -368,7 +306,73 @@ class _SignInScreenState extends State<SignInScreen> {
           );
   }
 
-  signInRegisteredUser() async {
+  signInWithGoogle() async {
+    log('SIGN IN WITH GOOGLE IS PROCESSING');
+    final provider = Provider.of<GoogleSignInProvider>(context, listen: false);
+    try {
+      await provider.googleLogIn();
+      if (mounted) {
+        await storage.write(key: 'uid', value: 'abc...xyz');
+        await storage.write(key: 'signInWith', value: 'GOOGLE');
+        await Fluttertoast.showToast(
+          msg: 'User Login Successfully', // message
+          toastLength: Toast.LENGTH_SHORT, // length
+          gravity: ToastGravity.BOTTOM, // location
+          backgroundColor: Colors.green,
+        );
+        setState(() {
+          _isGoogleSignIn = true;
+        });
+
+        final currentUser = FirebaseAuth.instance.currentUser!;
+
+        log(currentUser.email!);
+        log(currentUser.displayName!);
+
+        String googleUserEmail = '';
+        bool isCheck = false;
+        await FirebaseFirestore.instance
+            .collection('User Data')
+            .doc(currentUser.email)
+            .get()
+            .then((ds) {
+          isCheck = true;
+          googleUserEmail = ds['User Email'];
+        });
+        if (googleUserEmail != currentUser.email && isCheck) {
+          final json = {
+            'User Name': currentUser.displayName!,
+            'User Email': currentUser.email!,
+            'User Password': currentUser.uid,
+          };
+          user.collection('User Data').doc(currentUser.email!).set(json);
+        }
+
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const StepByStep(),
+            ),
+            (route) => false);
+      }
+    } catch (e) {
+      await Fluttertoast.showToast(
+        msg: 'Failed to Login Try Again', // message
+        toastLength: Toast.LENGTH_SHORT, // length
+        gravity: ToastGravity.BOTTOM, // location
+        backgroundColor: Colors.grey,
+      );
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const SignInScreen(),
+          ),
+          (route) => false);
+    }
+  }
+
+  signInWithEmailAndPassword() async {
+    log('SIGN IN WITH EMAIL AND PASSWORD IS PROCESSING');
     try {
       _isLoading = true;
       UserCredential userCredential = await FirebaseAuth.instance
@@ -376,23 +380,30 @@ class _SignInScreenState extends State<SignInScreen> {
 //______________________________________________________________________//
       log('user credential email : ${userCredential.user?.email}');
       await storage.write(key: 'uid', value: userCredential.user?.uid);
-      await storage.write(
-          key: 'signInWith',
-          value:
-              'OTHER'); //______________________________________________________________________//
-      Fluttertoast.showToast(
-        msg: 'User Login Successfully', // message
-        toastLength: Toast.LENGTH_SHORT, // length
-        gravity: ToastGravity.BOTTOM, // location
-        backgroundColor: Colors.green,
-      );
-      // ignore: use_build_context_synchronously
-      Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const StepByStep(),
-          ),
-          (route) => false);
+      await storage.write(key: 'signInWith', value: 'OTHER');
+//______________________________________________________________________//
+      if (mounted) {
+        Fluttertoast.showToast(
+          msg: 'User Login Successfully', // message
+          toastLength: Toast.LENGTH_SHORT, // length
+          gravity: ToastGravity.BOTTOM, // location
+          backgroundColor: Colors.green,
+        );
+        setState(() {
+          currentUserId = FirebaseAuth.instance.currentUser!.uid;
+          currentUserEmail = FirebaseAuth.instance.currentUser!.email;
+          log('---------------------------------');
+          log(currentUserEmail.toString());
+          log('---------------------------------');
+        });
+
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const StepByStep(),
+            ),
+            (route) => false);
+      }
     } on FirebaseAuthException catch (e) {
       setState(() {
         _isLoading = false;

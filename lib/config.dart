@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
-final currentUserId = FirebaseAuth.instance.currentUser!.uid;
-final currentUserEmail = FirebaseAuth.instance.currentUser!.email;
+var currentUser = FirebaseAuth.instance.currentUser;
+var currentUserId = FirebaseAuth.instance.currentUser!.uid;
+var currentUserEmail = FirebaseAuth.instance.currentUser!.email;

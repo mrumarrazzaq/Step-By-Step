@@ -5,9 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:stepbystep/apis/data_fect_api.dart';
+import 'package:stepbystep/apis/firebase_api.dart';
 import 'package:stepbystep/colors.dart';
-import 'package:stepbystep/config.dart';
 
 class CreateWorkspace extends StatefulWidget {
   const CreateWorkspace({Key? key}) : super(key: key);
@@ -206,12 +205,20 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
                         'Workspace Type': dropdownValue,
                         'Workspace Owner Name': userName,
                         'Workspace Owner Email': userEmail,
+                        'Workspace Members': [],
+                        'Workspace Code':
+                            '$userEmail ${workspaceNameController.text}',
                         'Created At': DateTime.now(),
                       };
-                      await FireBaseApi.SaveDataIntoFireStore(
+                      await FireBaseApi.saveDataIntoFireStore(
                         collection:
                             '$userEmail ${workspaceNameController.text}',
                         document: 'Log',
+                        jsonData: jsonLog,
+                      );
+
+                      await FireBaseApi.createCollectionAutoDoc(
+                        collection: 'Workspaces',
                         jsonData: jsonLog,
                       );
 
