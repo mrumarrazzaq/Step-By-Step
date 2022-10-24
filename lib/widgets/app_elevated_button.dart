@@ -11,6 +11,7 @@ class AppElevatedButton extends StatelessWidget {
     this.borderSideColor = Colors.transparent,
     this.width = 80,
     this.height = 35,
+    this.fontSize = 10,
   }) : super(key: key);
   String text;
   Color textColor;
@@ -20,6 +21,7 @@ class AppElevatedButton extends StatelessWidget {
   Function() function;
   double width;
   double height;
+  double fontSize;
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
@@ -37,7 +39,7 @@ class AppElevatedButton extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: TextStyle(color: textColor, fontSize: 10),
+        style: TextStyle(color: textColor, fontSize: fontSize),
       ),
     );
   }

@@ -47,6 +47,7 @@ dependencies:
 
   sqflite: ^2.0.2
 
+  bot_toast: ^4.0.3
   flutter_swipe_action_cell: ^3.0.4
   syncfusion_flutter_charts: ^20.1.60+1
 

@@ -19,6 +19,7 @@ class WorkspaceHome extends StatefulWidget {
 class _WorkspaceHomeState extends State<WorkspaceHome> {
   bool isEmpty = false;
   List<dynamic> joinedWorkspaces = [];
+  List<dynamic> ownedWorkspaces = [];
   final Stream<QuerySnapshot> _workspaces = FirebaseFirestore.instance
       .collection('Workspaces')
       .orderBy('Created At', descending: true)
@@ -33,12 +34,27 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
     setState(() {
       joinedWorkspaces = value.data()!['Joined Workspaces'];
     });
+    log('Joined Workspaces.....');
     log(joinedWorkspaces.toString());
+  }
+
+  getOwnedWorkspaces() async {
+    final value = await FirebaseFirestore.instance
+        .collection("User Data")
+        .doc(currentUserEmail)
+        .get();
+
+    setState(() {
+      ownedWorkspaces = value.data()!['Owned Workspaces'];
+    });
+    log('Owned Workspaces.....');
+    log(ownedWorkspaces.toString());
   }
 
   @override
   void initState() {
     getJoinedWorkspaces();
+    getOwnedWorkspaces();
     log(currentUserEmail.toString());
     super.initState();
   }
@@ -46,115 +62,122 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: StreamBuilder<QuerySnapshot>(
-          stream: _workspaces,
-          builder:
-              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-            if (snapshot.hasError) {
-              log('Something went wrong');
-            }
-            if (snapshot.connectionState == ConnectionState.waiting) {
+      body: SingleChildScrollView(
+        child: StreamBuilder<QuerySnapshot>(
+            stream: _workspaces,
+            builder:
+                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (snapshot.hasError) {
+                log('Something went wrong');
+              }
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                    child: CircularProgressIndicator(
+                  color: AppColor.orange,
+                  strokeWidth: 2.0,
+                ));
+              }
+              if (snapshot.hasData) {
+                final List storedWorkspaces = [];
+
+                snapshot.data!.docs.map((DocumentSnapshot document) {
+                  Map id = document.data() as Map<String, dynamic>;
+                  storedWorkspaces.add(id);
+                  id['id'] = document.id;
+                }).toList();
+                return storedWorkspaces.isEmpty
+                    ? Container(
+                        decoration: const BoxDecoration(
+                          image: DecorationImage(
+                            scale: 1.3,
+                            image: AssetImage('assets/workspace_bg.png'),
+                          ),
+                        ),
+                      )
+                    : Column(
+                        children: [
+                          for (int i = 0; i < storedWorkspaces.length; i++) ...[
+                            if (storedWorkspaces[i]['Workspace Owner Email'] ==
+                                currentUserEmail) ...[
+                              GestureDetector(
+                                onLongPress: () {
+                                  print(storedWorkspaces[i]['Workspace Code']);
+                                },
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => WorkspaceScreenCombiner(
+                                          workspaceCode:
+                                              "${storedWorkspaces[i]['Workspace Code']}",
+                                          docId: "${storedWorkspaces[i]['id']}",
+                                          workspaceName: storedWorkspaces[i]
+                                              ['Workspace Name']),
+                                    ),
+                                  );
+                                },
+                                child: Card(
+                                  child: ListTile(
+                                      dense: true,
+                                      title: Text(storedWorkspaces[i]
+                                          ['Workspace Name']),
+                                      subtitle: Text(storedWorkspaces[i]
+                                          ['Workspace Type']),
+                                      trailing: Icon(Icons.star,
+                                          color: AppChartColor.yellow)),
+                                ),
+                              ),
+                            ],
+                            if (joinedWorkspaces.contains(
+                                storedWorkspaces[i]['Workspace Code'])) ...[
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => WorkspaceTaskHolder(
+                                        workspaceCode: storedWorkspaces[i]
+                                            ['Workspace Code'],
+                                        workspaceName: storedWorkspaces[i]
+                                            ['Workspace Name'],
+                                        docId: storedWorkspaces[i]['id'],
+                                        workspaceOwnerName: storedWorkspaces[i]
+                                            ['Workspace Owner Name'],
+                                        workspaceOwnerEmail: storedWorkspaces[i]
+                                            ['Workspace Owner Email'],
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Card(
+                                  child: ListTile(
+                                    dense: true,
+                                    title: Text(
+                                        storedWorkspaces[i]['Workspace Name']),
+                                    subtitle: Text(
+                                        storedWorkspaces[i]['Workspace Type']),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ],
+                      );
+              }
               return Center(
                   child: CircularProgressIndicator(
                 color: AppColor.orange,
                 strokeWidth: 2.0,
               ));
-            }
-            if (snapshot.hasData) {
-              final List storedWorkspaces = [];
-
-              snapshot.data!.docs.map((DocumentSnapshot document) {
-                Map id = document.data() as Map<String, dynamic>;
-                storedWorkspaces.add(id);
-                id['id'] = document.id;
-              }).toList();
-              return storedWorkspaces.isEmpty
-                  ? Container(
-                      decoration: const BoxDecoration(
-                        image: DecorationImage(
-                          scale: 1.3,
-                          image: AssetImage('assets/workspace_bg.png'),
-                        ),
-                      ),
-                    )
-                  : Column(
-                      children: [
-                        for (int i = 0; i < storedWorkspaces.length; i++) ...[
-                          if (storedWorkspaces[i]['Workspace Owner Email'] ==
-                              currentUserEmail) ...[
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => WorkspaceScreenCombiner(
-                                        workspaceCode:
-                                            "${storedWorkspaces[i]['Workspace Code']}",
-                                        docId: "${storedWorkspaces[i]['id']}",
-                                        workspaceName: storedWorkspaces[i]
-                                            ['Workspace Name']),
-                                  ),
-                                );
-                              },
-                              child: Card(
-                                child: ListTile(
-                                  dense: true,
-                                  title: Text(
-                                      storedWorkspaces[i]['Workspace Name']),
-                                  subtitle: Text(
-                                      storedWorkspaces[i]['Workspace Type']),
-                                ),
-                              ),
-                            ),
-                          ],
-                          if (joinedWorkspaces.contains(
-                              storedWorkspaces[i]['Workspace Code'])) ...[
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => WorkspaceTaskHolder(
-                                      workspaceCode: storedWorkspaces[i]
-                                          ['Workspace Code'],
-                                      workspaceName: storedWorkspaces[i]
-                                          ['Workspace Name'],
-                                      docId: storedWorkspaces[i]['id'],
-                                      workspaceOwnerName: storedWorkspaces[i]
-                                          ['Workspace Owner Name'],
-                                      workspaceOwnerEmail: storedWorkspaces[i]
-                                          ['Workspace Owner Email'],
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: Card(
-                                child: ListTile(
-                                  dense: true,
-                                  title: Text(
-                                      storedWorkspaces[i]['Workspace Name']),
-                                  subtitle: Text(
-                                      storedWorkspaces[i]['Workspace Type']),
-                                ),
-                              ),
-                            ),
-                          ]
-                        ],
-                      ],
-                    );
-            }
-            return Center(
-                child: CircularProgressIndicator(
-              color: AppColor.orange,
-              strokeWidth: 2.0,
-            ));
-          }),
+            }),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const CreateWorkspace(),
+              builder: (context) =>
+                  CreateWorkspace(ownedWorkspaces: ownedWorkspaces),
             ),
           );
         },

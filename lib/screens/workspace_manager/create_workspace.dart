@@ -1,16 +1,21 @@
 import 'dart:developer';
 
+import 'package:bot_toast/bot_toast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stepbystep/apis/firebase_api.dart';
 import 'package:stepbystep/colors.dart';
+import 'package:stepbystep/config.dart';
+import 'package:stepbystep/widgets/app_elevated_button.dart';
+import 'package:stepbystep/widgets/app_toast.dart';
 
 class CreateWorkspace extends StatefulWidget {
-  const CreateWorkspace({Key? key}) : super(key: key);
-
+  CreateWorkspace({Key? key, required this.ownedWorkspaces}) : super(key: key);
+  List<dynamic> ownedWorkspaces = [];
   @override
   State<CreateWorkspace> createState() => _CreateWorkspaceState();
 }
@@ -28,6 +33,7 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
     'Other'
   ];
   String dropdownValue = '';
+  late FToast fToast;
   final workspaceNameController = TextEditingController();
 
   String userName = '';
@@ -56,9 +62,11 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
 
   @override
   void initState() {
+    fToast = FToast();
+    fToast.init(context);
     dropdownValue = workspaceTypes.first;
     fetchData();
-
+    log(widget.ownedWorkspaces.toString());
     super.initState();
   }
 
@@ -187,19 +195,12 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
                   ],
                 ),
               ),
-              Material(
-                color: AppColor.black,
-                borderRadius: BorderRadius.circular(30.0),
-                clipBehavior: Clip.antiAlias,
-                child: MaterialButton(
-                  minWidth: 160.0,
-                  elevation: 3.0,
-                  height: 40.0,
-                  padding: const EdgeInsets.symmetric(vertical: 10.0),
-                  onPressed: () async {
-                    SystemChannels.textInput.invokeMethod('TextInput.hide');
-
-                    if (_formKey.currentState!.validate()) {
+              AppElevatedButton(
+                function: () async {
+                  if (_formKey.currentState!.validate()) {
+                    bool isOwned = widget.ownedWorkspaces
+                        .contains('$userEmail ${workspaceNameController.text}');
+                    if (!isOwned) {
                       final jsonLog = {
                         'Workspace Name': workspaceNameController.text,
                         'Workspace Type': dropdownValue,
@@ -217,28 +218,89 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
                         jsonData: jsonLog,
                       );
 
-                      await FireBaseApi.createCollectionAutoDoc(
+                      await FireBaseApi.saveDataIntoFireStore(
                         collection: 'Workspaces',
+                        document: '$userEmail ${workspaceNameController.text}',
                         jsonData: jsonLog,
                       );
 
+                      await updateUserDateOwnedWorkspaces(
+                        email: userEmail,
+                        workspaceCode:
+                            '$userEmail ${workspaceNameController.text}',
+                      );
                       if (mounted) {
+                        SystemChannels.textInput.invokeMethod('TextInput.hide');
+                        Fluttertoast.showToast(
+                          msg: 'Workspace create successfully', // message
+                          toastLength: Toast.LENGTH_SHORT, // length
+                          gravity: ToastGravity.BOTTOM, // location
+                          backgroundColor: Colors.green,
+                        );
                         Navigator.pop(context);
                       }
+                    } else {
+                      BotToast.showAttachedWidget(
+                        attachedBuilder: (_) => Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 80.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: AppColor.black,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Workspace Already in your use',
+                                style: TextStyle(color: AppColor.white),
+                              ),
+                            ],
+                          ),
+                        ),
+                        preferDirection: PreferDirection.bottomCenter,
+                        verticalOffset:
+                            MediaQuery.of(context).size.height - 110,
+                        duration: const Duration(seconds: 3),
+                        target: const Offset(520, 520),
+                      );
+                      // cancel();
+                      // Fluttertoast.showToast(
+                      //   msg: 'Workspace Already in your use', // message
+                      //   toastLength: Toast.LENGTH_SHORT, // length
+                      //   gravity: ToastGravity.BOTTOM, // location
+                      //   backgroundColor: Colors.red,
+                      // );
                     }
-                  },
-                  child: Text(
-                    'Create Workspace',
-                    style: TextStyle(
-                      color: AppColor.white,
-                    ),
-                  ),
-                ),
+                  }
+                },
+                textColor: AppColor.white,
+                text: 'Create Workspace',
+                backgroundColor: AppColor.black,
+                height: 45,
+                width: 160,
+                fontSize: 15,
               ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  updateUserDateOwnedWorkspaces(
+      {required String email, required String workspaceCode}) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('User Data')
+          .doc(email)
+          .update({
+        'Owned Workspaces': FieldValue.arrayUnion([workspaceCode]),
+      });
+      log('Workspace is added in User Data');
+    } catch (e) {
+      log(e.toString());
+    }
   }
 }

@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
+import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:stepbystep/colors.dart';
@@ -68,6 +69,8 @@ class _MyAppState extends State<MyApp> {
       child: MaterialApp(
         title: 'Step By Step',
         debugShowCheckedModeBanner: false,
+        builder: BotToastInit(), //1. call BotToastInit
+        navigatorObservers: [BotToastNavigatorObserver()],
         theme: ThemeData(
           primaryColor: AppColor.orange,
           splashColor: AppColor.orange.withOpacity(0.1),

@@ -358,6 +358,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           'User Email': emailController.text.trim(),
           'User Password': passwordController.text.trim(),
           'Joined Workspaces': [],
+          'Owned Workspaces': [],
           'Created At': DateTime.now(),
         };
 
