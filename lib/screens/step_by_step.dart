@@ -33,10 +33,14 @@ class _StepByStepState extends State<StepByStep> {
           IconButton(
             onPressed: () {
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const Visualization(),
-                  ));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Visualization(
+                    workspaceName: 'Workspace Name',
+                    userName: 'User Email',
+                  ),
+                ),
+              );
             },
             icon: const Icon(Icons.mobile_friendly),
           ),

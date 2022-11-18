@@ -7,9 +7,10 @@ import 'package:stepbystep/apis/firebase_api.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
 import 'package:stepbystep/screens/workspace_manager/workspace_roles_handler/workspace_role_card.dart';
-import 'package:stepbystep/widgets/app_divider.dart';
+
 import 'package:stepbystep/widgets/app_elevated_button.dart';
 import 'package:numberpicker/numberpicker.dart';
+import 'package:stepbystep/widgets/app_progress_indicator.dart';
 
 class WorkspaceRolesHandler extends StatefulWidget {
   WorkspaceRolesHandler(
@@ -34,7 +35,7 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
   final roleController = TextEditingController();
   final descriptionController = TextEditingController();
   late final Stream<QuerySnapshot> rolesRecords;
-
+  bool createRoleLoading = false;
   @override
   void initState() {
     rolesRecords = FirebaseFirestore.instance
@@ -75,10 +76,15 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
                   children: [
                     for (int i = 0; i < storedRolesData.length; i++) ...[
                       WorkspaceRoleCard(
+                        id: storedRolesData[i]['id'],
                         workspaceCode: widget.workspaceCode,
                         roleName: storedRolesData[i]['Role'],
+                        roleDescription: storedRolesData[i]['Role Description'],
                         roleLevel: storedRolesData[i]['Role Level'].toString(),
-                        controls: storedRolesData[i]['Controls'],
+                        teamControl: storedRolesData[i]['Team Control'],
+                        roleControl: storedRolesData[i]['Role Control'],
+                        taskControl: storedRolesData[i]['Task Control'],
+                        viewControl: storedRolesData[i]['View Control'],
                       ),
                     ],
                   ],
@@ -99,7 +105,7 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
             foregroundColor: AppColor.orange,
             textColor: AppColor.white,
             function: () {
-              roleAssignmentDialog();
+              createRoleDialog();
             },
           ),
         ),
@@ -107,7 +113,7 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
     );
   }
 
-  void roleAssignmentDialog() {
+  void createRoleDialog() {
     showDialog(
       context: context,
       builder: (context) {
@@ -196,6 +202,7 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
                                 TextFormField(
                                   keyboardType: TextInputType.text,
                                   cursorColor: AppColor.black,
+                                  maxLength: 300,
                                   style: TextStyle(color: AppColor.black),
                                   decoration: InputDecoration(
                                     isDense: true,
@@ -247,49 +254,65 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
                         ],
                       ),
                       const SizedBox(height: 25),
-                      AppElevatedButton(
-                        text: 'Assign',
-                        width: 100,
-                        fontSize: 12,
-                        textColor: AppColor.white,
-                        backgroundColor: AppColor.orange,
-                        function: () async {
-                          if (_formKey.currentState!.validate()) {
-                            final roleJson = {
-                              'Role': roleController.text,
-                              'Role Description':
-                                  descriptionController.text.isEmpty
-                                      ? ''
-                                      : descriptionController.text,
-                              'Role Level': roleLevel,
-                              'Controls': [false, false, false],
-                              'Assigned By': currentUserEmail,
-                              'Created At': DateTime.now(),
-                            };
+                      createRoleLoading
+                          ? AppProgressIndicator(
+                              radius: 25,
+                              size: 30,
+                            )
+                          : AppElevatedButton(
+                              text: 'Create',
+                              width: 100,
+                              fontSize: 12,
+                              textColor: AppColor.white,
+                              backgroundColor: AppColor.orange,
+                              function: () async {
+                                if (_formKey.currentState!.validate()) {
+                                  setState(() {
+                                    createRoleLoading = true;
+                                  });
+                                  final roleJson = {
+                                    'Role': roleController.text.trim(),
+                                    'Role Description':
+                                        descriptionController.text.isEmpty
+                                            ? ''
+                                            : descriptionController.text.trim(),
+                                    'Role Level': roleLevel,
+                                    'Team Control': false,
+                                    'Role Control': false,
+                                    'Task Control': false,
+                                    'View Control': false,
+                                    'Assigned By': currentUserEmail,
+                                    'Created At': DateTime.now(),
+                                  };
 
-                            await FireBaseApi
-                                .saveDataIntoDoubleCollectionFireStore(
-                              mainCollection: 'Workspace Roles',
-                              mainDocument: widget.workspaceCode,
-                              subCollection: 'Log',
-                              subDocument: '${roleController.text} $roleLevel',
-                              jsonData: roleJson,
-                            );
+                                  // await FireBaseApi
+                                  //     .saveDataIntoDoubleCollectionFireStore(
+                                  //   mainCollection: 'Workspace Roles',
+                                  //   mainDocument: widget.workspaceCode,
+                                  //   subCollection: 'Log',
+                                  //   subDocument: '${roleController.text} $roleLevel',
+                                  //   jsonData: roleJson,
+                                  // );
 
-                            await FireBaseApi.saveDataIntoFireStore(
-                                collection: '${widget.workspaceCode} Roles',
-                                document: '${roleController.text} $roleLevel',
-                                jsonData: roleJson);
+                                  await FireBaseApi.saveDataIntoFireStore(
+                                      collection:
+                                          '${widget.workspaceCode} Roles',
+                                      document:
+                                          '${roleController.text} $roleLevel',
+                                      jsonData: roleJson);
 
-                            await addRolesInFirebase();
-                            if (mounted) {
-                              roleController.clear();
-                              descriptionController.clear();
-                              Navigator.pop(context);
-                            }
-                          }
-                        },
-                      ),
+                                  await addRolesInFirebase();
+                                  if (mounted) {
+                                    roleController.clear();
+                                    descriptionController.clear();
+                                    Navigator.pop(context);
+                                    setState(() {
+                                      createRoleLoading = false;
+                                    });
+                                  }
+                                }
+                              },
+                            ),
                     ],
                   ),
                 ),

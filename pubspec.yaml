@@ -31,6 +31,7 @@ dependencies:
   velocity_x: ^3.4.0
   font_awesome_flutter: ^10.2.1
 
+  readmore: ^2.2.0
   numberpicker: ^2.1.1
   date_format: ^2.0.2
   #Google Fonts

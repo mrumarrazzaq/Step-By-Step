@@ -8,8 +8,10 @@ import 'package:stepbystep/visualization/doughnut_chart.dart';
 import 'package:stepbystep/visualization/line_carts.dart';
 
 class Visualization extends StatefulWidget {
-  const Visualization({Key? key}) : super(key: key);
-
+  Visualization({Key? key, required this.workspaceName, required this.userName})
+      : super(key: key);
+  String workspaceName;
+  String userName;
   @override
   State<Visualization> createState() => _VisualizationState();
 }
@@ -48,7 +50,7 @@ class _VisualizationState extends State<Visualization> {
         // resizeToAvoidBottomInset: false,
         appBar: AppBar(
           title: Text(
-            'WorkSpace Name',
+            widget.workspaceName,
             style: TextStyle(
                 color: AppColor.darkGrey,
                 fontFamily: 'SegoeUIBold',
@@ -66,7 +68,7 @@ class _VisualizationState extends State<Visualization> {
                   color: AppColor.black,
                   child: Center(
                     child: Text(
-                      'Person Name',
+                      widget.userName,
                       style: GoogleFonts.kanit(
                         color: AppColor.white,
                         fontSize: 22,

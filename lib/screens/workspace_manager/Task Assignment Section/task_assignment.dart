@@ -9,33 +9,38 @@ import 'package:stepbystep/apis/firebase_api.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
 import 'package:stepbystep/screens/workspace_manager/task_view.dart';
+import 'package:stepbystep/screens/workspace_manager/workspace_members_handler.dart';
+import 'package:stepbystep/screens/workspace_manager/workspace_roles_handler/workspace_roles_handler.dart';
 import 'package:stepbystep/screens/workspace_manager/workspace_task_tile.dart';
 import 'package:stepbystep/widgets/app_elevated_button.dart';
 
-class TaskAssignment extends StatefulWidget {
+class TaskTeamAssignment extends StatefulWidget {
   String name;
   String email;
   String docId;
   String workspaceCode;
   String workspaceName;
-  TaskAssignment(
-      {Key? key,
-      required this.name,
-      required this.email,
-      required this.workspaceCode,
-      required this.docId,
-      required this.workspaceName})
-      : super(key: key);
+  String assignedRole;
+  TaskTeamAssignment({
+    Key? key,
+    required this.name,
+    required this.email,
+    required this.workspaceCode,
+    required this.docId,
+    required this.workspaceName,
+    required this.assignedRole,
+  }) : super(key: key);
   @override
-  _TaskAssignmentState createState() => _TaskAssignmentState();
+  _TaskTeamAssignmentState createState() => _TaskTeamAssignmentState();
 }
 
-class _TaskAssignmentState extends State<TaskAssignment> {
+class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late final Stream<QuerySnapshot> _assignTasksData;
   DateTime dateTime = DateTime.now();
 
   String _date = '';
+  String selectedTab = 'Task';
   bool isDateTimeChecked = false;
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
@@ -44,8 +49,17 @@ class _TaskAssignmentState extends State<TaskAssignment> {
   Color tileColor = AppChartColor.blue;
   String imageURL = '';
 
+  bool spaceEvenly = false;
   bool leftButton = false;
   bool rightButton = false;
+
+  bool teamControl = false;
+  bool taskControl = false;
+  bool roleControl = false;
+  bool viewControl = false;
+
+  List<Color> mainTabsColor = [AppColor.white, AppColor.orange];
+
   List<Color> taskTabsColor = [
     AppColor.orange,
     AppColor.white,
@@ -53,7 +67,7 @@ class _TaskAssignmentState extends State<TaskAssignment> {
     AppColor.white,
     AppColor.white
   ];
-
+  List<Color> teamTabsColor = [AppColor.orange, AppColor.white, AppColor.white];
   @override
   void initState() {
     super.initState();
@@ -69,6 +83,7 @@ class _TaskAssignmentState extends State<TaskAssignment> {
           yyyy
         ])} ${formatDate(dateTime, [hh, ':', nn, ' ', am])}';
     fetchData();
+    getRolesData();
   }
 
   fetchData() async {
@@ -86,12 +101,41 @@ class _TaskAssignmentState extends State<TaskAssignment> {
     }
   }
 
+  getRolesData() async {
+    log('Role Data is fetching');
+    try {
+      await FirebaseFirestore.instance
+          .collection('${widget.workspaceCode} Roles')
+          .doc(widget.assignedRole)
+          .get()
+          .then((ds) {
+        teamControl = ds['Team Control'];
+        taskControl = ds['Task Control'];
+        roleControl = ds['Role Control'];
+        viewControl = ds['View Control'];
+      });
+      if (teamControl && taskControl && roleControl ||
+          teamControl && taskControl ||
+          teamControl && roleControl ||
+          taskControl && roleControl) {
+        spaceEvenly = true;
+      }
+      log(teamControl.toString());
+      log(taskControl.toString());
+      log(roleControl.toString());
+      log(viewControl.toString());
+      setState(() {});
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         bottom: PreferredSize(
-          preferredSize: const Size(30, 180),
+          preferredSize: const Size(30, 225),
           child: Column(
             children: [
               Column(
@@ -126,143 +170,349 @@ class _TaskAssignmentState extends State<TaskAssignment> {
                   ),
                 ],
               ),
-              Container(
-                margin: const EdgeInsets.only(top: 20),
-                color: AppColor.black,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        setState(() {
-                          taskStatusValue = 0;
-                          tileColor = AppChartColor.blue;
-                          leftButton = false;
-                          rightButton = false;
-                          taskTabsColor[0] = AppColor.orange;
-                          taskTabsColor[1] = AppColor.white;
-                          taskTabsColor[2] = AppColor.white;
-                          taskTabsColor[3] = AppColor.white;
-                          taskTabsColor[4] = AppColor.white;
-                        });
-                      },
-                      child: Text(
-                        'TODO',
-                        style: TextStyle(
-                          color: taskTabsColor[0],
-                        ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Visibility(
+                    visible: teamControl,
+                    child: Container(
+                      margin: const EdgeInsets.only(top: 20),
+                      color: AppColor.orange,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              MaterialButton(
+                                onPressed: () {
+                                  setState(() {
+                                    selectedTab = 'Task';
+                                    mainTabsColor[0] = AppColor.white;
+                                    mainTabsColor[1] = AppColor.orange;
+                                  });
+                                },
+                                minWidth: 160,
+                                child: Text(
+                                  'Task',
+                                  style: TextStyle(
+                                    color: AppColor.white,
+                                    fontWeight:
+                                        mainTabsColor[0] == AppColor.white
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                height: 3,
+                                width: 160,
+                                color: mainTabsColor[0],
+                              ),
+                            ],
+                          ),
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              MaterialButton(
+                                onPressed: () {
+                                  setState(() {
+                                    selectedTab = 'Team';
+                                    mainTabsColor[0] = AppColor.orange;
+                                    mainTabsColor[1] = AppColor.white;
+                                  });
+                                },
+                                minWidth: 160,
+                                child: Text(
+                                  'Team',
+                                  style: TextStyle(
+                                    color: AppColor.white,
+                                    fontWeight:
+                                        mainTabsColor[1] == AppColor.white
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                height: 3,
+                                width: 160,
+                                color: mainTabsColor[1],
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
+                      // TabBar(
+                      //   controller: tabController,
+                      //   onTap: (index) {
+                      //     setState(() {
+                      //       currentIndex = index;
+                      //     });
+                      //   },
+                      //   indicatorColor: Colors.transparent,
+                      //   unselectedLabelColor: AppColor.white,
+                      //   labelColor: AppColor.orange,
+                      //   tabs: taskTabs,
+                      // ),
                     ),
-                    TextButton(
-                      onPressed: () {
-                        setState(() {
-                          taskStatusValue = 1;
-                          tileColor = AppChartColor.yellow;
-                          leftButton = false;
-                          rightButton = false;
-                          taskTabsColor[0] = AppColor.white;
-                          taskTabsColor[1] = AppColor.orange;
-                          taskTabsColor[2] = AppColor.white;
-                          taskTabsColor[3] = AppColor.white;
-                          taskTabsColor[4] = AppColor.white;
-                        });
-                      },
-                      child: Text(
-                        'Doing',
-                        style: TextStyle(
-                          color: taskTabsColor[1],
-                        ),
+                  ),
+                  //Task Sub Tabs
+                  Visibility(
+                    visible: selectedTab == 'Task',
+                    child: Container(
+                      margin: EdgeInsets.only(top: teamControl ? 0 : 20),
+                      color: AppColor.black,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                taskStatusValue = 0;
+                                tileColor = AppChartColor.blue;
+                                leftButton = false;
+                                rightButton = false;
+                                taskTabsColor[0] = AppColor.orange;
+                                taskTabsColor[1] = AppColor.white;
+                                taskTabsColor[2] = AppColor.white;
+                                taskTabsColor[3] = AppColor.white;
+                                taskTabsColor[4] = AppColor.white;
+                              });
+                            },
+                            child: Text(
+                              'TODO',
+                              style: TextStyle(
+                                color: taskTabsColor[0],
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                taskStatusValue = 1;
+                                tileColor = AppChartColor.yellow;
+                                leftButton = false;
+                                rightButton = false;
+                                taskTabsColor[0] = AppColor.white;
+                                taskTabsColor[1] = AppColor.orange;
+                                taskTabsColor[2] = AppColor.white;
+                                taskTabsColor[3] = AppColor.white;
+                                taskTabsColor[4] = AppColor.white;
+                              });
+                            },
+                            child: Text(
+                              'Doing',
+                              style: TextStyle(
+                                color: taskTabsColor[1],
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                taskStatusValue = 2;
+                                tileColor = AppChartColor.grey;
+                                leftButton = false;
+                                rightButton = true;
+                                taskTabsColor[0] = AppColor.white;
+                                taskTabsColor[1] = AppColor.white;
+                                taskTabsColor[2] = AppColor.orange;
+                                taskTabsColor[3] = AppColor.white;
+                                taskTabsColor[4] = AppColor.white;
+                              });
+                            },
+                            child: Text(
+                              'Review',
+                              style: TextStyle(
+                                color: taskTabsColor[2],
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                taskStatusValue = 3;
+                                tileColor = AppChartColor.green;
+                                leftButton = true;
+                                rightButton = false;
+                                taskTabsColor[0] = AppColor.white;
+                                taskTabsColor[1] = AppColor.white;
+                                taskTabsColor[2] = AppColor.white;
+                                taskTabsColor[3] = AppColor.orange;
+                                taskTabsColor[4] = AppColor.white;
+                              });
+                            },
+                            child: Text(
+                              'Completed',
+                              style: TextStyle(
+                                color: taskTabsColor[3],
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              setState(() {});
+                              taskStatusValue = 4;
+                              tileColor = AppChartColor.red;
+                              leftButton = false;
+                              rightButton = false;
+                              taskTabsColor[0] = AppColor.white;
+                              taskTabsColor[1] = AppColor.white;
+                              taskTabsColor[2] = AppColor.white;
+                              taskTabsColor[3] = AppColor.white;
+                              taskTabsColor[4] = AppColor.orange;
+                            },
+                            child: Text(
+                              'Expired',
+                              style: TextStyle(
+                                color: taskTabsColor[4],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
+                      // TabBar(
+                      //   controller: tabController,
+                      //   onTap: (index) {
+                      //     setState(() {
+                      //       currentIndex = index;
+                      //     });
+                      //   },
+                      //   indicatorColor: Colors.transparent,
+                      //   unselectedLabelColor: AppColor.white,
+                      //   labelColor: AppColor.orange,
+                      //   tabs: taskTabs,
+                      // ),
                     ),
-                    TextButton(
-                      onPressed: () {
-                        setState(() {
-                          taskStatusValue = 2;
-                          tileColor = AppChartColor.grey;
-                          leftButton = false;
-                          rightButton = true;
-                          taskTabsColor[0] = AppColor.white;
-                          taskTabsColor[1] = AppColor.white;
-                          taskTabsColor[2] = AppColor.orange;
-                          taskTabsColor[3] = AppColor.white;
-                          taskTabsColor[4] = AppColor.white;
-                        });
-                      },
-                      child: Text(
-                        'Review',
-                        style: TextStyle(
-                          color: taskTabsColor[2],
-                        ),
+                  ),
+                  //Team Sub Tabs
+                  Visibility(
+                    visible: selectedTab == 'Team',
+                    child: Container(
+                      margin: const EdgeInsets.only(top: 0),
+                      color: AppColor.black,
+                      child: Row(
+                        mainAxisAlignment: spaceEvenly
+                            ? MainAxisAlignment.spaceEvenly
+                            : MainAxisAlignment.center,
+                        children: [
+                          Visibility(
+                            visible: teamControl,
+                            child: TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  teamTabsColor[0] = AppColor.orange;
+                                  teamTabsColor[1] = AppColor.white;
+                                  teamTabsColor[2] = AppColor.white;
+                                });
+                              },
+                              child: Text(
+                                'Members',
+                                style: TextStyle(
+                                  color: teamTabsColor[0],
+                                ),
+                              ),
+                            ),
+                          ),
+                          Visibility(
+                            visible: roleControl,
+                            child: TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  teamTabsColor[0] = AppColor.white;
+                                  teamTabsColor[1] = AppColor.orange;
+                                  teamTabsColor[2] = AppColor.white;
+                                });
+                              },
+                              child: Text(
+                                'Roles',
+                                style: TextStyle(
+                                  color: teamTabsColor[1],
+                                ),
+                              ),
+                            ),
+                          ),
+                          Visibility(
+                            visible: viewControl,
+                            child: TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  teamTabsColor[0] = AppColor.white;
+                                  teamTabsColor[1] = AppColor.white;
+                                  teamTabsColor[2] = AppColor.orange;
+                                });
+                              },
+                              child: Text(
+                                'View',
+                                style: TextStyle(
+                                  color: teamTabsColor[2],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
+                      // TabBar(
+                      //   controller: tabController,
+                      //   onTap: (index) {
+                      //     setState(() {
+                      //       currentIndex = index;
+                      //     });
+                      //   },
+                      //   indicatorColor: Colors.transparent,
+                      //   unselectedLabelColor: AppColor.white,
+                      //   labelColor: AppColor.orange,
+                      //   tabs: taskTabs,
+                      // ),
                     ),
-                    TextButton(
-                      onPressed: () {
-                        setState(() {
-                          taskStatusValue = 3;
-                          tileColor = AppChartColor.green;
-                          leftButton = true;
-                          rightButton = false;
-                          taskTabsColor[0] = AppColor.white;
-                          taskTabsColor[1] = AppColor.white;
-                          taskTabsColor[2] = AppColor.white;
-                          taskTabsColor[3] = AppColor.orange;
-                          taskTabsColor[4] = AppColor.white;
-                        });
-                      },
-                      child: Text(
-                        'Completed',
-                        style: TextStyle(
-                          color: taskTabsColor[3],
-                        ),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        setState(() {});
-                        taskStatusValue = 4;
-                        tileColor = AppChartColor.red;
-                        leftButton = false;
-                        rightButton = false;
-                        taskTabsColor[0] = AppColor.white;
-                        taskTabsColor[1] = AppColor.white;
-                        taskTabsColor[2] = AppColor.white;
-                        taskTabsColor[3] = AppColor.white;
-                        taskTabsColor[4] = AppColor.orange;
-                      },
-                      child: Text(
-                        'Expired',
-                        style: TextStyle(
-                          color: taskTabsColor[4],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                // TabBar(
-                //   controller: tabController,
-                //   onTap: (index) {
-                //     setState(() {
-                //       currentIndex = index;
-                //     });
-                //   },
-                //   indicatorColor: Colors.transparent,
-                //   unselectedLabelColor: AppColor.white,
-                //   labelColor: AppColor.orange,
-                //   tabs: taskTabs,
-                // ),
+                  ),
+                ],
               ),
             ],
           ),
         ),
       ),
-      body: TaskView(
-        isOwner: true,
-        workspaceTaskCode: '${widget.email} ${widget.workspaceCode}',
-        taskStatusValue: taskStatusValue,
-        snapshot: _assignTasksData,
-        color: tileColor,
-        leftButton: leftButton,
-        rightButton: rightButton,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            //Tasks
+            Visibility(
+              visible: selectedTab == 'Task',
+              child: TaskView(
+                isOwner: true,
+                workspaceTaskCode: '${widget.email} ${widget.workspaceCode}',
+                taskStatusValue: taskStatusValue,
+                snapshot: _assignTasksData,
+                color: tileColor,
+                leftButton: leftButton,
+                rightButton: rightButton,
+              ),
+            ),
+            //Teams
+            Visibility(
+              visible: selectedTab == 'Team' &&
+                  teamControl &&
+                  teamTabsColor[0] == AppColor.orange,
+              child: WorkspaceMembersHandler(
+                workspaceName: widget.workspaceName,
+                workspaceCode: widget.workspaceCode,
+                docId: widget.docId,
+              ),
+            ),
+            //Roles
+            Visibility(
+              visible: selectedTab == 'Team' &&
+                  roleControl &&
+                  teamTabsColor[1] == AppColor.orange,
+              child: WorkspaceRolesHandler(
+                workspaceCode: widget.workspaceCode,
+                workspaceName: widget.workspaceName,
+                docId: widget.docId,
+              ),
+            ),
+          ],
+        ),
       ),
 
       // TabBarView(
@@ -356,13 +606,16 @@ class _TaskAssignmentState extends State<TaskAssignment> {
       // ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: currentIndex == 0
-          ? AppElevatedButton(
-              text: 'Assign Task',
-              textColor: AppColor.white,
-              backgroundColor: AppColor.orange,
-              function: () {
-                taskAssignmentDialog();
-              },
+          ? Visibility(
+              visible: selectedTab == 'Task',
+              child: AppElevatedButton(
+                text: 'Assign Task',
+                textColor: AppColor.white,
+                backgroundColor: AppColor.orange,
+                function: () {
+                  taskAssignmentDialog();
+                },
+              ),
             )
           : null,
     );

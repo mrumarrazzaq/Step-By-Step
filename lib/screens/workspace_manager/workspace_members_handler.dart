@@ -2,11 +2,15 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_swipe_action_cell/flutter_swipe_action_cell.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:stepbystep/apis/firebase_api.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
 import 'package:stepbystep/screens/workspace_manager/Task%20Assignment%20Section/task_assignment.dart';
+import 'package:stepbystep/visualization/visualization.dart';
 import 'package:stepbystep/widgets/app_divider.dart';
+import 'package:velocity_x/velocity_x.dart';
 
 class WorkspaceMembersHandler extends StatefulWidget {
   String docId;
@@ -29,7 +33,13 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
   String userName = '';
   final searchController = TextEditingController();
   List<dynamic> membersList = [];
+  List<dynamic> rolesList = [];
+  String selectedRoleValue = 'Assign Role';
 
+  String assignedBy = '';
+  String assignedRole = 'No Role Assign';
+
+  int selected = -1;
   final Stream<QuerySnapshot> userRecords = FirebaseFirestore.instance
       .collection('User Data')
       // .orderBy('Created At', descending: true)
@@ -51,6 +61,22 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
     //log(membersList.toString());
   }
 
+  getAddedRoles() async {
+    try {
+      final value = await FirebaseFirestore.instance
+          .collection("Workspaces")
+          .doc(widget.docId)
+          .get();
+
+      setState(() {
+        rolesList = value.data()!['Workspace Roles'];
+      });
+      log(rolesList.toString());
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
   getUserData(String docId) async {
     try {
       await FirebaseFirestore.instance
@@ -68,9 +94,29 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
     }
   }
 
+  getAssignedRole(String email) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('${widget.workspaceCode} Assigned Roles')
+          .doc(email)
+          .get()
+          .then((ds) {
+        assignedBy = ds['Assigned By'];
+        assignedRole = ds['Assigned Role'];
+      });
+      setState(() {
+        log(email);
+        log(assignedRole);
+      });
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
   @override
   void initState() {
     getAddedMembers();
+    getAddedRoles();
     super.initState();
   }
 
@@ -93,7 +139,7 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
               ),
               const SizedBox(height: 5),
               TextFormField(
-                keyboardType: TextInputType.text,
+                keyboardType: TextInputType.emailAddress,
                 cursorColor: AppColor.black,
                 style: TextStyle(color: AppColor.black),
                 autofillHints: const [AutofillHints.email],
@@ -168,8 +214,31 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
                           storedUserData[i]['User Email'] !=
                               currentUserEmail) ...[
                         Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 5, horizontal: 15),
                           child: ListTile(
                             dense: true,
+                            leading: CircleAvatar(
+                              backgroundColor: AppColor.orange,
+                              radius: 30,
+                              foregroundImage:
+                                  storedUserData[i]['Image URL'].isEmpty
+                                      ? null
+                                      : NetworkImage(
+                                          storedUserData[i]['Image URL']),
+                              child: Center(
+                                child: Text(
+                                  storedUserData[i]['User Name'][0],
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 20,
+                                      color: AppColor.white),
+                                ),
+                              ),
+                            ),
                             title: Text(storedUserData[i]['User Name']),
                             subtitle: Text(storedUserData[i]['User Email']),
                             trailing: MaterialButton(
@@ -213,45 +282,189 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
               AppDivider(text: 'Workspace Members', color: AppColor.black),
               for (int i = 0; i < membersList.length; i++) ...[
                 Card(
-                  child: ListTile(
-                    onTap: () async {
-                      await getUserData(membersList[i]);
-                      if (mounted) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => TaskAssignment(
-                              name: userName,
-                              email: membersList[i],
-                              workspaceCode: widget.workspaceCode,
-                              docId: widget.docId,
-                              workspaceName: widget.workspaceName,
-                            ),
-                          ),
-                        );
-                      }
-                    },
-                    dense: true,
-                    title: Text(membersList[i]),
-                    subtitle: Row(children: [
-                      Container(
-                        width: 50,
-                        height: 10,
-                        color: AppChartColor.blue,
-                      ),
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 10),
-                        width: 50,
-                        height: 10,
-                        color: AppChartColor.yellow,
-                      ),
-                      Container(
-                        width: 50,
-                        height: 10,
-                        color: AppChartColor.grey,
-                      ),
-                    ]),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
                   ),
+                  margin:
+                      const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+                  child: ExpansionTile(
+                    title: Text(
+                      membersList[i],
+                      style: TextStyle(color: AppColor.black),
+                    ),
+                    iconColor: AppColor.black,
+                    onExpansionChanged: (v) async {
+                      await getAssignedRole(membersList[i]);
+                    },
+                    // Text(
+                    //   selectedRoleValue,
+                    //   style: TextStyle(fontWeight: FontWeight.bold),
+                    // ),
+                    children: [
+                      const Divider(
+                        thickness: 2,
+                        indent: 20,
+                        endIndent: 20,
+                      ),
+                      ListTile(
+                        onTap: () async {
+                          await getUserData(membersList[i]);
+                          if (mounted) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => TaskTeamAssignment(
+                                  name: userName,
+                                  email: membersList[i],
+                                  workspaceCode: widget.workspaceCode,
+                                  docId: widget.docId,
+                                  workspaceName: widget.workspaceName,
+                                  assignedRole: assignedRole,
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        dense: true,
+                        title: const Text('Assign Task'),
+                        trailing:
+                            Image.asset('assets/right-arrow3.png', height: 30),
+                      ),
+                      ListTile(
+                        onTap: () async {
+                          await getUserData(membersList[i]);
+                          log(userName);
+                          if (mounted) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Visualization(
+                                  workspaceName: widget.workspaceName,
+                                  userName: userName,
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        dense: true,
+                        title: const Text('Check Report'),
+                        trailing:
+                            Image.asset('assets/bar-graph.png', height: 30),
+                      ),
+                      ListTile(
+                        dense: true,
+                        title: const Text('Assigned Role'),
+                        subtitle: Text('By: $assignedBy'),
+                        trailing: Text(
+                          assignedRole,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      const Divider(
+                        thickness: 1,
+                        indent: 20,
+                        endIndent: 20,
+                      ),
+                      Visibility(
+                        visible: rolesList.isNotEmpty,
+                        child: ListTile(
+                          dense: true,
+                          title: const Text('Assign Role'),
+                          trailing: DropdownButton<dynamic>(
+                            hint: const Text('Roles'),
+                            isDense: true,
+                            items: rolesList.map<DropdownMenuItem<dynamic>>(
+                                (dynamic value) {
+                              return DropdownMenuItem<dynamic>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                            value:
+                                selectedRoleValue.isEmpty ? assignedRole : null,
+                            onChanged: (value) async {
+                              setState(() {
+                                assignedRole = value!;
+                                selectedRoleValue = value!;
+                              });
+
+                              final assignRoleJson = {
+                                'Assigned Role': selectedRoleValue,
+                                'Assigned By': currentUserEmail,
+                                'Assigned At': DateTime.now(),
+                              };
+                              await FireBaseApi.saveDataIntoFireStore(
+                                  collection:
+                                      '${widget.workspaceCode} Assigned Roles',
+                                  document: membersList[i],
+                                  jsonData: assignRoleJson);
+                              log('Role Assign Successfully');
+                            },
+                          ),
+                        ),
+                      ),
+                      Visibility(
+                        visible: assignedRole != 'No Role Assign',
+                        child: ListTile(
+                          onTap: () async {
+                            await FirebaseFirestore.instance
+                                .collection(
+                                    '${widget.workspaceCode} Assigned Roles')
+                                .doc(membersList[i])
+                                .update({
+                              'Assigned Role': 'No Role Assign',
+                            });
+                            log('Role De-Assign successfully');
+                            setState(() {
+                              assignedRole = 'No Role Assign';
+                            });
+                          },
+                          dense: true,
+                          title: const Text('De-Assign Role'),
+                          trailing: const Icon(Icons.close),
+                        ),
+                      ),
+                    ],
+                  ),
+                  // ListTile(
+                  //   onTap: () async {
+                  //     await getUserData(membersList[i]);
+                  //     if (mounted) {
+                  //       Navigator.push(
+                  //         context,
+                  //         MaterialPageRoute(
+                  //           builder: (context) => TaskAssignment(
+                  //             name: userName,
+                  //             email: membersList[i],
+                  //             workspaceCode: widget.workspaceCode,
+                  //             docId: widget.docId,
+                  //             workspaceName: widget.workspaceName,
+                  //           ),
+                  //         ),
+                  //       );
+                  //     }
+                  //   },
+                  //   dense: true,
+                  //   title: Text(membersList[i]),
+                  //   subtitle: Row(children: [
+                  //     Container(
+                  //       width: 50,
+                  //       height: 10,
+                  //       color: AppChartColor.blue,
+                  //     ),
+                  //     Container(
+                  //       margin: const EdgeInsets.symmetric(horizontal: 10),
+                  //       width: 50,
+                  //       height: 10,
+                  //       color: AppChartColor.yellow,
+                  //     ),
+                  //     Container(
+                  //       width: 50,
+                  //       height: 10,
+                  //       color: AppChartColor.grey,
+                  //     ),
+                  //   ]),
+                  // ),
                 ),
               ]
             ],
