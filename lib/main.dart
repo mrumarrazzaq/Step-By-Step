@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:stepbystep/providers/date_comparison.dart';
 import 'package:stepbystep/providers/taskCollection.dart';
 
 import 'firebase_options.dart';
@@ -30,6 +31,9 @@ void main() async {
       providers: [
         ChangeNotifierProvider(
           create: (_) => TaskCollection(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => DateCompare(),
         ),
       ],
       child: const MyApp(),

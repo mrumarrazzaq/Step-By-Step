@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:stepbystep/authentication/authentication_with_google.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
+import 'package:stepbystep/screens/privacy_policy.dart';
 import 'package:stepbystep/screens/security_section/signIn_screen.dart';
 
 class AppDrawer extends StatefulWidget {
@@ -24,7 +25,7 @@ class _AppDrawerState extends State<AppDrawer> {
   String signInWith = 'NULL';
   String name = '';
   String email = '';
-  String imageUrl = '';
+  String imageURL = '';
 
   isGoogleLogin() async {
     String? value = await storage.read(key: 'signInWith') ?? 'NULL';
@@ -54,8 +55,10 @@ class _AppDrawerState extends State<AppDrawer> {
           .then((ds) {
         name = ds['User Name'];
         email = ds['User Email'];
+        imageURL = ds['Image URL'];
         log(name);
         log(email);
+        log(imageURL);
       });
       setState(() {});
     } catch (e) {
@@ -77,6 +80,20 @@ class _AppDrawerState extends State<AppDrawer> {
         child: Column(
           children: [
             _userAccountsDrawerHeader(),
+            FlatButton(
+              child: const ListTile(
+                leading: Icon(Icons.privacy_tip),
+                title: Text('Privacy Policy'),
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PrivacyPolicy(),
+                  ),
+                );
+              },
+            ),
             FlatButton(
               onPressed: () async {
                 signInWith == 'GOOGLE' ? googleSignOut() : signOut();
@@ -123,30 +140,36 @@ class _AppDrawerState extends State<AppDrawer> {
         ),
         currentAccountPicture: GestureDetector(
           onTap: () {},
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: Align(
-                  alignment: Alignment.center,
-                  child: CircleAvatar(
-                    backgroundColor: AppColor.orange.withOpacity(0.5),
-                    minRadius: 15.0,
-                  ),
-                ),
-              ),
-              Positioned.fill(
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Text(
-                    name[0],
-                    style: GoogleFonts.righteous(
-                      fontSize: 20,
+          child: imageURL.isEmpty
+              ? Stack(
+                  children: [
+                    Positioned.fill(
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: CircleAvatar(
+                          backgroundColor: AppColor.orange.withOpacity(0.5),
+                          minRadius: 15.0,
+                        ),
+                      ),
                     ),
-                  ),
+                    Positioned.fill(
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Text(
+                          name[0],
+                          style: GoogleFonts.righteous(
+                            fontSize: 20,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              : CircleAvatar(
+                  backgroundColor: AppColor.orange.withOpacity(0.5),
+                  minRadius: 15.0,
+                  backgroundImage: NetworkImage(imageURL.toString()),
                 ),
-              ),
-            ],
-          ),
         ),
         accountName: Text(
           name,

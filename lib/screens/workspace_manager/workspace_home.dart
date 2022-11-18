@@ -18,6 +18,7 @@ class WorkspaceHome extends StatefulWidget {
 
 class _WorkspaceHomeState extends State<WorkspaceHome> {
   bool isEmpty = false;
+  bool result = false;
   List<dynamic> joinedWorkspaces = [];
   List<dynamic> ownedWorkspaces = [];
   final Stream<QuerySnapshot> _workspaces = FirebaseFirestore.instance
@@ -61,6 +62,7 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
 
   @override
   Widget build(BuildContext context) {
+    print(result);
     return Scaffold(
       body: SingleChildScrollView(
         child: StreamBuilder<QuerySnapshot>(
@@ -172,14 +174,22 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
             }),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          var value = await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) =>
                   CreateWorkspace(ownedWorkspaces: ownedWorkspaces),
             ),
           );
+          setState(() {
+            if (value != null) {
+              result = value;
+            }
+          });
+          if (result) {
+            getOwnedWorkspaces();
+          }
         },
         tooltip: 'Add Workspace',
         child: Image.asset(

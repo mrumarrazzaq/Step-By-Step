@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:stepbystep/screens/drawer.dart';
 import 'package:stepbystep/screens/home.dart';
+import 'package:stepbystep/screens/user_profile_section/user_profile.dart';
 
 import 'package:stepbystep/visualization/visualization.dart';
 
@@ -20,7 +21,7 @@ class _StepByStepState extends State<StepByStep> {
     Container(),
     Container(),
     Container(),
-    Container()
+    UserProfile()
   ];
 
   @override

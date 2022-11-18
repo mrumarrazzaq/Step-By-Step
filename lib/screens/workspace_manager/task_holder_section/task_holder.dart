@@ -1,7 +1,10 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
@@ -30,6 +33,7 @@ class _WorkspaceTaskHolderState extends State<WorkspaceTaskHolder> {
   DateTime dateTime = DateTime.now();
   int taskStatusValue = 0;
   Color tileColor = AppChartColor.blue;
+  String imageURL = '';
 
   bool leftButton = false;
   bool rightButton = true;
@@ -48,6 +52,22 @@ class _WorkspaceTaskHolderState extends State<WorkspaceTaskHolder> {
         .collection('$currentUserEmail ${widget.workspaceCode}')
         .orderBy('Created At', descending: true)
         .snapshots();
+    fetchData();
+  }
+
+  fetchData() async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('User Data')
+          .doc(widget.workspaceOwnerEmail)
+          .get()
+          .then((ds) {
+        imageURL = ds['Image URL'];
+      });
+      setState(() {});
+    } catch (e) {
+      log(e.toString());
+    }
   }
 
   @override
@@ -63,8 +83,18 @@ class _WorkspaceTaskHolderState extends State<WorkspaceTaskHolder> {
                 children: [
                   CircleAvatar(
                     backgroundColor: AppColor.orange,
-                    foregroundImage: const AssetImage('assets/dummy.jpg'),
                     radius: 40,
+                    foregroundImage:
+                        imageURL.isEmpty ? null : NetworkImage(imageURL),
+                    child: Center(
+                      child: Text(
+                        widget.workspaceOwnerName[0],
+                        style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 40,
+                            color: AppColor.white),
+                      ),
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 3.0),

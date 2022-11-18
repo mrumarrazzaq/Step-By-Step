@@ -48,7 +48,7 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
     setState(() {
       membersList = value.data()!['Workspace Members'];
     });
-    log(membersList.toString());
+    //log(membersList.toString());
   }
 
   getUserData(String docId) async {
@@ -61,7 +61,7 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
         userName = ds['User Name'];
       });
       setState(() {
-        log(userName);
+        //log(userName);
       });
     } catch (e) {
       log(e.toString());

@@ -32,4 +32,18 @@ class FireBaseApi {
         .doc(document)
         .set(jsonData);
   }
+
+  static Future<void> saveDataIntoDoubleCollectionFireStore(
+      {required String mainCollection,
+      required String subCollection,
+      required String mainDocument,
+      required String subDocument,
+      required Map<String, dynamic> jsonData}) async {
+    await FirebaseFirestore.instance
+        .collection(mainCollection)
+        .doc(mainDocument)
+        .collection(subCollection)
+        .doc(subDocument)
+        .set(jsonData);
+  }
 }

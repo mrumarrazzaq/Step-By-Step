@@ -42,6 +42,7 @@ class _TaskAssignmentState extends State<TaskAssignment> {
   int currentIndex = 0;
   int taskStatusValue = 0;
   Color tileColor = AppChartColor.blue;
+  String imageURL = '';
 
   bool leftButton = false;
   bool rightButton = false;
@@ -67,6 +68,22 @@ class _TaskAssignmentState extends State<TaskAssignment> {
           '-',
           yyyy
         ])} ${formatDate(dateTime, [hh, ':', nn, ' ', am])}';
+    fetchData();
+  }
+
+  fetchData() async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('User Data')
+          .doc(widget.email)
+          .get()
+          .then((ds) {
+        imageURL = ds['Image URL'];
+      });
+      setState(() {});
+    } catch (e) {
+      log(e.toString());
+    }
   }
 
   @override
@@ -82,8 +99,18 @@ class _TaskAssignmentState extends State<TaskAssignment> {
                 children: [
                   CircleAvatar(
                     backgroundColor: AppColor.orange,
-                    foregroundImage: const AssetImage('assets/dummy.jpg'),
                     radius: 40,
+                    foregroundImage:
+                        imageURL.isEmpty ? null : NetworkImage(imageURL),
+                    child: Center(
+                      child: Text(
+                        widget.name[0],
+                        style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 40,
+                            color: AppColor.white),
+                      ),
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 3.0),

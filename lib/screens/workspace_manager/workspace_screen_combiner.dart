@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/screens/workspace_manager/workspace_members_handler.dart';
+import 'package:stepbystep/screens/workspace_manager/workspace_roles_handler/workspace_roles_handler.dart';
 
 class WorkspaceScreenCombiner extends StatefulWidget {
   String docId;
@@ -21,6 +22,8 @@ class WorkspaceScreenCombiner extends StatefulWidget {
 }
 
 class _WorkspaceScreenCombinerState extends State<WorkspaceScreenCombiner> {
+  List<Color> tabsColor = [AppColor.orange, AppColor.black, AppColor.black];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,38 +34,122 @@ class _WorkspaceScreenCombinerState extends State<WorkspaceScreenCombiner> {
               TextStyle(color: AppColor.darkGrey, fontWeight: FontWeight.w900),
         ),
         backgroundColor: AppColor.white,
-        // bottom: TabBar(
-        //   indicatorWeight: 3,
-        //   indicatorColor: AppColor.orange,
-        //   labelColor: AppColor.black,
-        //   tabs: const [
-        //     Tab(
-        //       text: 'Members',
-        //     ),
-        //     Tab(
-        //       text: 'Roles',
-        //     ),
-        //     Tab(
-        //       text: 'View',
-        //     ),
-        //   ],
-        // ),
+        bottom: PreferredSize(
+          preferredSize: const Size(200, 50),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    tabsColor[0] = AppColor.orange;
+                    tabsColor[1] = AppColor.black;
+                    tabsColor[2] = AppColor.black;
+                  });
+                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Members',
+                      style: TextStyle(
+                        color: tabsColor[0],
+                      ),
+                    ),
+                    Visibility(
+                      visible: tabsColor[0] == AppColor.orange,
+                      child: Container(
+                        margin: const EdgeInsets.only(top: 5),
+                        height: 3,
+                        width: 80,
+                        color: tabsColor[0],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    tabsColor[0] = AppColor.black;
+                    tabsColor[1] = AppColor.orange;
+                    tabsColor[2] = AppColor.black;
+                  });
+                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Roles',
+                      style: TextStyle(
+                        color: tabsColor[1],
+                      ),
+                    ),
+                    Visibility(
+                      visible: tabsColor[1] == AppColor.orange,
+                      child: Container(
+                        margin: const EdgeInsets.only(top: 5),
+                        height: 3,
+                        width: 80,
+                        color: tabsColor[1],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    tabsColor[0] = AppColor.black;
+                    tabsColor[1] = AppColor.black;
+                    tabsColor[2] = AppColor.orange;
+                  });
+                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'View',
+                      style: TextStyle(
+                        color: tabsColor[2],
+                      ),
+                    ),
+                    Visibility(
+                      visible: tabsColor[2] == AppColor.orange,
+                      child: Container(
+                        margin: const EdgeInsets.only(top: 5),
+                        height: 3,
+                        width: 80,
+                        color: tabsColor[2],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
-      body: WorkspaceMembersHandler(
-          workspaceCode: widget.workspaceCode,
-          docId: widget.docId,
-          workspaceName: widget.workspaceName),
-
-      // TabBarView(
-      //   children: [
-      //     WorkspaceMembersHandler(
-      //         workspaceCode: widget.workspaceCode,
-      //         docId: widget.docId,
-      //         workspaceName: widget.workspaceName),
-      //     Container(),
-      //     Container(),
-      //   ],
-      // ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Visibility(
+              visible: tabsColor[0] == AppColor.orange,
+              child: WorkspaceMembersHandler(
+                  workspaceCode: widget.workspaceCode,
+                  docId: widget.docId,
+                  workspaceName: widget.workspaceName),
+            ),
+            Visibility(
+              visible: tabsColor[1] == AppColor.orange,
+              child: WorkspaceRolesHandler(
+                  workspaceCode: widget.workspaceCode,
+                  docId: widget.docId,
+                  workspaceName: widget.workspaceName),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -12,16 +12,20 @@ class AppElevatedButton extends StatelessWidget {
     this.width = 80,
     this.height = 35,
     this.fontSize = 10,
+    this.isLoading = false,
+    this.loadingColor = Colors.white,
   }) : super(key: key);
   String text;
   Color textColor;
   Color foregroundColor;
   Color backgroundColor;
   Color borderSideColor;
+  Color loadingColor;
   Function() function;
   double width;
   double height;
   double fontSize;
+  bool isLoading;
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(

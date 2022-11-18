@@ -1,11 +1,15 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:developer';
+
 import 'package:date_format/date_format.dart';
+import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_date_picker_timeline/flutter_date_picker_timeline.dart';
 import 'package:flutter_swipe_action_cell/flutter_swipe_action_cell.dart';
 import 'package:provider/provider.dart';
 import 'package:stepbystep/colors.dart';
+import 'package:stepbystep/providers/date_comparison.dart';
 import 'package:stepbystep/providers/taskCollection.dart';
 import 'package:stepbystep/screens/self_task_manager/add_task.dart';
 import 'package:stepbystep/screens/self_task_manager/update_task.dart';
@@ -22,11 +26,10 @@ class _SelfSpaceHomeState extends State<SelfSpaceHome> {
   bool _isLoading = false;
   IconData taskStatusIcon = Icons.check_box_outline_blank_rounded;
   String dateFilter = '';
-
+  DateTime initialSelectedDate = DateTime.now();
   @override
   void initState() {
     context.read<TaskCollection>().refreshData();
-
     super.initState();
   }
 
@@ -53,15 +56,40 @@ class _SelfSpaceHomeState extends State<SelfSpaceHome> {
         child: Center(
           child: Column(
             children: [
-              FlutterDatePickerTimeline(
-                initialSelectedDate: DateTime.now(),
-                startDate: DateTime.now(),
-                endDate: DateTime(3000, 01, 30),
-                calendarMode: CalendarMode.gregorian,
-                onSelectedDateChange: (DateTime? dateTime) {
-                  dateFilter = formatDate(dateTime!, [yyyy, '-', mm, '-', dd]);
+              ListTile(
+                title: const Text('See Previous Date Task'),
+                textColor: AppColor.black,
+                trailing: IconButton(
+                  onPressed: () {
+                    _pickDate();
+                  },
+                  icon: Icon(Icons.date_range_sharp, color: AppColor.black),
+                ),
+              ),
+              DatePicker(
+                initialSelectedDate,
+                initialSelectedDate: initialSelectedDate,
+                selectionColor: Colors.black,
+                selectedTextColor: Colors.white,
+                width: 60,
+                onDateChange: (dateTime) {
+                  setState(() {
+                    dateFilter = formatDate(dateTime, [yyyy, '-', mm, '-', dd]);
+                    log(dateFilter);
+                  });
                 },
               ),
+              // FlutterDatePickerTimeline(
+              //   initialSelectedDate: DateTime.now(),
+              //   startDate: DateTime.now(),
+              //   endDate: DateTime(3000, 01, 30),
+              //   calendarMode: CalendarMode.gregorian,
+              //   onSelectedDateChange: (dateTime) {
+              //     dateFilter = formatDate(dateTime!, [yyyy, '-', mm, '-', dd]);
+              //     context.read<DateCompare>().setDateFilter(dateFilter);
+              //     log(dateFilter);
+              //   },
+              // ),
               Expanded(
                 child: _isLoading
                     ? const Center(
@@ -96,9 +124,13 @@ class _SelfSpaceHomeState extends State<SelfSpaceHome> {
                                     },
                                   ),
                                 ],
-                                child: TaskTile(
+                                child:
+                                    // task['dateFilter'] == dateFilter ?
+                                    TaskTile(
                                   task: task,
+                                  dateFilter: dateFilter,
                                 ),
+                                // : Container(),
                               );
                             },
                           ),
@@ -124,6 +156,39 @@ class _SelfSpaceHomeState extends State<SelfSpaceHome> {
         ),
       ),
     );
+  }
+
+  void _pickDate() async {
+    DateTime? pickDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000, 01, 01),
+      lastDate: DateTime(3000),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColor.orange,
+              onPrimary: AppColor.white,
+              onSurface: AppColor.black,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                primary: AppColor.black,
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (pickDate != null) {
+      setState(() {
+        initialSelectedDate = pickDate;
+        log(initialSelectedDate.toString());
+        //dateFilter = formatDate(pickDate, [dd, ' ', MM, ' ', yyyy]);
+      });
+    }
   }
 
   openDeleteDialog(int id) => showDialog(
@@ -184,67 +249,75 @@ class _SelfSpaceHomeState extends State<SelfSpaceHome> {
 
 class TaskTile extends StatelessWidget {
   final task;
-  const TaskTile({Key? key, this.task}) : super(key: key);
+  String dateFilter;
+  TaskTile({Key? key, this.task, required this.dateFilter}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => UpdateTask(
-              id: task['id'],
-              title: task['taskTitle'],
-              description: task['taskDescription'],
-              taskStatus: task['taskStatus'],
-            ),
-          ),
-        );
-      },
-      leading: IconButton(
-        onPressed: () {
-          String taskStatus = task['taskStatus'];
+    return
+        //context.watch<DateCompare>().dateFilter
+        dateFilter == task['dateFilter']
+            ? ListTile(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => UpdateTask(
+                        id: task['id'],
+                        title: task['taskTitle'],
+                        description: task['taskDescription'],
+                        taskStatus: task['taskStatus'],
+                      ),
+                    ),
+                  );
+                },
+                leading: IconButton(
+                  onPressed: () {
+                    String taskStatus = task['taskStatus'];
 
-          if (taskStatus == 'TODO') {
-            taskStatus = 'COMPLETED';
-          } else {
-            taskStatus = 'TODO';
-          }
-          _updateTaskStatus(
-              id: task['id'],
-              title: task['taskTitle'],
-              description: task['taskDescription'],
-              taskDate: task['taskDate'],
-              taskTime: task['taskTime'],
-              dateFilter: task['dateFilter'],
-              notification: task['notification'],
-              taskStatus: taskStatus,
-              context: context);
-        },
-        splashRadius: 25,
-        color: task['taskStatus'] == 'TODO' ? AppColor.black : AppColor.grey,
-        icon: Icon(task['taskStatus'] == 'TODO'
-            ? Icons.check_box_outline_blank_rounded
-            : Icons.check_box_outlined),
-      ),
-      title: Text(
-        task['taskTitle'],
-        style: TextStyle(
-            color:
-                task['taskStatus'] == 'TODO' ? AppColor.black : AppColor.grey,
-            decoration: task['taskStatus'] == 'TODO'
-                ? TextDecoration.none
-                : TextDecoration.lineThrough),
-      ),
-      subtitle: Text(
-        task['dateFilter'], //taskDescription
-        style: TextStyle(
-            decoration: task['taskStatus'] == 'TODO'
-                ? TextDecoration.none
-                : TextDecoration.lineThrough),
-      ),
-    );
+                    if (taskStatus == 'TODO') {
+                      taskStatus = 'COMPLETED';
+                    } else {
+                      taskStatus = 'TODO';
+                    }
+                    _updateTaskStatus(
+                        id: task['id'],
+                        title: task['taskTitle'],
+                        description: task['taskDescription'],
+                        taskDate: task['taskDate'],
+                        taskTime: task['taskTime'],
+                        dateFilter: task['dateFilter'],
+                        notification: task['notification'],
+                        taskStatus: taskStatus,
+                        context: context);
+                  },
+                  splashRadius: 25,
+                  color: task['taskStatus'] == 'TODO'
+                      ? AppColor.black
+                      : AppColor.grey,
+                  icon: Icon(task['taskStatus'] == 'TODO'
+                      ? Icons.check_box_outline_blank_rounded
+                      : Icons.check_box_outlined),
+                ),
+                title: Text(
+                  task['taskTitle'],
+                  style: TextStyle(
+                      color: task['taskStatus'] == 'TODO'
+                          ? AppColor.black
+                          : AppColor.grey,
+                      decoration: task['taskStatus'] == 'TODO'
+                          ? TextDecoration.none
+                          : TextDecoration.lineThrough),
+                ),
+                subtitle: Text(
+                  task['taskTime'], //taskDescription
+                  style: TextStyle(
+                      decoration: task['taskStatus'] == 'TODO'
+                          ? TextDecoration.none
+                          : TextDecoration.lineThrough),
+                ),
+              )
+            : Container();
   }
 
   Future<void> _updateTaskStatus(
