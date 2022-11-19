@@ -20,6 +20,7 @@ class TaskTeamAssignment extends StatefulWidget {
   String docId;
   String workspaceCode;
   String workspaceName;
+  String workspaceOwnerEmail;
   String assignedRole;
   TaskTeamAssignment({
     Key? key,
@@ -28,6 +29,7 @@ class TaskTeamAssignment extends StatefulWidget {
     required this.workspaceCode,
     required this.docId,
     required this.workspaceName,
+    required this.workspaceOwnerEmail,
     required this.assignedRole,
   }) : super(key: key);
   @override
@@ -313,7 +315,7 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
                               setState(() {
                                 taskStatusValue = 2;
                                 tileColor = AppChartColor.grey;
-                                leftButton = false;
+                                leftButton = true;
                                 rightButton = true;
                                 taskTabsColor[0] = AppColor.white;
                                 taskTabsColor[1] = AppColor.white;
@@ -489,18 +491,27 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
                 rightButton: rightButton,
               ),
             ),
-            //Teams
+            //Teams Section
             Visibility(
               visible: selectedTab == 'Team' &&
                   teamControl &&
                   teamTabsColor[0] == AppColor.orange,
               child: WorkspaceMembersHandler(
+                fromTaskAssignment: true,
+                fromTaskHolder: false,
                 workspaceName: widget.workspaceName,
                 workspaceCode: widget.workspaceCode,
                 docId: widget.docId,
+                workspaceOwnerEmail: widget.workspaceOwnerEmail,
+                assignTaskControl: taskControl,
+                reportControl: true,
+                addMember: true,
+                removeMember: true,
+                assignRole: true,
+                deAssignRole: true,
               ),
             ),
-            //Roles
+            //Roles Section
             Visibility(
               visible: selectedTab == 'Team' &&
                   roleControl &&
@@ -509,6 +520,11 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
                 workspaceCode: widget.workspaceCode,
                 workspaceName: widget.workspaceName,
                 docId: widget.docId,
+                createRole: true,
+                editRole: true,
+                deleteRole: true,
+                controlForUser: false,
+                controlForOwner: true,
               ),
             ),
           ],

@@ -13,16 +13,25 @@ import 'package:numberpicker/numberpicker.dart';
 import 'package:stepbystep/widgets/app_progress_indicator.dart';
 
 class WorkspaceRolesHandler extends StatefulWidget {
-  WorkspaceRolesHandler(
-      {Key? key,
-      required this.workspaceCode,
-      required this.docId,
-      required this.workspaceName})
-      : super(key: key);
+  WorkspaceRolesHandler({
+    Key? key,
+    required this.workspaceCode,
+    required this.docId,
+    required this.workspaceName,
+    required this.controlForUser,
+    required this.controlForOwner,
+    required this.createRole,
+    required this.editRole,
+    required this.deleteRole,
+  }) : super(key: key);
   String workspaceCode;
   String docId;
   String workspaceName;
-
+  bool controlForUser;
+  bool controlForOwner;
+  bool createRole;
+  bool editRole;
+  bool deleteRole;
   @override
   State<WorkspaceRolesHandler> createState() => _WorkspaceRolesHandlerState();
 }
@@ -31,7 +40,7 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   int roleLevel = 1;
-
+  String assignedRole = '';
   final roleController = TextEditingController();
   final descriptionController = TextEditingController();
   late final Stream<QuerySnapshot> rolesRecords;
@@ -42,7 +51,25 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
         .collection('${widget.workspaceCode} Roles')
         .orderBy('Role Level', descending: false)
         .snapshots();
+    getAssignRoleData();
     super.initState();
+  }
+
+  getAssignRoleData() async {
+    log('Role Data is fetching');
+    try {
+      await FirebaseFirestore.instance
+          .collection('${widget.workspaceCode} Assigned Roles')
+          .doc(currentUserEmail)
+          .get()
+          .then((ds) {
+        assignedRole = ds['Assigned Role'];
+      });
+      log(assignedRole);
+      setState(() {});
+    } catch (e) {
+      log(e.toString());
+    }
   }
 
   @override
@@ -75,17 +102,32 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
                 return Column(
                   children: [
                     for (int i = 0; i < storedRolesData.length; i++) ...[
-                      WorkspaceRoleCard(
-                        id: storedRolesData[i]['id'],
-                        workspaceCode: widget.workspaceCode,
-                        roleName: storedRolesData[i]['Role'],
-                        roleDescription: storedRolesData[i]['Role Description'],
-                        roleLevel: storedRolesData[i]['Role Level'].toString(),
-                        teamControl: storedRolesData[i]['Team Control'],
-                        roleControl: storedRolesData[i]['Role Control'],
-                        taskControl: storedRolesData[i]['Task Control'],
-                        viewControl: storedRolesData[i]['View Control'],
-                      ),
+                      if (assignedRole !=
+                          '${storedRolesData[i]['Role']} ${storedRolesData[i]['Role Level']}') ...[
+                        WorkspaceRoleCard(
+                          id: storedRolesData[i]['id'],
+                          workspaceCode: widget.workspaceCode,
+                          roleName: storedRolesData[i]['Role'],
+                          roleDescription: storedRolesData[i]
+                              ['Role Description'],
+                          roleLevel:
+                              storedRolesData[i]['Role Level'].toString(),
+                          teamControl: storedRolesData[i]['Team Control'],
+                          controlForOwner: widget.controlForOwner,
+                          controlForUser: storedRolesData[i]['Control'],
+                          roleControl: storedRolesData[i]['Role Control'],
+                          taskControl: storedRolesData[i]['Task Control'],
+                          viewControl: storedRolesData[i]['View Control'],
+                          reportControl: storedRolesData[i]['Report Control'],
+                          addMember: storedRolesData[i]['Add Member'],
+                          removeMember: storedRolesData[i]['Remove Member'],
+                          assignRole: storedRolesData[i]['Assign Role'],
+                          deAssignRole: storedRolesData[i]['DeAssign Role'],
+                          createRole: storedRolesData[i]['Create Role'],
+                          editRole: storedRolesData[i]['Edit Role'],
+                          deleteRole: storedRolesData[i]['Delete Role'],
+                        ),
+                      ],
                     ],
                   ],
                 );
@@ -96,17 +138,20 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
                 strokeWidth: 2.0,
               ));
             }),
-        Align(
-          alignment: FractionalOffset.bottomCenter,
-          child: AppElevatedButton(
-            text: 'Create Role',
-            fontSize: 12,
-            backgroundColor: AppColor.orange,
-            foregroundColor: AppColor.orange,
-            textColor: AppColor.white,
-            function: () {
-              createRoleDialog();
-            },
+        Visibility(
+          visible: widget.createRole,
+          child: Align(
+            alignment: FractionalOffset.bottomCenter,
+            child: AppElevatedButton(
+              text: 'Create Role',
+              fontSize: 12,
+              backgroundColor: AppColor.orange,
+              foregroundColor: AppColor.orange,
+              textColor: AppColor.white,
+              function: () {
+                createRoleDialog();
+              },
+            ),
           ),
         ),
       ],
@@ -277,10 +322,19 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
                                             ? ''
                                             : descriptionController.text.trim(),
                                     'Role Level': roleLevel,
+                                    'Control': false,
                                     'Team Control': false,
+                                    'Add Member': false,
+                                    'Remove Member': false,
+                                    'Assign Role': false,
+                                    'DeAssign Role': false,
                                     'Role Control': false,
+                                    'Create Role': false,
+                                    'Edit Role': false,
+                                    'Delete Role': false,
                                     'Task Control': false,
                                     'View Control': false,
+                                    'Report Control': false,
                                     'Assigned By': currentUserEmail,
                                     'Created At': DateTime.now(),
                                   };

@@ -9,12 +9,14 @@ class WorkspaceScreenCombiner extends StatefulWidget {
   String docId;
   String workspaceCode;
   String workspaceName;
-  WorkspaceScreenCombiner(
-      {Key? key,
-      required this.workspaceCode,
-      required this.docId,
-      required this.workspaceName})
-      : super(key: key);
+  String workspaceOwnerEmail;
+  WorkspaceScreenCombiner({
+    Key? key,
+    required this.workspaceCode,
+    required this.docId,
+    required this.workspaceName,
+    required this.workspaceOwnerEmail,
+  }) : super(key: key);
 
   @override
   State<WorkspaceScreenCombiner> createState() =>
@@ -133,19 +135,37 @@ class _WorkspaceScreenCombinerState extends State<WorkspaceScreenCombiner> {
       body: SingleChildScrollView(
         child: Column(
           children: [
+            //Members Section
             Visibility(
               visible: tabsColor[0] == AppColor.orange,
               child: WorkspaceMembersHandler(
-                  workspaceCode: widget.workspaceCode,
-                  docId: widget.docId,
-                  workspaceName: widget.workspaceName),
+                workspaceCode: widget.workspaceCode,
+                docId: widget.docId,
+                workspaceName: widget.workspaceName,
+                workspaceOwnerEmail: widget.workspaceOwnerEmail,
+                fromTaskAssignment: false,
+                fromTaskHolder: false,
+                assignTaskControl: true,
+                reportControl: true,
+                addMember: true,
+                removeMember: true,
+                assignRole: true,
+                deAssignRole: true,
+              ),
             ),
+            //Roles Section
             Visibility(
               visible: tabsColor[1] == AppColor.orange,
               child: WorkspaceRolesHandler(
-                  workspaceCode: widget.workspaceCode,
-                  docId: widget.docId,
-                  workspaceName: widget.workspaceName),
+                workspaceCode: widget.workspaceCode,
+                docId: widget.docId,
+                workspaceName: widget.workspaceName,
+                createRole: true,
+                editRole: true,
+                deleteRole: true,
+                controlForUser: false,
+                controlForOwner: true,
+              ),
             ),
           ],
         ),

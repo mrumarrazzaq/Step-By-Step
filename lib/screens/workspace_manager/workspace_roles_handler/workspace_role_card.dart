@@ -20,20 +20,41 @@ class WorkspaceRoleCard extends StatefulWidget {
     required this.roleName,
     required this.roleDescription,
     required this.roleLevel,
+    required this.controlForOwner,
+    required this.controlForUser,
     required this.teamControl,
     required this.roleControl,
     required this.taskControl,
     required this.viewControl,
+    required this.addMember,
+    required this.removeMember,
+    required this.assignRole,
+    required this.deAssignRole,
+    required this.createRole,
+    required this.editRole,
+    required this.deleteRole,
+    required this.reportControl,
   }) : super(key: key);
   String id;
   String workspaceCode;
   String roleName;
   String roleDescription;
   String roleLevel;
+  bool controlForUser;
+  bool controlForOwner;
   bool teamControl;
   bool roleControl;
   bool taskControl;
   bool viewControl;
+  bool reportControl;
+
+  bool addMember;
+  bool removeMember;
+  bool assignRole;
+  bool deAssignRole;
+  bool createRole;
+  bool editRole;
+  bool deleteRole;
   @override
   State<WorkspaceRoleCard> createState() => _WorkspaceRoleCardState();
 }
@@ -47,7 +68,9 @@ class _WorkspaceRoleCardState extends State<WorkspaceRoleCard> {
   bool deleteRoleLoading = false;
   bool updateRoleLoading = false;
 
-  List<bool> values = [false, false, false, false];
+  List<bool> values = [false, false, false, false, false, false];
+  List<bool> teamSubAuth = [false, false, false, false];
+  List<bool> roleSubAuth = [false, false, false];
   Offset _tapPosition = const Offset(0, 0);
   @override
   void initState() {
@@ -61,6 +84,16 @@ class _WorkspaceRoleCardState extends State<WorkspaceRoleCard> {
       values[1] = widget.roleControl;
       values[2] = widget.taskControl;
       values[3] = widget.viewControl;
+      values[4] = widget.controlForUser;
+      values[5] = widget.reportControl;
+
+      teamSubAuth[0] = widget.addMember;
+      teamSubAuth[1] = widget.removeMember;
+      teamSubAuth[2] = widget.assignRole;
+      teamSubAuth[3] = widget.deAssignRole;
+      roleSubAuth[0] = widget.createRole;
+      roleSubAuth[1] = widget.editRole;
+      roleSubAuth[2] = widget.deleteRole;
     });
   }
 
@@ -112,7 +145,8 @@ class _WorkspaceRoleCardState extends State<WorkspaceRoleCard> {
             Visibility(
               visible: widget.roleDescription.isNotEmpty,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20.0, vertical: 3),
                 child: ReadMoreText(
                   '" ${widget.roleDescription} "',
                   trimLines: 2,
@@ -136,105 +170,387 @@ class _WorkspaceRoleCardState extends State<WorkspaceRoleCard> {
                 ),
               ),
             ),
-            AppDivider(text: 'Controls', color: AppColor.black),
-            ListTile(
-              minLeadingWidth: 0,
-              leading: Checkbox(
-                value: values[0],
-                onChanged: (value) async {
-                  setState(() {
-                    values[0] = value!;
-                  });
-                  await updateRoleControls(
-                      widget.id, values[0], 'Team Control');
-                },
-              ),
-              title: Text(
-                'Expand Team Authority',
-                style: TextStyle(
-                  color: AppColor.black,
-                  fontWeight: values[0] ? FontWeight.bold : FontWeight.normal,
+            Visibility(
+                visible: widget.controlForOwner || widget.controlForUser,
+                child: AppDivider(text: 'Controls', color: AppColor.black)),
+            Visibility(
+              visible: widget.controlForOwner,
+              child: ListTile(
+                minLeadingWidth: 0,
+                leading: Checkbox(
+                  value: values[4],
+                  onChanged: (value) async {
+                    setState(() {
+                      values[4] = value!;
+                    });
+                    await updateRoleControls(widget.id, values[4], 'Control');
+                  },
                 ),
-              ),
-              trailing: Image.asset(
-                'assets/group.png',
-                height: 13,
-                color: values[0] ? AppColor.black : AppColor.grey,
+                title: Text(
+                  'Role Control Authority',
+                  style: TextStyle(
+                    color: AppColor.black,
+                    fontWeight: values[4] ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
               ),
             ),
-            ListTile(
-              minLeadingWidth: 0,
-              leading: Checkbox(
-                value: values[1],
-                onChanged: (value) async {
-                  setState(() {
-                    values[1] = value!;
-                  });
-                  await updateRoleControls(
-                      widget.id, values[1], 'Role Control');
-                },
-              ),
-              title: Text(
-                'Create Roles Authority',
-                style: TextStyle(
-                  color: AppColor.black,
-                  fontWeight: values[1] ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-              trailing: Image.asset(
-                'assets/hat.png',
-                height: 15,
-                color: values[1] ? AppColor.black : AppColor.grey,
-              ),
-            ),
-            ListTile(
-              minLeadingWidth: 0,
-              leading: Checkbox(
-                value: values[2],
-                onChanged: (value) async {
-                  setState(() {
-                    values[2] = value!;
-                  });
-                  await updateRoleControls(
-                      widget.id, values[2], 'Task Control');
-                },
-              ),
-              title: Text(
-                'Assign Tasks Authority',
-                style: TextStyle(
-                  color: AppColor.black,
-                  fontWeight: values[2] ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-              trailing: Image.asset(
-                'assets/planning.png',
-                height: 15,
-                color: values[2] ? AppColor.black : AppColor.grey,
-              ),
-            ),
-            ListTile(
-              minLeadingWidth: 0,
-              leading: Checkbox(
-                value: values[3],
-                onChanged: (value) async {
-                  setState(() {
-                    values[3] = value!;
-                  });
-                  await updateRoleControls(
-                      widget.id, values[3], 'View Control');
-                },
-              ),
-              title: Text(
-                'View Authority',
-                style: TextStyle(
-                  color: AppColor.black,
-                  fontWeight: values[3] ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-              trailing: Image.asset(
-                'assets/planning.png',
-                height: 15,
-                color: values[2] ? AppColor.black : AppColor.grey,
+            Visibility(
+              visible: widget.controlForOwner || widget.controlForUser,
+              child: Column(
+                children: [
+                  //Role Control Authority
+                  //Team Control
+                  Visibility(
+                    visible: widget.controlForOwner || widget.controlForUser,
+                    child: ExpansionTile(
+                      iconColor: AppColor.black,
+                      collapsedIconColor: AppColor.black,
+                      leading: Checkbox(
+                        value: values[0],
+                        onChanged: (value) async {
+                          setState(() {
+                            values[0] = value!;
+                          });
+                          await updateRoleControls(
+                              widget.id, values[0], 'Team Control');
+                        },
+                      ),
+                      title: Text(
+                        'Team Authority',
+                        style: TextStyle(
+                          color: AppColor.black,
+                          fontWeight:
+                              values[0] ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                      childrenPadding:
+                          const EdgeInsets.symmetric(horizontal: 30),
+                      children: [
+                        Visibility(
+                          visible: values[0],
+                          child: ListTile(
+                            dense: true,
+                            minLeadingWidth: 0,
+                            leading: Transform.scale(
+                              scale: 0.8,
+                              child: Checkbox(
+                                activeColor: AppColor.black,
+                                value: teamSubAuth[0],
+                                onChanged: (value) async {
+                                  setState(() {
+                                    teamSubAuth[0] = value!;
+                                  });
+                                  await updateRoleControls(
+                                      widget.id, teamSubAuth[0], 'Add Member');
+                                },
+                              ),
+                            ),
+                            title: Text(
+                              'Add Members',
+                              style: TextStyle(
+                                color: AppColor.black,
+                                fontStyle: teamSubAuth[0]
+                                    ? FontStyle.italic
+                                    : FontStyle.normal,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Visibility(
+                          visible: values[0],
+                          child: ListTile(
+                            dense: true,
+                            minLeadingWidth: 0,
+                            leading: Transform.scale(
+                              scale: 0.8,
+                              child: Checkbox(
+                                activeColor: AppColor.black,
+                                value: teamSubAuth[1],
+                                onChanged: (value) async {
+                                  setState(() {
+                                    teamSubAuth[1] = value!;
+                                  });
+                                  await updateRoleControls(widget.id,
+                                      teamSubAuth[1], 'Remove Member');
+                                },
+                              ),
+                            ),
+                            title: Text(
+                              'Remove Members',
+                              style: TextStyle(
+                                color: AppColor.black,
+                                fontStyle: teamSubAuth[1]
+                                    ? FontStyle.italic
+                                    : FontStyle.normal,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Visibility(
+                          visible: values[0],
+                          child: ListTile(
+                            dense: true,
+                            minLeadingWidth: 0,
+                            leading: Transform.scale(
+                              scale: 0.8,
+                              child: Checkbox(
+                                activeColor: AppColor.black,
+                                value: teamSubAuth[2],
+                                onChanged: (value) async {
+                                  setState(() {
+                                    teamSubAuth[2] = value!;
+                                  });
+                                  await updateRoleControls(
+                                      widget.id, teamSubAuth[2], 'Assign Role');
+                                },
+                              ),
+                            ),
+                            title: Text(
+                              'Assign Roles To Members',
+                              style: TextStyle(
+                                color: AppColor.black,
+                                fontStyle: teamSubAuth[2]
+                                    ? FontStyle.italic
+                                    : FontStyle.normal,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Visibility(
+                          visible: values[0],
+                          child: ListTile(
+                            dense: true,
+                            minLeadingWidth: 0,
+                            leading: Transform.scale(
+                              scale: 0.8,
+                              child: Checkbox(
+                                activeColor: AppColor.black,
+                                value: teamSubAuth[3],
+                                onChanged: (value) async {
+                                  setState(() {
+                                    teamSubAuth[3] = value!;
+                                  });
+                                  await updateRoleControls(widget.id,
+                                      teamSubAuth[3], 'DeAssign Role');
+                                },
+                              ),
+                            ),
+                            title: Text(
+                              'De-Assign Roles To Members',
+                              style: TextStyle(
+                                color: AppColor.black,
+                                fontStyle: teamSubAuth[3]
+                                    ? FontStyle.italic
+                                    : FontStyle.normal,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Visibility(
+                          visible: values[0],
+                          child: ListTile(
+                            dense: true,
+                            minLeadingWidth: 0,
+                            leading: Transform.scale(
+                              scale: 0.8,
+                              child: Checkbox(
+                                value: values[5],
+                                activeColor: AppColor.black,
+                                onChanged: (value) async {
+                                  setState(() {
+                                    values[5] = value!;
+                                  });
+                                  await updateRoleControls(
+                                      widget.id, values[5], 'Report Control');
+                                },
+                              ),
+                            ),
+                            title: Text(
+                              'Report Generate',
+                              style: TextStyle(
+                                color: AppColor.black,
+                                fontStyle: values[5]
+                                    ? FontStyle.italic
+                                    : FontStyle.normal,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  //Role Control
+                  Visibility(
+                    visible: widget.controlForOwner || widget.controlForUser,
+                    child: ExpansionTile(
+                      iconColor: AppColor.black,
+                      collapsedIconColor: AppColor.black,
+                      leading: Checkbox(
+                        value: values[1],
+                        onChanged: (value) async {
+                          setState(() {
+                            values[1] = value!;
+                          });
+                          await updateRoleControls(
+                              widget.id, values[1], 'Role Control');
+                        },
+                      ),
+                      title: Text(
+                        'Roles Authority',
+                        style: TextStyle(
+                          color: AppColor.black,
+                          fontWeight:
+                              values[1] ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                      childrenPadding:
+                          const EdgeInsets.symmetric(horizontal: 30),
+                      children: [
+                        Visibility(
+                          visible: values[1],
+                          child: ListTile(
+                            dense: true,
+                            minLeadingWidth: 0,
+                            leading: Transform.scale(
+                              scale: 0.8,
+                              child: Checkbox(
+                                activeColor: AppColor.black,
+                                value: roleSubAuth[0],
+                                onChanged: (value) async {
+                                  setState(() {
+                                    roleSubAuth[0] = value!;
+                                  });
+                                  await updateRoleControls(
+                                      widget.id, roleSubAuth[0], 'Create Role');
+                                },
+                              ),
+                            ),
+                            title: Text(
+                              'Create Role',
+                              style: TextStyle(
+                                color: AppColor.black,
+                                fontStyle: roleSubAuth[0]
+                                    ? FontStyle.italic
+                                    : FontStyle.normal,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Visibility(
+                          visible: values[1],
+                          child: ListTile(
+                            dense: true,
+                            minLeadingWidth: 0,
+                            leading: Transform.scale(
+                              scale: 0.8,
+                              child: Checkbox(
+                                activeColor: AppColor.black,
+                                value: roleSubAuth[1],
+                                onChanged: (value) async {
+                                  setState(() {
+                                    roleSubAuth[1] = value!;
+                                  });
+                                  await updateRoleControls(
+                                      widget.id, roleSubAuth[1], 'Edit Role');
+                                },
+                              ),
+                            ),
+                            title: Text(
+                              'Edit Roles',
+                              style: TextStyle(
+                                color: AppColor.black,
+                                fontStyle: roleSubAuth[1]
+                                    ? FontStyle.italic
+                                    : FontStyle.normal,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Visibility(
+                          visible: values[1],
+                          child: ListTile(
+                            dense: true,
+                            minLeadingWidth: 0,
+                            leading: Transform.scale(
+                              scale: 0.8,
+                              child: Checkbox(
+                                activeColor: AppColor.black,
+                                value: roleSubAuth[2],
+                                onChanged: (value) async {
+                                  setState(() {
+                                    roleSubAuth[2] = value!;
+                                  });
+                                  await updateRoleControls(
+                                      widget.id, roleSubAuth[2], 'Delete Role');
+                                },
+                              ),
+                            ),
+                            title: Text(
+                              'Delete Roles',
+                              style: TextStyle(
+                                color: AppColor.black,
+                                fontStyle: roleSubAuth[2]
+                                    ? FontStyle.italic
+                                    : FontStyle.normal,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  //Assign Task Authority
+                  Visibility(
+                    visible: widget.controlForOwner || widget.controlForUser,
+                    child: ListTile(
+                      minLeadingWidth: 0,
+                      leading: Checkbox(
+                        value: values[2],
+                        onChanged: (value) async {
+                          setState(() {
+                            values[2] = value!;
+                          });
+                          await updateRoleControls(
+                              widget.id, values[2], 'Task Control');
+                        },
+                      ),
+                      title: Text(
+                        'Assign Tasks Authority',
+                        style: TextStyle(
+                          color: AppColor.black,
+                          fontWeight:
+                              values[2] ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                    ),
+                  ),
+                  //View Authority
+                  Visibility(
+                    visible: widget.controlForOwner || widget.controlForUser,
+                    child: ListTile(
+                      minLeadingWidth: 0,
+                      leading: Checkbox(
+                        value: values[3],
+                        onChanged: (value) async {
+                          setState(() {
+                            values[3] = value!;
+                          });
+                          await updateRoleControls(
+                              widget.id, values[3], 'View Control');
+                        },
+                      ),
+                      title: Text(
+                        'Org View Authority',
+                        style: TextStyle(
+                          color: AppColor.black,
+                          fontWeight:
+                              values[3] ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -255,6 +571,7 @@ class _WorkspaceRoleCardState extends State<WorkspaceRoleCard> {
       log('Role control update successfully');
     } catch (e) {
       log(e.toString());
+      log('Role control update failed');
     }
   }
 
@@ -290,15 +607,17 @@ class _WorkspaceRoleCardState extends State<WorkspaceRoleCard> {
           height: 30,
           textStyle: TextStyle(color: AppColor.black),
           onTap: () {
-            setState(() {
-              roleController.text = roleName;
-              descriptionController.text = roleDescription;
-              this.roleLevel = int.parse(roleLevel);
-            });
-            Future.delayed(
-              Duration.zero,
-              () => roleUpdateDialog(id: id),
-            );
+            if (widget.controlForOwner || widget.editRole) {
+              setState(() {
+                roleController.text = roleName;
+                descriptionController.text = roleDescription;
+                this.roleLevel = int.parse(roleLevel);
+              });
+              Future.delayed(
+                Duration.zero,
+                () => roleUpdateDialog(id: id),
+              );
+            }
           },
           child: const Center(
             child: Text('Edit'),
@@ -310,13 +629,15 @@ class _WorkspaceRoleCardState extends State<WorkspaceRoleCard> {
           height: 30,
           textStyle: TextStyle(color: AppColor.black),
           onTap: () {
-            Future.delayed(
-              Duration.zero,
-              () => openDeleteDialog(
-                  id: id,
-                  title: '$roleName,Level $roleLevel',
-                  warning: 'Deleted Roles can not be recovered'),
-            );
+            if (widget.controlForOwner || widget.deleteRole) {
+              Future.delayed(
+                Duration.zero,
+                () => openDeleteDialog(
+                    id: id,
+                    title: '$roleName,Level $roleLevel',
+                    warning: 'Deleted Roles can not be recovered'),
+              );
+            }
           },
           child: const Center(
             child: Text('Delete'),
@@ -638,10 +959,19 @@ class _WorkspaceRoleCardState extends State<WorkspaceRoleCard> {
                                             ? ''
                                             : descriptionController.text.trim(),
                                     'Role Level': roleLevel,
+                                    'Control': widget.controlForUser,
                                     'Team Control': widget.teamControl,
+                                    'Add Member': widget.addMember,
+                                    'Remove Member': widget.removeMember,
+                                    'Assign Role': widget.assignRole,
+                                    'DeAssign Role': widget.deAssignRole,
                                     'Role Control': widget.roleControl,
+                                    'Create Role': widget.createRole,
+                                    'Edit Role': widget.editRole,
+                                    'Delete Role': widget.deleteRole,
                                     'Task Control': widget.taskControl,
                                     'View Control': widget.viewControl,
+                                    'Report Control': widget.reportControl,
                                     'Assigned By': currentUserEmail,
                                     'Created At': DateTime.now(),
                                   };

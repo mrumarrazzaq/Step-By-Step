@@ -27,29 +27,37 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
       .snapshots();
 
   getJoinedWorkspaces() async {
-    final value = await FirebaseFirestore.instance
-        .collection("User Data")
-        .doc(currentUserEmail)
-        .get();
+    try {
+      final value = await FirebaseFirestore.instance
+          .collection("User Data")
+          .doc(currentUserEmail)
+          .get();
 
-    setState(() {
-      joinedWorkspaces = value.data()!['Joined Workspaces'];
-    });
-    log('Joined Workspaces.....');
-    log(joinedWorkspaces.toString());
+      setState(() {
+        joinedWorkspaces = value.data()!['Joined Workspaces'];
+      });
+      log('Joined Workspaces.....');
+      log(joinedWorkspaces.toString());
+    } catch (e) {
+      log(e.toString());
+    }
   }
 
   getOwnedWorkspaces() async {
-    final value = await FirebaseFirestore.instance
-        .collection("User Data")
-        .doc(currentUserEmail)
-        .get();
+    try {
+      final value = await FirebaseFirestore.instance
+          .collection("User Data")
+          .doc(currentUserEmail)
+          .get();
 
-    setState(() {
-      ownedWorkspaces = value.data()!['Owned Workspaces'];
-    });
-    log('Owned Workspaces.....');
-    log(ownedWorkspaces.toString());
+      setState(() {
+        ownedWorkspaces = value.data()!['Owned Workspaces'];
+      });
+      log('Owned Workspaces.....');
+      log(ownedWorkspaces.toString());
+    } catch (e) {
+      log(e.toString());
+    }
   }
 
   @override
@@ -109,12 +117,16 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => WorkspaceScreenCombiner(
-                                          workspaceCode:
-                                              "${storedWorkspaces[i]['Workspace Code']}",
-                                          docId: "${storedWorkspaces[i]['id']}",
-                                          workspaceName: storedWorkspaces[i]
-                                              ['Workspace Name']),
+                                      builder: (context) =>
+                                          WorkspaceScreenCombiner(
+                                        workspaceCode:
+                                            "${storedWorkspaces[i]['Workspace Code']}",
+                                        docId: "${storedWorkspaces[i]['id']}",
+                                        workspaceName: storedWorkspaces[i]
+                                            ['Workspace Name'],
+                                        workspaceOwnerEmail: storedWorkspaces[i]
+                                            ['Workspace Owner Email'],
+                                      ),
                                     ),
                                   );
                                 },
