@@ -50,11 +50,14 @@ dependencies:
   workmanager: ^0.5.0
 
   sqflite: ^2.0.2
-
+  lottie:
+  pull_to_refresh: ^2.0.0
+  internet_connection_checker: ^0.0.1+1
   bot_toast: ^4.0.3
   flutter_swipe_action_cell: ^3.0.4
   syncfusion_flutter_charts: ^20.1.60+1
-
+  overlay_support: ^1.2.1
+  shimmer: ^2.0.0
 
 dev_dependencies:
   flutter_test:
@@ -91,6 +94,7 @@ flutter:
   assets:
     - assets/
     - logos/
+    - animations/
 
   fonts:
     - family: SegoeUI

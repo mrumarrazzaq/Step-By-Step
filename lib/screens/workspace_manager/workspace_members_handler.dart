@@ -25,6 +25,7 @@ class WorkspaceMembersHandler extends StatefulWidget {
   bool deAssignRole;
   bool fromTaskAssignment;
   bool fromTaskHolder;
+  String extraEmail;
   WorkspaceMembersHandler({
     Key? key,
     required this.workspaceCode,
@@ -39,6 +40,7 @@ class WorkspaceMembersHandler extends StatefulWidget {
     required this.deAssignRole,
     required this.fromTaskAssignment,
     required this.fromTaskHolder,
+    this.extraEmail = '',
   }) : super(key: key);
 
   @override
@@ -56,7 +58,7 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
 
   String assignedBy = '';
   String assignedRole = 'No Role Assign';
-
+  bool tA = false, tH = false;
   int selected = -1;
   final Stream<QuerySnapshot> userRecords = FirebaseFirestore.instance
       .collection('User Data')
@@ -67,13 +69,22 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
       // .orderBy('Created At', descending: true)
       .snapshots();
 
-  getAddedMembers() async {
+  getAddedMembers({required bool tH, required bool tA}) async {
     try {
-      if (widget.fromTaskAssignment || widget.fromTaskHolder) {
-        log('From Task Assignment');
+      if (widget.fromTaskHolder || tH) {
         log('From Task Holder');
         final value = await FirebaseFirestore.instance
             .collection('$currentUserEmail ${widget.workspaceCode} Team')
+            .doc(widget.docId)
+            .get();
+
+        setState(() {
+          membersList = value.data()!['Workspace Members'];
+        });
+      } else if (widget.fromTaskAssignment || tA) {
+        log('From Task Assignment');
+        final value = await FirebaseFirestore.instance
+            .collection('${widget.extraEmail} ${widget.workspaceCode} Team')
             .doc(widget.docId)
             .get();
 
@@ -152,9 +163,17 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
 
   @override
   void initState() {
-    getAddedMembers();
+    setValues();
+    getAddedMembers(tH: tH, tA: tA);
     getAddedRoles();
     super.initState();
+  }
+
+  setValues() {
+    setState(() {
+      tA = widget.fromTaskAssignment;
+      tH = widget.fromTaskHolder;
+    });
   }
 
   @override
@@ -162,64 +181,67 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
     return Column(
       children: [
         //Search Bar
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Search User',
-                style: GoogleFonts.robotoMono(
-                  fontSize: 18,
+        Visibility(
+          visible: !widget.fromTaskAssignment,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Search User',
+                  style: GoogleFonts.robotoMono(
+                    fontSize: 18,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 5),
-              TextFormField(
-                keyboardType: TextInputType.emailAddress,
-                cursorColor: AppColor.black,
-                style: TextStyle(color: AppColor.black),
-                autofillHints: const [AutofillHints.email],
-                decoration: InputDecoration(
-                  isDense: true,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(0.0),
+                const SizedBox(height: 5),
+                TextFormField(
+                  keyboardType: TextInputType.emailAddress,
+                  cursorColor: AppColor.black,
+                  style: TextStyle(color: AppColor.black),
+                  autofillHints: const [AutofillHints.email],
+                  decoration: InputDecoration(
+                    isDense: true,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(0.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(0.0),
+                      borderSide: BorderSide(color: AppColor.black, width: 1.0),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(0.0),
+                      borderSide: BorderSide(color: AppColor.grey, width: 1.0),
+                    ),
+                    hintText: 'Search by email id',
+                    // suffixIcon: MaterialButton(
+                    //   onPressed: () {
+                    //     setState(() {
+                    //       searchController.text;
+                    //     });
+                    //   },
+                    //   textColor: AppColor.white,
+                    //   color: AppColor.black,
+                    //   height: 50,
+                    //   child: const Icon(Icons.search, size: 30),
+                    // ),
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(0.0),
-                    borderSide: BorderSide(color: AppColor.black, width: 1.0),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(0.0),
-                    borderSide: BorderSide(color: AppColor.grey, width: 1.0),
-                  ),
-                  hintText: 'Search by email id',
-                  // suffixIcon: MaterialButton(
-                  //   onPressed: () {
-                  //     setState(() {
-                  //       searchController.text;
-                  //     });
-                  //   },
-                  //   textColor: AppColor.white,
-                  //   color: AppColor.black,
-                  //   height: 50,
-                  //   child: const Icon(Icons.search, size: 30),
-                  // ),
+                  controller: searchController,
+                  onChanged: (value) {
+                    setState(() {
+                      searchValue = value;
+                    });
+                  },
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please enter workspace name';
+                    }
+                    return null;
+                  },
                 ),
-                controller: searchController,
-                onChanged: (value) {
-                  setState(() {
-                    searchValue = value;
-                  });
-                },
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please enter workspace name';
-                  }
-                  return null;
-                },
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         StreamBuilder<QuerySnapshot>(
@@ -286,14 +308,14 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
                                     addMemberInWorkspaces(
                                         memberEmail: storedUserData[i]
                                             ['User Email']);
-                                    getAddedMembers();
+                                    getAddedMembers(tH: tH, tA: tA);
                                   } else if (membersList
                                       .contains(searchValue)) {
                                     if (widget.removeMember) {
                                       removeMemberFromWorkspaces(
                                           memberEmail: storedUserData[i]
                                               ['User Email']);
-                                      getAddedMembers();
+                                      getAddedMembers(tH: tH, tA: tA);
                                     }
                                   }
                                 },
@@ -442,37 +464,45 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
                             child: ListTile(
                               dense: true,
                               title: const Text('Assign Role'),
-                              trailing: DropdownButton<dynamic>(
-                                hint: const Text('Roles'),
-                                isDense: true,
-                                items: rolesList.map<DropdownMenuItem<dynamic>>(
-                                    (dynamic value) {
-                                  return DropdownMenuItem<dynamic>(
-                                    value: value,
-                                    child: Text(value),
-                                  );
-                                }).toList(),
-                                value: selectedRoleValue.isEmpty
-                                    ? assignedRole
-                                    : null,
-                                onChanged: (value) async {
-                                  setState(() {
-                                    assignedRole = value!;
-                                    selectedRoleValue = value!;
-                                  });
+                              subtitle: Container(
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 20),
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: DropdownButton<dynamic>(
+                                    hint: const Text('Roles'),
+                                    isDense: true,
+                                    items: rolesList
+                                        .map<DropdownMenuItem<dynamic>>(
+                                            (dynamic value) {
+                                      return DropdownMenuItem<dynamic>(
+                                        value: value,
+                                        child: Text(value),
+                                      );
+                                    }).toList(),
+                                    value: selectedRoleValue.isEmpty
+                                        ? assignedRole
+                                        : null,
+                                    onChanged: (value) async {
+                                      setState(() {
+                                        assignedRole = value!;
+                                        selectedRoleValue = value!;
+                                      });
 
-                                  final assignRoleJson = {
-                                    'Assigned Role': selectedRoleValue,
-                                    'Assigned By': currentUserEmail,
-                                    'Assigned At': DateTime.now(),
-                                  };
-                                  await FireBaseApi.saveDataIntoFireStore(
-                                      collection:
-                                          '${widget.workspaceCode} Assigned Roles',
-                                      document: membersList[i],
-                                      jsonData: assignRoleJson);
-                                  log('Role Assign Successfully');
-                                },
+                                      final assignRoleJson = {
+                                        'Assigned Role': selectedRoleValue,
+                                        'Assigned By': currentUserEmail,
+                                        'Assigned At': DateTime.now(),
+                                      };
+                                      await FireBaseApi.saveDataIntoFireStore(
+                                          collection:
+                                              '${widget.workspaceCode} Assigned Roles',
+                                          document: membersList[i],
+                                          jsonData: assignRoleJson);
+                                      log('Role Assign Successfully');
+                                    },
+                                  ),
+                                ),
                               ),
                             ),
                           ),

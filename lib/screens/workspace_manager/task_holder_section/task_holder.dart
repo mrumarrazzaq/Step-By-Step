@@ -136,19 +136,19 @@ class _WorkspaceTaskHolderState extends State<WorkspaceTaskHolder> {
         spaceEvenly = true;
       }
 
-      log(assignedRole);
-      log(teamControl.toString());
-      log(taskControl.toString());
-      log(roleControl.toString());
-      log(viewControl.toString());
+      log('$currentUserEmail : assignedRole $assignedRole');
+      log('teamControl $teamControl');
+      log('taskControl $taskControl');
+      log('roleControl $roleControl');
+      log('viewControl $viewControl');
 
-      log(addMember.toString());
-      log(removeMember.toString());
-      log(assignedRole.toString());
-      log(deAssignRole.toString());
-      log(createRole.toString());
-      log(editRole.toString());
-      log(deleteRole.toString());
+      log('addMember $addMember');
+      log('removeMember $removeMember');
+      log('deAssignRole $deAssignRole');
+      log('createRole $createRole');
+      log('editRole $editRole');
+      log('deleteRole $deleteRole');
+
       setState(() {});
     } catch (e) {
       log(e.toString());
@@ -529,6 +529,8 @@ class _WorkspaceTaskHolderState extends State<WorkspaceTaskHolder> {
                   roleControl &&
                   teamTabsColor[1] == AppColor.orange,
               child: WorkspaceRolesHandler(
+                fromTaskAssignment: false,
+                fromTaskHolder: true,
                 workspaceCode: widget.workspaceCode,
                 workspaceName: widget.workspaceName,
                 docId: widget.docId,

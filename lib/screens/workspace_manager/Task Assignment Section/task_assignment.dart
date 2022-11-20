@@ -497,6 +497,7 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
                   teamControl &&
                   teamTabsColor[0] == AppColor.orange,
               child: WorkspaceMembersHandler(
+                extraEmail: widget.email,
                 fromTaskAssignment: true,
                 fromTaskHolder: false,
                 workspaceName: widget.workspaceName,
@@ -517,6 +518,8 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
                   roleControl &&
                   teamTabsColor[1] == AppColor.orange,
               child: WorkspaceRolesHandler(
+                fromTaskAssignment: true,
+                fromTaskHolder: false,
                 workspaceCode: widget.workspaceCode,
                 workspaceName: widget.workspaceName,
                 docId: widget.docId,

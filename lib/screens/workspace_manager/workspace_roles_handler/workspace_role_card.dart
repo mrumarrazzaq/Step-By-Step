@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:readmore/readmore.dart';
 import 'package:stepbystep/apis/firebase_api.dart';
@@ -126,14 +127,38 @@ class _WorkspaceRoleCardState extends State<WorkspaceRoleCard> {
         ),
         margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
         child: ExpansionTile(
-          title: Text(
+          title: ReadMoreText(
             widget.roleName,
+            trimLength: 2,
+            trimLines: 1,
+            colorClickableText: AppColor.orange,
+            textAlign: TextAlign.justify,
+            trimMode: TrimMode.Line,
+            trimCollapsedText: '  more',
+            trimExpandedText: '      less',
             style: TextStyle(
               color: AppColor.orange,
               fontWeight: FontWeight.bold,
               fontSize: 20,
             ),
+            moreStyle: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: AppColor.black),
+            lessStyle: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: AppColor.black),
           ),
+
+          // Text(
+          //   widget.roleName,
+          //   style: TextStyle(
+          //     color: AppColor.orange,
+          //     fontWeight: FontWeight.bold,
+          //     fontSize: 20,
+          //   ),
+          // ),
           trailing: Text(
             'Level ${widget.roleLevel}',
             style: TextStyle(
@@ -634,7 +659,8 @@ class _WorkspaceRoleCardState extends State<WorkspaceRoleCard> {
                 Duration.zero,
                 () => openDeleteDialog(
                     id: id,
-                    title: '$roleName,Level $roleLevel',
+                    title: roleName,
+                    subTitle: 'Level $roleLevel',
                     warning: 'Deleted Roles can not be recovered'),
               );
             }
@@ -650,6 +676,7 @@ class _WorkspaceRoleCardState extends State<WorkspaceRoleCard> {
   openDeleteDialog({
     required String id,
     required String title,
+    required String subTitle,
     required String warning,
   }) =>
       showDialog(
@@ -657,100 +684,131 @@ class _WorkspaceRoleCardState extends State<WorkspaceRoleCard> {
         builder: (context) => StatefulBuilder(
           builder: (context, setState) {
             var width = MediaQuery.of(context).size.width;
-            return AlertDialog(
-              shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(20.0))),
-              contentPadding: const EdgeInsets.only(top: 10.0),
-              title: const Center(child: Text('Delete Role')),
-              content: SingleChildScrollView(
-                child: SizedBox(
-                  width: width,
-                  height: 40.0,
-                  child: Center(
-                      child: Column(
-                    children: [
-                      Text(title),
-                      Text(
-                        warning,
-                        style: TextStyle(
-                            fontStyle: FontStyle.italic,
-                            fontSize: 12,
-                            color: AppColor.red),
-                      ),
-                    ],
-                  )),
-                ),
-              ),
-              actions: [
-                //CANCEL Button
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context, rootNavigator: true).pop('dialog');
-                  },
-                  child: Text(
-                    'CANCEL',
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                ),
-                //CREATE Button
-                deleteRoleLoading
-                    ? AppProgressIndicator(
-                        radius: 25,
-                        size: 20,
-                      )
-                    : TextButton(
-                        onPressed: () async {
-                          if (id.isNotEmpty) {
-                            setState(() {
-                              deleteRoleLoading = true;
-                            });
-
-                            try {
-                              await FirebaseFirestore.instance
-                                  .collection(
-                                      '${widget.workspaceCode} Assigned Roles')
-                                  .doc(id)
-                                  .delete();
-                            } catch (e) {
-                              log(e.toString());
-                            }
-                            await FirebaseFirestore.instance
-                                .collection('${widget.workspaceCode} Roles')
-                                .doc(id)
-                                .delete();
-
-                            await FirebaseFirestore.instance
-                                .collection(widget.workspaceCode)
-                                .doc('Log')
-                                .update({
-                              'Workspace Roles': FieldValue.arrayRemove([id]),
-                            });
-
-                            await FirebaseFirestore.instance
-                                .collection('Workspaces')
-                                .doc(widget.workspaceCode)
-                                .update({
-                              'Workspace Roles': FieldValue.arrayRemove([id]),
-                            });
-
-                            log('Role Deleted Successfully');
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Role Deleted Successfully'),
+            return Stack(
+              alignment: Alignment.topCenter,
+              children: [
+                AlertDialog(
+                  shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20.0))),
+                  titlePadding: const EdgeInsets.only(top: 50.0),
+                  title: const Center(child: Text('Delete Role')),
+                  content: SingleChildScrollView(
+                    child: SizedBox(
+                      width: width,
+                      height: 55.0,
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(title),
+                            Text(
+                              subTitle,
+                              style: const TextStyle(
+                                color: Colors.blue,
+                                fontStyle: FontStyle.italic,
                               ),
-                            );
-                            Navigator.of(context, rootNavigator: true)
-                                .pop('dialog');
-                            setState(() {
-                              deleteRoleLoading = false;
-                            });
-                          }
-                        },
-                        child: const Text(
-                          'DELETE',
-                          style: TextStyle(color: Colors.red),
+                            ),
+                            Text(
+                              warning,
+                              style: TextStyle(
+                                  fontStyle: FontStyle.italic,
+                                  fontSize: 12,
+                                  color: AppColor.red),
+                            ),
+                          ],
                         ),
                       ),
+                    ),
+                  ),
+                  actions: [
+                    //CANCEL Button
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context, rootNavigator: true)
+                            .pop('dialog');
+                      },
+                      child: Text(
+                        'CANCEL',
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                    ),
+                    //CREATE Button
+                    deleteRoleLoading
+                        ? AppProgressIndicator(
+                            radius: 25,
+                            size: 20,
+                          )
+                        : TextButton(
+                            onPressed: () async {
+                              if (id.isNotEmpty) {
+                                setState(() {
+                                  deleteRoleLoading = true;
+                                });
+
+                                try {
+                                  await FirebaseFirestore.instance
+                                      .collection(
+                                          '${widget.workspaceCode} Assigned Roles')
+                                      .doc(id)
+                                      .delete();
+                                } catch (e) {
+                                  log(e.toString());
+                                }
+                                await FirebaseFirestore.instance
+                                    .collection('${widget.workspaceCode} Roles')
+                                    .doc(id)
+                                    .delete();
+
+                                await FirebaseFirestore.instance
+                                    .collection(widget.workspaceCode)
+                                    .doc('Log')
+                                    .update({
+                                  'Workspace Roles':
+                                      FieldValue.arrayRemove([id]),
+                                });
+
+                                await FirebaseFirestore.instance
+                                    .collection('Workspaces')
+                                    .doc(widget.workspaceCode)
+                                    .update({
+                                  'Workspace Roles':
+                                      FieldValue.arrayRemove([id]),
+                                });
+
+                                log('Role Deleted Successfully');
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Role Deleted Successfully'),
+                                  ),
+                                );
+                                Navigator.of(context, rootNavigator: true)
+                                    .pop('dialog');
+                                setState(() {
+                                  deleteRoleLoading = false;
+                                });
+                              }
+                            },
+                            child: const Text(
+                              'DELETE',
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          ),
+                  ],
+                ),
+                Positioned(
+                  top: 202,
+                  child: CircleAvatar(
+                    backgroundColor: AppColor.white,
+                    radius: 50,
+                    child: Container(
+                      height: 80,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: Lottie.asset('animations/delete-files-loop.json'),
+                    ),
+                  ),
+                ),
               ],
             );
           },

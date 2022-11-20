@@ -23,6 +23,8 @@ class WorkspaceRolesHandler extends StatefulWidget {
     required this.createRole,
     required this.editRole,
     required this.deleteRole,
+    required this.fromTaskAssignment,
+    required this.fromTaskHolder,
   }) : super(key: key);
   String workspaceCode;
   String docId;
@@ -32,6 +34,8 @@ class WorkspaceRolesHandler extends StatefulWidget {
   bool createRole;
   bool editRole;
   bool deleteRole;
+  bool fromTaskAssignment;
+  bool fromTaskHolder;
   @override
   State<WorkspaceRolesHandler> createState() => _WorkspaceRolesHandlerState();
 }
@@ -65,7 +69,7 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
           .then((ds) {
         assignedRole = ds['Assigned Role'];
       });
-      log(assignedRole);
+      log('$currentUserEmail : assignedRole $assignedRole');
       setState(() {});
     } catch (e) {
       log(e.toString());
@@ -102,8 +106,8 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
                 return Column(
                   children: [
                     for (int i = 0; i < storedRolesData.length; i++) ...[
-                      if (assignedRole !=
-                          '${storedRolesData[i]['Role']} ${storedRolesData[i]['Role Level']}') ...[
+                      /**/
+                      if (true) ...[
                         WorkspaceRoleCard(
                           id: storedRolesData[i]['id'],
                           workspaceCode: widget.workspaceCode,
@@ -139,7 +143,7 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
               ));
             }),
         Visibility(
-          visible: widget.createRole,
+          visible: widget.createRole && !widget.fromTaskAssignment,
           child: Align(
             alignment: FractionalOffset.bottomCenter,
             child: AppElevatedButton(
@@ -203,7 +207,7 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
                                 TextFormField(
                                   keyboardType: TextInputType.text,
                                   cursorColor: AppColor.black,
-                                  maxLength: 80,
+                                  maxLength: 30,
                                   style: TextStyle(color: AppColor.black),
                                   decoration: InputDecoration(
                                     isDense: true,

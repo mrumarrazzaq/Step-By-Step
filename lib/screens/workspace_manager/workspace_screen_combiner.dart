@@ -160,6 +160,8 @@ class _WorkspaceScreenCombinerState extends State<WorkspaceScreenCombiner> {
                 workspaceCode: widget.workspaceCode,
                 docId: widget.docId,
                 workspaceName: widget.workspaceName,
+                fromTaskAssignment: false,
+                fromTaskHolder: false,
                 createRole: true,
                 editRole: true,
                 deleteRole: true,
