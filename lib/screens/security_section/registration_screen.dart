@@ -8,11 +8,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/screens/security_section/signIn_screen.dart';
+import 'package:stepbystep/apis/send_email_api.dart';
 
 final user = FirebaseFirestore.instance;
 
@@ -28,7 +30,8 @@ class RegistrationScreen extends StatefulWidget {
 class _RegistrationScreenState extends State<RegistrationScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
+  final FirebaseMessaging _fcm = FirebaseMessaging.instance;
+  var fcmToken;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool isValidEmail = false;
@@ -294,10 +297,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       if (_formKey.currentState!.validate()) {
                         setState(() {
                           isValidEmail = true;
-                          personName = personNameController.text;
-                          email = emailController.text;
-                          password = passwordController.text;
-                          confirmPassword = confirmPasswordController.text;
+                          personName = personNameController.text.trim();
+                          email = emailController.text.trim();
+                          password = passwordController.text.trim();
+                          confirmPassword =
+                              confirmPasswordController.text.trim();
                         });
                         registerNewUser();
                       }
@@ -357,19 +361,43 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           'User Name': personName,
           'User Email': emailController.text.trim(),
           'User Password': passwordController.text.trim(),
+          'User Current Status': 'Offline',
+          'Status Quote': '',
+          'Image URL': '',
           'Joined Workspaces': [],
           'Owned Workspaces': [],
           'Created At': DateTime.now(),
         };
 
         user.collection('User Data').doc(email).set(json);
+        fcmToken = await _fcm.getToken();
+
+        final jsonToken = {
+          'token': fcmToken,
+          'createdAT': FieldValue.serverTimestamp(),
+        };
+
+        log('--------------------------------------------------');
+        log('FCM Token : $fcmToken');
+        log('--------------------------------------------------');
+        user
+            .collection('User Data')
+            .doc(email)
+            .collection('Token')
+            .doc(email)
+            .set(jsonToken);
+
         await storage.write(
             key: 'password', value: passwordController.text.trim());
         await storage.write(key: 'email', value: emailController.text.trim());
         log('------------------------------------');
         log('Email and Password Save Successfully');
         log('------------------------------------');
-
+        await SendEmailAPI().sendEmail(
+            name: personName,
+            email: emailController.text.trim(),
+            subject: 'Thanks for create a account',
+            message: 'You have successfully become a part of SBS Team');
         Fluttertoast.showToast(
           msg: 'Registered Successfully.. Now Login', // message
           toastLength: Toast.LENGTH_SHORT, // length

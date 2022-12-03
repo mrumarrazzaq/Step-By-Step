@@ -65,7 +65,45 @@ class NotificationAPI {
       androidAllowWhileIdle: true,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents: DateTimeComponents.dateAndTime,
     );
+  }
+
+  static Future dailyScheduledNotification({
+    required int id,
+    required Time time,
+    String? title,
+    String? body,
+    String? payload,
+    required DateTime scheduledDate,
+  }) async {
+    tz.initializeTimeZones();
+    _notifications.zonedSchedule(
+      id,
+      title,
+      body,
+      _scheduledDaily(time),
+      await _notificationDetails(),
+      payload: payload,
+      androidAllowWhileIdle: true,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents: DateTimeComponents.time,
+    );
+  }
+
+  static tz.TZDateTime _scheduledDaily(Time time) {
+    final now = tz.TZDateTime.now(tz.local);
+    final scheduledDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      time.hour,
+      time.minute,
+      time.second,
+    );
+    return scheduledDate.isAtSameMomentAs(now) ? scheduledDate : scheduledDate;
   }
 
   static Future<void> cancelNotification(int id) async {

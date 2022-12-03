@@ -125,6 +125,7 @@ class _UpdateTaskState extends State<UpdateTask> {
                   );
 
                   try {
+                    log('Notification Update Successfully');
                     NotificationAPI.showScheduledNotification(
                       id: _selectedDateTime.minute,
                       title: 'Don\'t Forget  to complete task',

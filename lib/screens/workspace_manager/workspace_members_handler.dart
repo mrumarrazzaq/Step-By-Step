@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_swipe_action_cell/flutter_swipe_action_cell.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:stepbystep/apis/firebase_api.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
@@ -343,240 +344,241 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
                 strokeWidth: 2.0,
               ));
             }),
-        SingleChildScrollView(
-          child: Column(
-            children: [
-              AppDivider(text: 'Workspace Members', color: AppColor.black),
-              for (int i = 0; i < membersList.length; i++) ...[
-                if (membersList[i] != currentUserEmail) ...[
-                  Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+        Column(
+          children: [
+            AppDivider(text: 'Workspace Members', color: AppColor.black),
+            for (int i = 0; i < membersList.length; i++) ...[
+              if (membersList[i] != currentUserEmail) ...[
+                Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  margin:
+                      const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+                  child: ExpansionTile(
+                    title: Text(
+                      membersList[i],
+                      style: TextStyle(color: AppColor.black),
                     ),
-                    margin:
-                        const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-                    child: ExpansionTile(
-                      title: Text(
-                        membersList[i],
-                        style: TextStyle(color: AppColor.black),
-                      ),
-                      iconColor: AppColor.black,
-                      subtitle: Row(
-                        children: [
-                          Container(
-                            width: 50,
-                            height: 10,
-                            color: AppChartColor.blue,
-                          ),
-                          Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 10),
-                            width: 50,
-                            height: 10,
-                            color: AppChartColor.yellow,
-                          ),
-                          Container(
-                            width: 50,
-                            height: 10,
-                            color: AppChartColor.grey,
-                          ),
-                        ],
-                      ),
-                      onExpansionChanged: (v) async {
-                        await getAssignedRole(membersList[i]);
-                      },
+                    iconColor: AppColor.black,
+                    subtitle: Row(
                       children: [
-                        const Divider(
-                          thickness: 2,
-                          indent: 20,
-                          endIndent: 20,
+                        Container(
+                          width: 50,
+                          height: 10,
+                          color: AppChartColor.blue,
                         ),
-                        Visibility(
-                          visible: widget.assignTaskControl,
-                          child: ListTile(
-                            onTap: () async {
-                              await getUserData(membersList[i]);
-                              if (mounted) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => TaskTeamAssignment(
-                                      name: userName,
-                                      email: membersList[i],
-                                      workspaceCode: widget.workspaceCode,
-                                      docId: widget.docId,
-                                      workspaceName: widget.workspaceName,
-                                      workspaceOwnerEmail:
-                                          widget.workspaceOwnerEmail,
-                                      assignedRole: assignedRole,
-                                    ),
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 10),
+                          width: 50,
+                          height: 10,
+                          color: AppChartColor.yellow,
+                        ),
+                        Container(
+                          width: 50,
+                          height: 10,
+                          color: AppChartColor.grey,
+                        ),
+                      ],
+                    ),
+                    onExpansionChanged: (v) async {
+                      await getAssignedRole(membersList[i]);
+                    },
+                    children: [
+                      const Divider(
+                        thickness: 2,
+                        indent: 20,
+                        endIndent: 20,
+                      ),
+                      Visibility(
+                        visible: widget.assignTaskControl,
+                        child: ListTile(
+                          onTap: () async {
+                            await getUserData(membersList[i]);
+                            if (mounted) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => TaskTeamAssignment(
+                                    name: userName,
+                                    email: membersList[i],
+                                    workspaceCode: widget.workspaceCode,
+                                    docId: widget.docId,
+                                    workspaceName: widget.workspaceName,
+                                    workspaceOwnerEmail:
+                                        widget.workspaceOwnerEmail,
+                                    assignedRole: assignedRole,
                                   ),
-                                );
-                              }
-                            },
-                            dense: true,
-                            title: const Text('Assign Task'),
-                            trailing: Image.asset('assets/right-arrow3.png',
-                                height: 30),
-                          ),
-                        ),
-                        Visibility(
-                          visible: widget.reportControl,
-                          child: ListTile(
-                            onTap: () async {
-                              await getUserData(membersList[i]);
-                              log(userName);
-                              if (mounted) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => Visualization(
-                                      workspaceName: widget.workspaceName,
-                                      userName: userName,
-                                    ),
-                                  ),
-                                );
-                              }
-                            },
-                            dense: true,
-                            title: const Text('Check Report'),
-                            trailing:
-                                Image.asset('assets/bar-graph.png', height: 30),
-                          ),
-                        ),
-                        ListTile(
+                                ),
+                              );
+                            }
+                          },
                           dense: true,
-                          title: const Text('Assigned Role'),
-                          subtitle: Text('By: $assignedBy'),
-                          trailing: Text(
-                            assignedRole,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
+                          title: const Text('Assign Task'),
+                          trailing: Image.asset('assets/right-arrow3.png',
+                              height: 30),
                         ),
-                        const Divider(
-                          thickness: 2,
-                          indent: 20,
-                          endIndent: 20,
-                        ),
-                        Visibility(
-                          visible: widget.assignRole,
-                          child: Visibility(
-                            visible: rolesList.isNotEmpty,
-                            child: ListTile(
-                              dense: true,
-                              title: const Text('Assign Role'),
-                              subtitle: Container(
-                                margin:
-                                    const EdgeInsets.symmetric(horizontal: 20),
-                                child: SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: DropdownButton<dynamic>(
-                                    hint: const Text('Roles'),
-                                    isDense: true,
-                                    items: rolesList
-                                        .map<DropdownMenuItem<dynamic>>(
-                                            (dynamic value) {
-                                      return DropdownMenuItem<dynamic>(
-                                        value: value,
-                                        child: Text(value),
-                                      );
-                                    }).toList(),
-                                    value: selectedRoleValue.isEmpty
-                                        ? assignedRole
-                                        : null,
-                                    onChanged: (value) async {
-                                      setState(() {
-                                        assignedRole = value!;
-                                        selectedRoleValue = value!;
-                                      });
-
-                                      final assignRoleJson = {
-                                        'Assigned Role': selectedRoleValue,
-                                        'Assigned By': currentUserEmail,
-                                        'Assigned At': DateTime.now(),
-                                      };
-                                      await FireBaseApi.saveDataIntoFireStore(
-                                          collection:
-                                              '${widget.workspaceCode} Assigned Roles',
-                                          document: membersList[i],
-                                          jsonData: assignRoleJson);
-                                      log('Role Assign Successfully');
-                                    },
+                      ),
+                      Visibility(
+                        visible: widget.reportControl,
+                        child: ListTile(
+                          onTap: () async {
+                            await getUserData(membersList[i]);
+                            log(userName);
+                            if (mounted) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => Visualization(
+                                    workspaceName: widget.workspaceName,
+                                    userName: userName,
                                   ),
+                                ),
+                              );
+                            }
+                          },
+                          dense: true,
+                          title: const Text('Check Report'),
+                          trailing:
+                              Image.asset('assets/bar-graph.png', height: 30),
+                        ),
+                      ),
+                      ListTile(
+                        dense: true,
+                        title: const Text('Assigned Role'),
+                        subtitle: Text('By: $assignedBy'),
+                        trailing: Text(
+                          assignedRole,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      const Divider(
+                        thickness: 2,
+                        indent: 20,
+                        endIndent: 20,
+                      ),
+                      Visibility(
+                        visible: widget.assignRole,
+                        child: Visibility(
+                          visible: rolesList.isNotEmpty,
+                          child: ListTile(
+                            dense: true,
+                            title: const Text('Assign Role'),
+                            subtitle: Container(
+                              margin:
+                                  const EdgeInsets.symmetric(horizontal: 20),
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: DropdownButton<dynamic>(
+                                  hint: const Text('Roles'),
+                                  isDense: true,
+                                  items: rolesList
+                                      .map<DropdownMenuItem<dynamic>>(
+                                          (dynamic value) {
+                                    return DropdownMenuItem<dynamic>(
+                                      value: value,
+                                      child: Text(value),
+                                    );
+                                  }).toList(),
+                                  value: selectedRoleValue.isEmpty
+                                      ? assignedRole
+                                      : null,
+                                  onChanged: (value) async {
+                                    setState(() {
+                                      assignedRole = value!;
+                                      assignedBy = currentUserEmail.toString();
+                                      selectedRoleValue = value!;
+                                    });
+
+                                    final assignRoleJson = {
+                                      'Assigned Role': selectedRoleValue,
+                                      'Assigned By': currentUserEmail,
+                                      'Assigned At': DateTime.now(),
+                                    };
+                                    await FireBaseApi.saveDataIntoFireStore(
+                                        collection:
+                                            '${widget.workspaceCode} Assigned Roles',
+                                        document: membersList[i],
+                                        jsonData: assignRoleJson);
+                                    log('Role Assign Successfully');
+                                  },
                                 ),
                               ),
                             ),
                           ),
                         ),
-                        Visibility(
-                          visible: widget.deAssignRole,
-                          child: Visibility(
-                            visible: assignedRole != 'No Role Assign',
-                            child: ListTile(
-                              onTap: () async {
-                                await FirebaseFirestore.instance
-                                    .collection(
-                                        '${widget.workspaceCode} Assigned Roles')
-                                    .doc(membersList[i])
-                                    .update({
-                                  'Assigned Role': 'No Role Assign',
-                                });
-                                log('Role De-Assign successfully');
-                                setState(() {
-                                  assignedRole = 'No Role Assign';
-                                });
-                              },
-                              dense: true,
-                              title: const Text('De-Assign Role'),
-                              trailing: const Icon(Icons.close),
-                            ),
+                      ),
+                      Visibility(
+                        visible: widget.deAssignRole,
+                        child: Visibility(
+                          visible: assignedRole != 'No Role Assign',
+                          child: ListTile(
+                            onTap: () async {
+                              await FirebaseFirestore.instance
+                                  .collection(
+                                      '${widget.workspaceCode} Assigned Roles')
+                                  .doc(membersList[i])
+                                  .update({
+                                'Assigned By': '',
+                                'Assigned Role': 'No Role Assign',
+                              });
+                              log('Role De-Assign successfully');
+                              setState(() {
+                                assignedRole = 'No Role Assign';
+                                assignedBy = '';
+                              });
+                            },
+                            dense: true,
+                            title: const Text('De-Assign Role'),
+                            trailing: const Icon(Icons.close),
                           ),
                         ),
-                      ],
-                    ),
-                    // ListTile(
-                    //   onTap: () async {
-                    //     await getUserData(membersList[i]);
-                    //     if (mounted) {
-                    //       Navigator.push(
-                    //         context,
-                    //         MaterialPageRoute(
-                    //           builder: (context) => TaskAssignment(
-                    //             name: userName,
-                    //             email: membersList[i],
-                    //             workspaceCode: widget.workspaceCode,
-                    //             docId: widget.docId,
-                    //             workspaceName: widget.workspaceName,
-                    //           ),
-                    //         ),
-                    //       );
-                    //     }
-                    //   },
-                    //   dense: true,
-                    //   title: Text(membersList[i]),
-                    //   subtitle: Row(children: [
-                    //     Container(
-                    //       width: 50,
-                    //       height: 10,
-                    //       color: AppChartColor.blue,
-                    //     ),
-                    //     Container(
-                    //       margin: const EdgeInsets.symmetric(horizontal: 10),
-                    //       width: 50,
-                    //       height: 10,
-                    //       color: AppChartColor.yellow,
-                    //     ),
-                    //     Container(
-                    //       width: 50,
-                    //       height: 10,
-                    //       color: AppChartColor.grey,
-                    //     ),
-                    //   ]),
-                    // ),
+                      ),
+                    ],
                   ),
-                ]
+                  // ListTile(
+                  //   onTap: () async {
+                  //     await getUserData(membersList[i]);
+                  //     if (mounted) {
+                  //       Navigator.push(
+                  //         context,
+                  //         MaterialPageRoute(
+                  //           builder: (context) => TaskAssignment(
+                  //             name: userName,
+                  //             email: membersList[i],
+                  //             workspaceCode: widget.workspaceCode,
+                  //             docId: widget.docId,
+                  //             workspaceName: widget.workspaceName,
+                  //           ),
+                  //         ),
+                  //       );
+                  //     }
+                  //   },
+                  //   dense: true,
+                  //   title: Text(membersList[i]),
+                  //   subtitle: Row(children: [
+                  //     Container(
+                  //       width: 50,
+                  //       height: 10,
+                  //       color: AppChartColor.blue,
+                  //     ),
+                  //     Container(
+                  //       margin: const EdgeInsets.symmetric(horizontal: 10),
+                  //       width: 50,
+                  //       height: 10,
+                  //       color: AppChartColor.yellow,
+                  //     ),
+                  //     Container(
+                  //       width: 50,
+                  //       height: 10,
+                  //       color: AppChartColor.grey,
+                  //     ),
+                  //   ]),
+                  // ),
+                ),
               ]
-            ],
-          ),
+            ]
+          ],
         ),
       ],
     );

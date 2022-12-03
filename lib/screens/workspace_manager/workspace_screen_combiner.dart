@@ -135,7 +135,7 @@ class _WorkspaceScreenCombinerState extends State<WorkspaceScreenCombiner> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            //Members Section
+            //Workspace Members Handler Section
             Visibility(
               visible: tabsColor[0] == AppColor.orange,
               child: WorkspaceMembersHandler(
@@ -153,7 +153,7 @@ class _WorkspaceScreenCombinerState extends State<WorkspaceScreenCombiner> {
                 deAssignRole: true,
               ),
             ),
-            //Roles Section
+            //Workspace Roles Handler Section
             Visibility(
               visible: tabsColor[1] == AppColor.orange,
               child: WorkspaceRolesHandler(

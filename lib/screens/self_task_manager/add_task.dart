@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 
 import 'package:date_format/date_format.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:stepbystep/apis/notification_api.dart';
@@ -110,6 +111,18 @@ class _TaskState extends State<Task> {
                     taskStatus: 'TODO',
                   );
                   try {
+                    log('Notification Set Successfully');
+                    // NotificationAPI.dailyScheduledNotification(
+                    //   id: _selectedDateTime.minute + _selectedDateTime.second,
+                    //   time: const Time(0, 0, 0),
+                    //   scheduledDate: DateTime.parse(dateTimeString).add(
+                    //     const Duration(microseconds: 10),
+                    //   ),
+                    //   title: 'Don\'t Forget  to complete task',
+                    //   body: _taskTitleController.text,
+                    //   payload: _taskDescriptionController.text,
+                    // );
+
                     NotificationAPI.showScheduledNotification(
                       id: _selectedDateTime.minute + _selectedDateTime.second,
                       title: 'Don\'t Forget  to complete task',

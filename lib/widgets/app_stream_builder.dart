@@ -4,14 +4,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:stepbystep/colors.dart';
 
-class CustomSteamBuilder extends StatelessWidget {
-  CustomSteamBuilder(
+class AppSteamBuilder extends StatelessWidget {
+  AppSteamBuilder(
       {Key? key,
       required this.snapshots,
+      required this.emptyDataWidget,
       required this.widget,
       required this.condition})
       : super(key: key);
   Stream<QuerySnapshot> snapshots;
+  Widget emptyDataWidget;
   Widget widget;
   bool condition;
   @override
@@ -38,14 +40,7 @@ class CustomSteamBuilder extends StatelessWidget {
               id['id'] = document.id;
             }).toList();
             return storedData.isEmpty
-                ? Container(
-                    decoration: const BoxDecoration(
-                      image: DecorationImage(
-                        scale: 1.3,
-                        image: AssetImage('assets/workspace_bg.png'),
-                      ),
-                    ),
-                  )
+                ? emptyDataWidget
                 : Column(
                     children: [
                       for (int i = 0; i < storedData.length; i++) ...[

@@ -1,12 +1,13 @@
 // ignore_for_file: use_build_context_synchronously, deprecated_member_use
 
 import 'dart:developer';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -37,6 +38,9 @@ class _SignInScreenState extends State<SignInScreen> {
   bool isValidEmail = false;
   bool _isLoading = false;
   bool _isGoogleSignIn = false;
+
+  final FirebaseMessaging _fcm = FirebaseMessaging.instance;
+  var fcmToken;
 
   var email = "";
   var password = "";
@@ -310,44 +314,80 @@ class _SignInScreenState extends State<SignInScreen> {
     log('SIGN IN WITH GOOGLE IS PROCESSING');
     final provider = Provider.of<GoogleSignInProvider>(context, listen: false);
     try {
+      log('Try Block is Running');
       await provider.googleLogIn();
+      final currentUser = FirebaseAuth.instance.currentUser!;
+
+      log('--------------------------------');
+      log(currentUser.email!);
+      log(currentUser.displayName!);
+      log('--------------------------------');
+
+      try {
+        var existingEmail;
+        await FirebaseFirestore.instance
+            .collection('User Data')
+            .doc(currentUser.email)
+            .get()
+            .then((ds) {
+          existingEmail = ds['User Email'];
+          log('--------------------------------------');
+          log('Google Account Already Exist Saved');
+          log('--------------------------------------');
+        });
+        log(existingEmail);
+      } catch (e) {
+        log('--------------------------------------');
+        log('No Data found This GOOGLE Account is New');
+        log('--------------------------------------');
+
+        final json = {
+          'User Name': currentUser.displayName!,
+          'User Email': currentUser.email!,
+          'User Password': currentUser.uid,
+          'User Current Status': 'Offline',
+          'Status Quote': '',
+          'Image URL': currentUser.photoURL,
+          'Joined Workspaces': [],
+          'Owned Workspaces': [],
+          'Created At': DateTime.now(),
+        };
+        user.collection('User Data').doc(currentUser.email!).set(json);
+        fcmToken = await _fcm.getToken();
+
+        final jsonToken = {
+          'token': fcmToken,
+          'createdAT': FieldValue.serverTimestamp(),
+        };
+
+        log('--------------------------------------------------');
+        log('FCM Token : $fcmToken');
+        log('--------------------------------------------------');
+        user
+            .collection('User Data')
+            .doc(currentUser.email!)
+            .collection('Token')
+            .doc(currentUser.email!)
+            .set(jsonToken);
+        log('--------------------------------------');
+        log('Data is save into User Data For GOOGLE');
+        log('--------------------------------------');
+      }
+
+      await storage.write(key: 'uid', value: 'abc...xyz');
+      await storage.write(key: 'signInWith', value: 'GOOGLE');
+
+      setState(() {
+        _isGoogleSignIn = false;
+      });
+
       if (mounted) {
-        await storage.write(key: 'uid', value: 'abc...xyz');
-        await storage.write(key: 'signInWith', value: 'GOOGLE');
         await Fluttertoast.showToast(
           msg: 'User Login Successfully', // message
           toastLength: Toast.LENGTH_SHORT, // length
           gravity: ToastGravity.BOTTOM, // location
           backgroundColor: Colors.green,
         );
-        setState(() {
-          _isGoogleSignIn = true;
-        });
-
-        final currentUser = FirebaseAuth.instance.currentUser!;
-
-        log(currentUser.email!);
-        log(currentUser.displayName!);
-
-        String googleUserEmail = '';
-        bool isCheck = false;
-        await FirebaseFirestore.instance
-            .collection('User Data')
-            .doc(currentUser.email)
-            .get()
-            .then((ds) {
-          isCheck = true;
-          googleUserEmail = ds['User Email'];
-        });
-        if (googleUserEmail != currentUser.email && isCheck) {
-          final json = {
-            'User Name': currentUser.displayName!,
-            'User Email': currentUser.email!,
-            'User Password': currentUser.uid,
-          };
-          user.collection('User Data').doc(currentUser.email!).set(json);
-        }
-
         Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
@@ -355,19 +395,29 @@ class _SignInScreenState extends State<SignInScreen> {
             ),
             (route) => false);
       }
+      setState(() {
+        currentUserId = FirebaseAuth.instance.currentUser!.uid;
+        currentUserEmail = FirebaseAuth.instance.currentUser!.email;
+        log('---------------------------------');
+        log(currentUserEmail.toString());
+        log('---------------------------------');
+      });
     } catch (e) {
-      await Fluttertoast.showToast(
-        msg: 'Failed to Login Try Again', // message
-        toastLength: Toast.LENGTH_SHORT, // length
-        gravity: ToastGravity.BOTTOM, // location
-        backgroundColor: Colors.grey,
-      );
-      Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const SignInScreen(),
-          ),
-          (route) => false);
+      log('=======================================');
+      log(e.toString());
+      log('=======================================');
+      //   await Fluttertoast.showToast(
+      //     msg: 'Failed to Login Try Again', // message
+      //     toastLength: Toast.LENGTH_SHORT, // length
+      //     gravity: ToastGravity.BOTTOM, // location
+      //     backgroundColor: Colors.grey,
+      //   );
+      //   Navigator.pushAndRemoveUntil(
+      //       context,
+      //       MaterialPageRoute(
+      //         builder: (context) => const SignInScreen(),
+      //       ),
+      //       (route) => false);
     }
   }
 

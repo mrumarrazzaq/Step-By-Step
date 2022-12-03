@@ -1,13 +1,17 @@
 import 'dart:developer';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:stepbystep/screens/workspace_manager/create_workspace.dart';
 import 'package:stepbystep/screens/workspace_manager/task_holder_section/task_holder.dart';
 
 import 'package:stepbystep/screens/workspace_manager/workspace_screen_combiner.dart';
+import 'package:stepbystep/apis/send_email_api.dart';
 
 class WorkspaceHome extends StatefulWidget {
   const WorkspaceHome({Key? key}) : super(key: key);
@@ -17,6 +21,9 @@ class WorkspaceHome extends StatefulWidget {
 }
 
 class _WorkspaceHomeState extends State<WorkspaceHome> {
+  final RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
+
   bool isEmpty = false;
   bool result = false;
   List<dynamic> joinedWorkspaces = [];
@@ -60,6 +67,16 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
     }
   }
 
+  void _onRefresh() async {
+    log('-------------------------------------');
+    log('On Refresh');
+    await getJoinedWorkspaces();
+    await getOwnedWorkspaces();
+    if (mounted) setState(() {});
+    _refreshController.refreshCompleted();
+    log('-------------------------------------');
+  }
+
   @override
   void initState() {
     getJoinedWorkspaces();
@@ -70,120 +87,136 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
 
   @override
   Widget build(BuildContext context) {
-    print(result);
+    log(result.toString());
     return Scaffold(
-      body: SingleChildScrollView(
-        child: StreamBuilder<QuerySnapshot>(
-            stream: _workspaces,
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.hasError) {
-                log('Something went wrong');
-              }
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                    child: CircularProgressIndicator(
-                  color: AppColor.orange,
-                  strokeWidth: 2.0,
-                ));
-              }
-              if (snapshot.hasData) {
-                final List storedWorkspaces = [];
+      body: SmartRefresher(
+        enablePullUp: true,
+        controller: _refreshController,
+        onRefresh: _onRefresh,
+        child: SingleChildScrollView(
+          child: StreamBuilder<QuerySnapshot>(
+              stream: _workspaces,
+              builder: (BuildContext context,
+                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.hasError) {
+                  log('Something went wrong');
+                }
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 20.0),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: AppColor.orange,
+                        strokeWidth: 3.0,
+                      ),
+                    ),
+                  );
+                }
+                if (snapshot.hasData) {
+                  final List storedWorkspaces = [];
 
-                snapshot.data!.docs.map((DocumentSnapshot document) {
-                  Map id = document.data() as Map<String, dynamic>;
-                  storedWorkspaces.add(id);
-                  id['id'] = document.id;
-                }).toList();
-                return storedWorkspaces.isEmpty
-                    ? Container(
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(
-                            scale: 1.3,
-                            image: AssetImage('assets/workspace_bg.png'),
+                  snapshot.data!.docs.map((DocumentSnapshot document) {
+                    Map id = document.data() as Map<String, dynamic>;
+                    storedWorkspaces.add(id);
+                    id['id'] = document.id;
+                  }).toList();
+                  return storedWorkspaces.isEmpty
+                      ? Container(
+                          decoration: const BoxDecoration(
+                            image: DecorationImage(
+                              scale: 1.3,
+                              image: AssetImage('assets/workspace_bg.png'),
+                            ),
                           ),
-                        ),
-                      )
-                    : Column(
-                        children: [
-                          for (int i = 0; i < storedWorkspaces.length; i++) ...[
-                            if (storedWorkspaces[i]['Workspace Owner Email'] ==
-                                currentUserEmail) ...[
-                              GestureDetector(
-                                onLongPress: () {
-                                  print(storedWorkspaces[i]['Workspace Code']);
-                                },
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          WorkspaceScreenCombiner(
-                                        workspaceCode:
-                                            "${storedWorkspaces[i]['Workspace Code']}",
-                                        docId: "${storedWorkspaces[i]['id']}",
-                                        workspaceName: storedWorkspaces[i]
-                                            ['Workspace Name'],
-                                        workspaceOwnerEmail: storedWorkspaces[i]
-                                            ['Workspace Owner Email'],
+                        )
+                      : Column(
+                          children: [
+                            for (int i = 0;
+                                i < storedWorkspaces.length;
+                                i++) ...[
+                              if (storedWorkspaces[i]
+                                      ['Workspace Owner Email'] ==
+                                  currentUserEmail) ...[
+                                GestureDetector(
+                                  onLongPress: () {
+                                    log(storedWorkspaces[i]['Workspace Code']);
+                                  },
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            WorkspaceScreenCombiner(
+                                          workspaceCode:
+                                              "${storedWorkspaces[i]['Workspace Code']}",
+                                          docId: "${storedWorkspaces[i]['id']}",
+                                          workspaceName: storedWorkspaces[i]
+                                              ['Workspace Name'],
+                                          workspaceOwnerEmail:
+                                              storedWorkspaces[i]
+                                                  ['Workspace Owner Email'],
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                },
-                                child: Card(
-                                  child: ListTile(
+                                    );
+                                  },
+                                  child: Card(
+                                    child: ListTile(
+                                        dense: true,
+                                        title: Text(storedWorkspaces[i]
+                                            ['Workspace Name']),
+                                        subtitle: Text(storedWorkspaces[i]
+                                            ['Workspace Type']),
+                                        trailing: Icon(Icons.star,
+                                            color: AppChartColor.yellow)),
+                                  ),
+                                ),
+                              ],
+                              if (joinedWorkspaces.contains(
+                                  storedWorkspaces[i]['Workspace Code'])) ...[
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            WorkspaceTaskHolder(
+                                          workspaceCode: storedWorkspaces[i]
+                                              ['Workspace Code'],
+                                          workspaceName: storedWorkspaces[i]
+                                              ['Workspace Name'],
+                                          docId: storedWorkspaces[i]['id'],
+                                          workspaceOwnerName:
+                                              storedWorkspaces[i]
+                                                  ['Workspace Owner Name'],
+                                          workspaceOwnerEmail:
+                                              storedWorkspaces[i]
+                                                  ['Workspace Owner Email'],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Card(
+                                    child: ListTile(
                                       dense: true,
                                       title: Text(storedWorkspaces[i]
                                           ['Workspace Name']),
                                       subtitle: Text(storedWorkspaces[i]
                                           ['Workspace Type']),
-                                      trailing: Icon(Icons.star,
-                                          color: AppChartColor.yellow)),
-                                ),
-                              ),
-                            ],
-                            if (joinedWorkspaces.contains(
-                                storedWorkspaces[i]['Workspace Code'])) ...[
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => WorkspaceTaskHolder(
-                                        workspaceCode: storedWorkspaces[i]
-                                            ['Workspace Code'],
-                                        workspaceName: storedWorkspaces[i]
-                                            ['Workspace Name'],
-                                        docId: storedWorkspaces[i]['id'],
-                                        workspaceOwnerName: storedWorkspaces[i]
-                                            ['Workspace Owner Name'],
-                                        workspaceOwnerEmail: storedWorkspaces[i]
-                                            ['Workspace Owner Email'],
-                                      ),
                                     ),
-                                  );
-                                },
-                                child: Card(
-                                  child: ListTile(
-                                    dense: true,
-                                    title: Text(
-                                        storedWorkspaces[i]['Workspace Name']),
-                                    subtitle: Text(
-                                        storedWorkspaces[i]['Workspace Type']),
                                   ),
                                 ),
-                              ),
+                              ],
                             ],
                           ],
-                        ],
-                      );
-              }
-              return Center(
-                  child: CircularProgressIndicator(
-                color: AppColor.orange,
-                strokeWidth: 2.0,
-              ));
-            }),
+                        );
+                }
+                return Center(
+                    child: CircularProgressIndicator(
+                  color: AppColor.orange,
+                  strokeWidth: 2.0,
+                ));
+              }),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {

@@ -1,5 +1,8 @@
 import 'dart:developer';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 
 import 'package:provider/provider.dart';
@@ -23,6 +26,9 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  FlutterLocalNotificationsPlugin fltNotification =
+      FlutterLocalNotificationsPlugin();
   final _storage = const FlutterSecureStorage();
   bool _isLogin = false;
   bool _isWaiting = true;
@@ -48,9 +54,16 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  void pushFCMToken() async {
+    String? token = await messaging.getToken();
+    log(token.toString());
+  }
+
   @override
   void initState() {
     log('MY APP INIT RUNNING');
+    pushFCMToken();
+    initMessaging();
     checkLoginStatus();
     NotificationAPI.init(initScheduled: true);
     listenNotifications();
@@ -136,14 +149,42 @@ class _MyAppState extends State<MyApp> {
                   ),
                 )
               : !_isLogin
-                  ? !_internetConnectionStatus
-                      ? const Error404()
-                      : const SignInScreen()
-                  : !_internetConnectionStatus
-                      ? const Error404()
-                      : const StepByStep(),
+                  ? const SignInScreen()
+                  : const StepByStep(),
+
+          // !_isLogin
+          //     ? !_internetConnectionStatus
+          //     ? const Error404()
+          //     : const SignInScreen()
+          //     : !_internetConnectionStatus
+          //     ? const Error404()
+          //     : const StepByStep(),
         ),
       ),
+    );
+  }
+
+  void initMessaging() {
+    var androidInit =
+        const AndroidInitializationSettings('@mipmap/ic_launcher');
+    var iosInit = const IOSInitializationSettings();
+    var initSetting =
+        InitializationSettings(android: androidInit, iOS: iosInit);
+    fltNotification = FlutterLocalNotificationsPlugin();
+    fltNotification.initialize(initSetting);
+    var androidDetails = const AndroidNotificationDetails('1', 'channelName');
+    var iosDetails = const IOSNotificationDetails();
+    var generalNotificationDetails =
+        NotificationDetails(android: androidDetails, iOS: iosDetails);
+    FirebaseMessaging.onMessage.listen(
+      (RemoteMessage message) {
+        RemoteNotification? notification = message.notification;
+        AndroidNotification? android = message.notification?.android;
+        if (notification != null && android != null) {
+          fltNotification.show(notification.hashCode, notification.title,
+              notification.body, generalNotificationDetails);
+        }
+      },
     );
   }
 }

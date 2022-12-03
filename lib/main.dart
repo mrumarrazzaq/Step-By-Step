@@ -1,7 +1,10 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:stepbystep/providers/date_comparison.dart';
 import 'package:stepbystep/providers/taskCollection.dart';
+import 'package:stepbystep/providers/silence_operations.dart';
 
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
@@ -15,6 +18,7 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
 void main() async {
+  log('APP ROOT MAIN IS IN RUNNING');
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -25,7 +29,6 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
   runApp(
     MultiProvider(
       providers: [
@@ -34,6 +37,9 @@ void main() async {
         ),
         ChangeNotifierProvider(
           create: (_) => DateCompare(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => SilenceOperation(),
         ),
       ],
       child: const MyApp(),

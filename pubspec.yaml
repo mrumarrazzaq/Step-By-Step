@@ -58,6 +58,13 @@ dependencies:
   syncfusion_flutter_charts: ^20.1.60+1
   overlay_support: ^1.2.1
   shimmer: ^2.0.0
+  http: ^0.13.5
+  firebase_messaging:
+  carousel_slider: ^4.1.1
+
+  flutter_chat_bubble: ^2.0.0
+  emoji_picker_flutter:
+  flutter_keyboard_visibility: ^5.4.0
 
 dev_dependencies:
   flutter_test:
