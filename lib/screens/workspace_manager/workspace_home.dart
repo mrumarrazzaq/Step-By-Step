@@ -8,6 +8,7 @@ import 'package:stepbystep/config.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:stepbystep/screens/workspace_manager/create_workspace.dart';
+import 'package:stepbystep/screens/workspace_manager/delete_workspace.dart';
 import 'package:stepbystep/screens/workspace_manager/task_holder_section/task_holder.dart';
 
 import 'package:stepbystep/screens/workspace_manager/workspace_screen_combiner.dart';
@@ -139,7 +140,14 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
                                   currentUserEmail) ...[
                                 GestureDetector(
                                   onLongPress: () {
-                                    log(storedWorkspaces[i]['Workspace Code']);
+                                    DeleteWorkspace(
+                                      ownerEmail: storedWorkspaces[i]
+                                          ['Workspace Owner Email'],
+                                      workspaceName: storedWorkspaces[i]
+                                          ['Workspace Name'],
+                                      workspaceCode: storedWorkspaces[i]
+                                          ['Workspace Code'],
+                                    );
                                   },
                                   onTap: () {
                                     Navigator.push(

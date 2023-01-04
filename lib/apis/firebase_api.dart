@@ -2,27 +2,41 @@ import 'dart:developer';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:stepbystep/apis/collection_history.dart';
 import 'package:stepbystep/config.dart';
 
 class FireBaseApi {
   static Future<void> createCollectionAutoDoc(
-      {required String collection,
+      {required String workspaceCode,
+      required String collection,
       required Map<String, dynamic> jsonData}) async {
     await FirebaseFirestore.instance.collection(collection).doc().set(jsonData);
+
+    await CollectionDocHistory.saveCollectionHistory(
+        workspaceCode: workspaceCode,
+        collectionName: collection,
+        docName: 'AUTO');
   }
 
   static Future<void> saveDataIntoFireStore(
-      {required String collection,
+      {required String workspaceCode,
+      required String collection,
       required String document,
       required Map<String, dynamic> jsonData}) async {
     await FirebaseFirestore.instance
         .collection(collection)
         .doc(document)
         .set(jsonData);
+
+    await CollectionDocHistory.saveCollectionHistory(
+        workspaceCode: workspaceCode,
+        collectionName: collection,
+        docName: document);
   }
 
   static Future<void> saveDataIntoWorSpaceFireStore(
-      {required String workspaceName,
+      {required String workspaceCode,
+      required String workspaceName,
       required String document,
       required Map<String, dynamic> jsonData}) async {
     await FirebaseFirestore.instance
@@ -31,10 +45,16 @@ class FireBaseApi {
         .collection(workspaceName)
         .doc(document)
         .set(jsonData);
+
+    await CollectionDocHistory.saveCollectionHistory(
+        workspaceCode: workspaceCode,
+        collectionName: workspaceName,
+        docName: document);
   }
 
   static Future<void> saveDataIntoDoubleCollectionFireStore(
-      {required String mainCollection,
+      {required String workspaceCode,
+      required String mainCollection,
       required String subCollection,
       required String mainDocument,
       required String subDocument,
@@ -45,5 +65,10 @@ class FireBaseApi {
         .collection(subCollection)
         .doc(subDocument)
         .set(jsonData);
+
+    await CollectionDocHistory.saveCollectionHistory(
+        workspaceCode: workspaceCode,
+        collectionName: mainCollection,
+        docName: mainDocument);
   }
 }

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 import 'package:stepbystep/apis/firebase_api.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
@@ -227,7 +228,10 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
                                   '$userEmail ${workspaceNameController.text}',
                               'Created At': DateTime.now(),
                             };
+
                             await FireBaseApi.saveDataIntoFireStore(
+                              workspaceCode:
+                                  '$userEmail ${workspaceNameController.text}',
                               collection:
                                   '$userEmail ${workspaceNameController.text}',
                               document: 'Log',
@@ -235,6 +239,8 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
                             );
 
                             await FireBaseApi.saveDataIntoFireStore(
+                              workspaceCode:
+                                  '$userEmail ${workspaceNameController.text}',
                               collection: 'Workspaces',
                               document:
                                   '$userEmail ${workspaceNameController.text}',

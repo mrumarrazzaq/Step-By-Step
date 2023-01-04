@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:stepbystep/colors.dart';
-import 'package:stepbystep/screens/workspace_manager/workspace_members_handler.dart';
+import 'package:stepbystep/screens/workspace_manager/workspace_members/workspace_members_handler.dart';
 import 'package:stepbystep/screens/workspace_manager/workspace_roles_handler/workspace_roles_handler.dart';
 
 class WorkspaceScreenCombiner extends StatefulWidget {

@@ -9,7 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
 import 'package:stepbystep/screens/workspace_manager/task_view.dart';
-import 'package:stepbystep/screens/workspace_manager/workspace_members_handler.dart';
+import 'package:stepbystep/screens/workspace_manager/workspace_members/workspace_members_handler.dart';
 import 'package:stepbystep/screens/workspace_manager/workspace_roles_handler/workspace_roles_handler.dart';
 
 class WorkspaceTaskHolder extends StatefulWidget {

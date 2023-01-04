@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:readmore/readmore.dart';
+
 import 'package:stepbystep/apis/firebase_api.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
@@ -1035,6 +1036,7 @@ class _WorkspaceRoleCardState extends State<WorkspaceRoleCard> {
                                   };
 
                                   await FireBaseApi.saveDataIntoFireStore(
+                                      workspaceCode: widget.workspaceCode,
                                       collection:
                                           '${widget.workspaceCode} Roles',
                                       document:

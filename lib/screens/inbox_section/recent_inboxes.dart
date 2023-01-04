@@ -89,10 +89,13 @@ class _RecentInboxesState extends State<RecentInboxes> {
                           }
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return Center(
-                              child: CircularProgressIndicator(
-                                color: AppColor.orange,
-                                strokeWidth: 2.0,
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 50.0),
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  color: AppColor.orange,
+                                  strokeWidth: 2.0,
+                                ),
                               ),
                             );
                           }

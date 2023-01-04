@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_swipe_action_cell/flutter_swipe_action_cell.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
+
 import 'package:stepbystep/apis/firebase_api.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
@@ -78,7 +78,6 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
             .collection('$currentUserEmail ${widget.workspaceCode} Team')
             .doc(widget.docId)
             .get();
-
         setState(() {
           membersList = value.data()!['Workspace Members'];
         });
@@ -496,10 +495,12 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
                                       'Assigned At': DateTime.now(),
                                     };
                                     await FireBaseApi.saveDataIntoFireStore(
+                                        workspaceCode: widget.workspaceCode,
                                         collection:
                                             '${widget.workspaceCode} Assigned Roles',
                                         document: membersList[i],
                                         jsonData: assignRoleJson);
+
                                     log('Role Assign Successfully');
                                   },
                                 ),
@@ -634,12 +635,20 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
       log('------------------------------------');
     } catch (e) {
       log(e.toString());
-      await FirebaseFirestore.instance
-          .collection('$currentUserEmail ${widget.workspaceCode} Team')
-          .doc(widget.workspaceCode)
-          .set({
-        'Workspace Members': [],
-      });
+
+      await FireBaseApi.saveDataIntoFireStore(
+          workspaceCode: widget.workspaceCode,
+          collection: '$currentUserEmail ${widget.workspaceCode} Team',
+          document: widget.workspaceCode,
+          jsonData: {
+            'Workspace Members': [],
+          });
+      // await FirebaseFirestore.instance
+      //     .collection('$currentUserEmail ${widget.workspaceCode} Team')
+      //     .doc(widget.workspaceCode)
+      //     .set({
+      //   'Workspace Members': [],
+      // });
       await FirebaseFirestore.instance
           .collection('$currentUserEmail ${widget.workspaceCode} Team')
           .doc(widget.workspaceCode)

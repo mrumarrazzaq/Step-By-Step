@@ -1,7 +1,9 @@
 import 'dart:developer';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:readmore/readmore.dart';
@@ -21,6 +23,7 @@ class _MotivationalQuotesState extends State<MotivationalQuotes> {
   List<String> quoteImages = [];
   List<String> quoteText = [];
   bool loading = true;
+
   getQuotes() async {
     try {
       // Get docs from collection reference
@@ -91,10 +94,24 @@ class _MotivationalQuotesState extends State<MotivationalQuotes> {
                                   topLeft: Radius.circular(30.0),
                                   topRight: Radius.circular(30.0),
                                 ),
-                                child: Image.network(
+                                child: CachedNetworkImage(
+                                  imageUrl: quoteImages[itemIndex],
+                                  width: double.infinity,
+                                  maxWidthDiskCache: 500,
+                                  maxHeightDiskCache: 500,
+                                  placeholder: (context, url) => Container(
+                                    height: 200,
+                                    width: double.infinity,
+                                    color: AppColor.white,
+                                  ),
+                                  errorWidget: (context, url, error) =>
+                                      const Icon(Icons.error),
+                                ),
+
+                                /*Image.network(
                                   quoteImages[itemIndex],
                                   width: double.infinity,
-                                ),
+                                ),*/
                               ),
                               Container(
                                 margin: const EdgeInsets.symmetric(

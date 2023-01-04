@@ -110,19 +110,26 @@ class _InboxScreenState extends State<InboxScreen> {
         .catchError((error) => log('Failed to delete Message $error'));
   }
 
-  updateChatBubble(String id, String userReaction, String receiverId) async {
+  updateChatBubble(String id, String userReaction, String receiverId,
+      String senderEmail) async {
+    log('######################################');
+    log('id: $id');
+    log('userReaction: $userReaction');
+    log('receiverId: $receiverId');
+    log('senderEmail: $senderEmail');
+    log('######################################');
     log(currentUserEmail!);
     log(widget.receiverEmail);
 
-    // await FirebaseFirestore.instance
-    //     .collection('$currentUserEmail Chat')
-    //     .doc(id)
-    //     .update({
-    //       'isCompleted': 1,
-    //       'Reaction': userReaction,
-    //     })
-    //     .then((value) => log('Sender Message Status Updated'))
-    //     .catchError((error) => log('Failed to Update $error'));
+    await FirebaseFirestore.instance
+        .collection('$currentUserEmail Chat')
+        .doc(id)
+        .update({
+          'isCompleted': 1,
+          'Reaction': userReaction,
+        })
+        .then((value) => log('Sender Message Status Updated'))
+        .catchError((error) => log('Failed to Update $error'));
 
     await FirebaseFirestore.instance
         .collection('${widget.receiverEmail} Chat')
@@ -526,49 +533,50 @@ class _InboxScreenState extends State<InboxScreen> {
                                                   ),
                                                 ),
                                               ),
-                                              // Visibility(
-                                              //   visible: storedMassages[i]
-                                              //           ['Reaction']
-                                              //       .isNotEmpty,
-                                              //   child: Positioned.fill(
-                                              //     left: MediaQuery.of(context)
-                                              //             .size
-                                              //             .width *
-                                              //         0.8,
-                                              //     child: Align(
-                                              //       alignment:
-                                              //           Alignment.bottomRight,
-                                              //       child: GestureDetector(
-                                              //         onTapDown: (details) {
-                                              //           _tapPosition = details
-                                              //               .globalPosition;
-                                              //           showReactionMenu(
-                                              //             context,
-                                              //             _tapPosition,
-                                              //             storedMassages[i]['id'],
-                                              //             storedMassages[i]
-                                              //                 ['Receiver Id'],
-                                              //           );
-                                              //           print(_tapPosition);
-                                              //         },
-                                              //         child: Container(
-                                              //           padding:
-                                              //               const EdgeInsets.all(
-                                              //                   4.5),
-                                              //           decoration: BoxDecoration(
-                                              //             color: Colors.white,
-                                              //             borderRadius:
-                                              //                 BorderRadius
-                                              //                     .circular(50),
-                                              //           ),
-                                              //           child: Text(
-                                              //               storedMassages[i]
-                                              //                   ['Reaction']),
-                                              //         ),
-                                              //       ),
-                                              //     ),
-                                              //   ),
-                                              // ),
+                                              Visibility(
+                                                visible: storedMassages[i]
+                                                        ['Reaction']
+                                                    .isNotEmpty,
+                                                child: Positioned.fill(
+                                                  left: MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      0.8,
+                                                  child: Align(
+                                                    alignment:
+                                                        Alignment.bottomRight,
+                                                    child: GestureDetector(
+                                                      onTapDown: (details) {
+                                                        /*_tapPosition = details
+                                                            .globalPosition;
+                                                        showReactionMenu(
+                                                          context,
+                                                          _tapPosition,
+                                                          storedMassages[i]['id'],
+                                                          storedMassages[i]
+                                                              ['Receiver Id'],
+                                                        );
+                                                        print(_tapPosition);*/
+                                                      },
+                                                      child: Container(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(4.5),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color: Colors.white,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(50),
+                                                        ),
+                                                        child: Text(
+                                                            storedMassages[i]
+                                                                ['Reaction']),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
                                             ],
                                           )
                                         : storedMassages[i]['Sender Email'] ==
@@ -614,9 +622,12 @@ class _InboxScreenState extends State<InboxScreen> {
                                                           chatBubbleId,
                                                           storedMassages[i]
                                                               ['Receiver Id'],
+                                                          storedMassages[i]
+                                                              ['Sender Email'],
                                                         );
-                                                        print(
-                                                            'selectedChatBubbleId : $selectedChatBubbleId');
+                                                        log('Other selectedChatBubbleId : $selectedChatBubbleId');
+                                                        log('Receiver Id : ${storedMassages[i]['Receiver Id']}');
+                                                        log('Other Email: ${storedMassages[i]['Sender Email']}');
                                                       },
                                                       child: Container(
                                                         width: double.infinity,
@@ -711,6 +722,8 @@ class _InboxScreenState extends State<InboxScreen> {
                                                                   ['id'],
                                                               storedMassages[i][
                                                                   'Receiver Id'],
+                                                              storedMassages[i][
+                                                                  'Sender Email'],
                                                             );
                                                             print(_tapPosition);
                                                           },
@@ -905,6 +918,7 @@ class _InboxScreenState extends State<InboxScreen> {
     Offset position,
     String bubbleId,
     String receiverId,
+    String senderEmail,
   ) async {
     final RenderBox overlay =
         Overlay.of(context)?.context.findRenderObject() as RenderBox;
@@ -934,7 +948,8 @@ class _InboxScreenState extends State<InboxScreen> {
             children: [
               IconButton(
                 onPressed: () async {
-                  await updateChatBubble(bubbleId, '👍', receiverId);
+                  await updateChatBubble(
+                      bubbleId, '👍', receiverId, senderEmail);
                   resetToRest();
                   Navigator.pop(context);
                 },
@@ -945,7 +960,8 @@ class _InboxScreenState extends State<InboxScreen> {
               ),
               IconButton(
                 onPressed: () async {
-                  await updateChatBubble(bubbleId, '❤', receiverId);
+                  await updateChatBubble(
+                      bubbleId, '❤', receiverId, senderEmail);
                   resetToRest();
                   Navigator.pop(context);
                 },
@@ -957,7 +973,8 @@ class _InboxScreenState extends State<InboxScreen> {
               ),
               IconButton(
                 onPressed: () async {
-                  await updateChatBubble(bubbleId, '😂', receiverId);
+                  await updateChatBubble(
+                      bubbleId, '😂', receiverId, senderEmail);
                   resetToRest();
                   Navigator.pop(context);
                 },
@@ -969,7 +986,8 @@ class _InboxScreenState extends State<InboxScreen> {
               ),
               IconButton(
                 onPressed: () async {
-                  await updateChatBubble(bubbleId, '😮', receiverId);
+                  await updateChatBubble(
+                      bubbleId, '😮', receiverId, senderEmail);
                   resetToRest();
                   Navigator.pop(context);
                 },
@@ -980,7 +998,8 @@ class _InboxScreenState extends State<InboxScreen> {
               ),
               IconButton(
                 onPressed: () async {
-                  await updateChatBubble(bubbleId, '😥', receiverId);
+                  await updateChatBubble(
+                      bubbleId, '😥', receiverId, senderEmail);
                   resetToRest();
                   Navigator.pop(context);
                 },
@@ -991,7 +1010,8 @@ class _InboxScreenState extends State<InboxScreen> {
               ),
               IconButton(
                 onPressed: () async {
-                  await updateChatBubble(bubbleId, '🙏', receiverId);
+                  await updateChatBubble(
+                      bubbleId, '🙏', receiverId, senderEmail);
                   resetToRest();
                   Navigator.pop(context);
                 },

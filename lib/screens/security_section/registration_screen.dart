@@ -11,6 +11,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:mac_address/mac_address.dart';
 
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/screens/security_section/signIn_screen.dart';
@@ -53,295 +54,305 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     log("RegisterScreen Build Run");
     return Scaffold(
       key: _scaffoldKey,
-      resizeToAvoidBottomInset: false,
+      //resizeToAvoidBottomInset: false,
       body: Center(
         child: Form(
           key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20.0),
-                child: Text(
-                  'REGISTER',
-                  style: GoogleFonts.oswald(
-                    textStyle: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: AppColor.black,
-                      fontSize: 30,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 20.0),
+                  child: Text(
+                    'REGISTER',
+                    style: GoogleFonts.oswald(
+                      textStyle: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColor.black,
+                        fontSize: 30,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              //Name
-              Padding(
-                padding: const EdgeInsets.only(
-                    left: 20.0, right: 20.0, bottom: 20.0),
-                child: TextFormField(
-                  keyboardType: TextInputType.text,
-                  cursorColor: AppColor.orange,
-                  style: TextStyle(color: AppColor.black),
-                  decoration: InputDecoration(
-                    isDense: true,
-                    enabled: _isLoading ? false : true,
-                    /*fillColor: AppColor.orange,
-                    filled: true,*/
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30.0),
+                //Name
+                Padding(
+                  padding: const EdgeInsets.only(
+                      left: 20.0, right: 20.0, bottom: 20.0),
+                  child: TextFormField(
+                    keyboardType: TextInputType.text,
+                    cursorColor: AppColor.orange,
+                    style: TextStyle(color: AppColor.black),
+                    decoration: InputDecoration(
+                      isDense: true,
+                      enabled: _isLoading ? false : true,
+                      /*fillColor: AppColor.orange,
+                      filled: true,*/
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                        borderSide:
+                            BorderSide(color: AppColor.black, width: 1.5),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                        borderSide:
+                            BorderSide(color: AppColor.black, width: 1.0),
+                      ),
+                      hintText: 'Enter Name',
+                      // hintStyle: TextStyle(color: purpleColor),
+                      label:
+                          Text('Name', style: TextStyle(color: AppColor.black)),
+                      prefixIcon: Icon(
+                        Icons.person,
+                        color: AppColor.black,
+                      ),
+                      prefixText: '  ',
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                      borderSide: BorderSide(color: AppColor.black, width: 1.5),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                      borderSide: BorderSide(color: AppColor.black, width: 1.0),
-                    ),
-                    hintText: 'Enter Name',
-                    // hintStyle: TextStyle(color: purpleColor),
-                    label:
-                        Text('Name', style: TextStyle(color: AppColor.black)),
-                    prefixIcon: Icon(
-                      Icons.person,
-                      color: AppColor.black,
-                    ),
-                    prefixText: '  ',
-                  ),
-                  controller: personNameController,
-                  validator: (String? val) {
-                    if (val!.isEmpty) {
-                      return "Please enter name";
-                    } else if (double.tryParse(val) != null) {
-                      return 'numbers not allowed';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              //Email Address
-              Padding(
-                padding: const EdgeInsets.only(
-                    left: 20.0, right: 20.0, bottom: 20.0),
-                child: TextFormField(
-                  keyboardType: TextInputType.emailAddress,
-                  cursorColor: AppColor.black,
-                  style: TextStyle(color: AppColor.black),
-                  decoration: InputDecoration(
-                    isDense: true,
-                    enabled: _isLoading ? false : true,
-                    // fillColor: whiteColor,
-                    // filled: true,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                      borderSide: BorderSide(color: AppColor.black, width: 1.5),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                      borderSide: BorderSide(color: AppColor.black, width: 1.0),
-                    ),
-                    hintText: 'Enter Email Id',
-                    // hintStyle: TextStyle(color: purpleColor),
-                    label: Text('Email Id',
-                        style: TextStyle(color: AppColor.black)),
-                    prefixIcon: Icon(
-                      Icons.alternate_email,
-                      color: AppColor.black,
-                    ),
-                    prefixText: '  ',
-                    suffixIcon: isValidEmail
-                        ? const Icon(Icons.check,
-                            color: Colors.green, size: 20.0)
-                        : null,
-                  ),
-                  controller: emailController,
-                  validator: MultiValidator(
-                    [
-                      RequiredValidator(errorText: 'Please enter a email'),
-                      EmailValidator(errorText: 'Not a Valid Email'),
-                    ],
-                  ),
-                ),
-              ),
-              //Password
-              Padding(
-                padding: const EdgeInsets.only(
-                    left: 20.0, right: 20.0, bottom: 20.0),
-                child: TextFormField(
-                  obscureText: _obscurePassword,
-                  cursorColor: AppColor.black,
-                  style: TextStyle(color: AppColor.black),
-                  decoration: InputDecoration(
-                    isDense: true,
-                    enabled: _isLoading ? false : true,
-                    // fillColor: whiteColor,
-                    // filled: true,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                    ),
-                    hintText: 'Enter Password',
-                    // hintStyle: TextStyle(color: purpleColor),
-                    label: Text('Password',
-                        style: TextStyle(color: AppColor.black)),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                      borderSide: BorderSide(color: AppColor.black, width: 1.5),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                      borderSide: BorderSide(color: AppColor.black, width: 1.0),
-                    ),
-                    prefixIcon: Icon(
-                      Icons.vpn_key,
-                      color: AppColor.black,
-                    ),
-                    prefixText: '  ',
-                    suffixIcon: GestureDetector(
-                      child: _obscurePassword
-                          ? Icon(
-                              Icons.visibility,
-                              size: 18.0,
-                              color: AppColor.black,
-                            )
-                          : Icon(
-                              Icons.visibility_off,
-                              size: 18.0,
-                              color: AppColor.black,
-                            ),
-                      onTap: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                    ),
-                  ),
-                  controller: passwordController,
-                  validator: validatePassword,
-                ),
-              ),
-              //Confirm Password
-              Padding(
-                padding: const EdgeInsets.only(
-                  left: 20.0,
-                  right: 20.0,
-                  bottom: 20.0,
-                ),
-                child: TextFormField(
-                  obscureText: _obscureConfirmPassword,
-                  cursorColor: AppColor.black,
-                  style: TextStyle(color: AppColor.black),
-                  decoration: InputDecoration(
-                    isDense: true,
-                    enabled: _isLoading ? false : true,
-                    // fillColor: whiteColor,
-                    // filled: true,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                    ),
-                    hintText: 'Enter Confirm Password',
-                    // hintStyle: TextStyle(color: purpleColor),
-                    label: Text('Confirm Password',
-                        style: TextStyle(color: AppColor.black)),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                      borderSide: BorderSide(color: AppColor.black, width: 1.5),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                      borderSide: BorderSide(color: AppColor.black, width: 1.0),
-                    ),
-                    prefixIcon: Icon(
-                      Icons.vpn_key,
-                      color: AppColor.black,
-                    ),
-                    prefixText: '  ',
-                    suffixIcon: GestureDetector(
-                      child: _obscureConfirmPassword
-                          ? Icon(
-                              Icons.visibility,
-                              size: 18.0,
-                              color: AppColor.black,
-                            )
-                          : Icon(
-                              Icons.visibility_off,
-                              size: 18.0,
-                              color: AppColor.black,
-                            ),
-                      onTap: () {
-                        setState(() {
-                          _obscureConfirmPassword = !_obscureConfirmPassword;
-                        });
-                      },
-                    ),
-                  ),
-                  controller: confirmPasswordController,
-                  validator: validatePassword,
-                ),
-              ),
-              //Register Button
-              Material(
-                color: AppColor.orange,
-                clipBehavior: Clip.antiAlias,
-                borderRadius: BorderRadius.circular(30.0),
-                child: MaterialButton(
-                  minWidth: _isLoading ? 50.0 : 160.0,
-                  height: 40.0,
-                  padding: const EdgeInsets.symmetric(vertical: 10.0),
-                  onPressed: () {
-                    SystemChannels.textInput.invokeMethod('TextInput.hide');
-                    if (_isLoading) {
-                    } else {
-                      if (_formKey.currentState!.validate()) {
-                        setState(() {
-                          isValidEmail = true;
-                          personName = personNameController.text.trim();
-                          email = emailController.text.trim();
-                          password = passwordController.text.trim();
-                          confirmPassword =
-                              confirmPasswordController.text.trim();
-                        });
-                        registerNewUser();
+                    controller: personNameController,
+                    validator: (String? val) {
+                      if (val!.isEmpty) {
+                        return "Please enter name";
+                      } else if (double.tryParse(val) != null) {
+                        return 'numbers not allowed';
                       }
-                    }
-                  },
-                  child: _isLoading
-                      ? SizedBox(
-                          height: 30.0,
-                          width: 30.0,
-                          child: CircularProgressIndicator(
-                            color: AppColor.white,
-                            strokeWidth: 3.0,
-                          ),
-                        )
-                      : Text(
-                          'Register',
-                          style: TextStyle(
-                            color: AppColor.white,
-                          ),
-                        ),
+                      return null;
+                    },
+                  ),
                 ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text("Already have an Account? ",
-                      style: TextStyle(color: AppColor.black)),
-                  TextButton(
-                      onPressed: () => {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const SignInScreen(),
+                //Email Address
+                Padding(
+                  padding: const EdgeInsets.only(
+                      left: 20.0, right: 20.0, bottom: 20.0),
+                  child: TextFormField(
+                    keyboardType: TextInputType.emailAddress,
+                    cursorColor: AppColor.black,
+                    style: TextStyle(color: AppColor.black),
+                    decoration: InputDecoration(
+                      isDense: true,
+                      enabled: _isLoading ? false : true,
+                      // fillColor: whiteColor,
+                      // filled: true,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                        borderSide:
+                            BorderSide(color: AppColor.black, width: 1.5),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                        borderSide:
+                            BorderSide(color: AppColor.black, width: 1.0),
+                      ),
+                      hintText: 'Enter Email Id',
+                      // hintStyle: TextStyle(color: purpleColor),
+                      label: Text('Email Id',
+                          style: TextStyle(color: AppColor.black)),
+                      prefixIcon: Icon(
+                        Icons.alternate_email,
+                        color: AppColor.black,
+                      ),
+                      prefixText: '  ',
+                      suffixIcon: isValidEmail
+                          ? const Icon(Icons.check,
+                              color: Colors.green, size: 20.0)
+                          : null,
+                    ),
+                    controller: emailController,
+                    validator: MultiValidator(
+                      [
+                        RequiredValidator(errorText: 'Please enter a email'),
+                        EmailValidator(errorText: 'Not a Valid Email'),
+                      ],
+                    ),
+                  ),
+                ),
+                //Password
+                Padding(
+                  padding: const EdgeInsets.only(
+                      left: 20.0, right: 20.0, bottom: 20.0),
+                  child: TextFormField(
+                    obscureText: _obscurePassword,
+                    cursorColor: AppColor.black,
+                    style: TextStyle(color: AppColor.black),
+                    decoration: InputDecoration(
+                      isDense: true,
+                      enabled: _isLoading ? false : true,
+                      // fillColor: whiteColor,
+                      // filled: true,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                      hintText: 'Enter Password',
+                      // hintStyle: TextStyle(color: purpleColor),
+                      label: Text('Password',
+                          style: TextStyle(color: AppColor.black)),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                        borderSide:
+                            BorderSide(color: AppColor.black, width: 1.5),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                        borderSide:
+                            BorderSide(color: AppColor.black, width: 1.0),
+                      ),
+                      prefixIcon: Icon(
+                        Icons.vpn_key,
+                        color: AppColor.black,
+                      ),
+                      prefixText: '  ',
+                      suffixIcon: GestureDetector(
+                        child: _obscurePassword
+                            ? Icon(
+                                Icons.visibility,
+                                size: 18.0,
+                                color: AppColor.black,
+                              )
+                            : Icon(
+                                Icons.visibility_off,
+                                size: 18.0,
+                                color: AppColor.black,
                               ),
-                            )
-                          },
-                      child: const Text('SignIn'))
-                ],
-              ),
-            ],
+                        onTap: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
+                    ),
+                    controller: passwordController,
+                    validator: validatePassword,
+                  ),
+                ),
+                //Confirm Password
+                Padding(
+                  padding: const EdgeInsets.only(
+                    left: 20.0,
+                    right: 20.0,
+                    bottom: 20.0,
+                  ),
+                  child: TextFormField(
+                    obscureText: _obscureConfirmPassword,
+                    cursorColor: AppColor.black,
+                    style: TextStyle(color: AppColor.black),
+                    decoration: InputDecoration(
+                      isDense: true,
+                      enabled: _isLoading ? false : true,
+                      // fillColor: whiteColor,
+                      // filled: true,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                      hintText: 'Enter Confirm Password',
+                      // hintStyle: TextStyle(color: purpleColor),
+                      label: Text('Confirm Password',
+                          style: TextStyle(color: AppColor.black)),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                        borderSide:
+                            BorderSide(color: AppColor.black, width: 1.5),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                        borderSide:
+                            BorderSide(color: AppColor.black, width: 1.0),
+                      ),
+                      prefixIcon: Icon(
+                        Icons.vpn_key,
+                        color: AppColor.black,
+                      ),
+                      prefixText: '  ',
+                      suffixIcon: GestureDetector(
+                        child: _obscureConfirmPassword
+                            ? Icon(
+                                Icons.visibility,
+                                size: 18.0,
+                                color: AppColor.black,
+                              )
+                            : Icon(
+                                Icons.visibility_off,
+                                size: 18.0,
+                                color: AppColor.black,
+                              ),
+                        onTap: () {
+                          setState(() {
+                            _obscureConfirmPassword = !_obscureConfirmPassword;
+                          });
+                        },
+                      ),
+                    ),
+                    controller: confirmPasswordController,
+                    validator: validatePassword,
+                  ),
+                ),
+                //Register Button
+                Material(
+                  color: AppColor.orange,
+                  clipBehavior: Clip.antiAlias,
+                  borderRadius: BorderRadius.circular(30.0),
+                  child: MaterialButton(
+                    minWidth: _isLoading ? 50.0 : 160.0,
+                    height: 40.0,
+                    padding: const EdgeInsets.symmetric(vertical: 10.0),
+                    onPressed: () {
+                      SystemChannels.textInput.invokeMethod('TextInput.hide');
+                      if (_isLoading) {
+                      } else {
+                        if (_formKey.currentState!.validate()) {
+                          setState(() {
+                            isValidEmail = true;
+                            personName = personNameController.text.trim();
+                            email = emailController.text.trim();
+                            password = passwordController.text.trim();
+                            confirmPassword =
+                                confirmPasswordController.text.trim();
+                          });
+                          registerNewUser();
+                        }
+                      }
+                    },
+                    child: _isLoading
+                        ? SizedBox(
+                            height: 30.0,
+                            width: 30.0,
+                            child: CircularProgressIndicator(
+                              color: AppColor.white,
+                              strokeWidth: 3.0,
+                            ),
+                          )
+                        : Text(
+                            'Register',
+                            style: TextStyle(
+                              color: AppColor.white,
+                            ),
+                          ),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("Already have an Account? ",
+                        style: TextStyle(color: AppColor.black)),
+                    TextButton(
+                        onPressed: () => {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const SignInScreen(),
+                                ),
+                              )
+                            },
+                        child: const Text('SignIn'))
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -356,14 +367,24 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         UserCredential userCredential = await FirebaseAuth.instance
             .createUserWithEmailAndPassword(email: email, password: password);
         log(userCredential.toString());
+        String mac = 'UNKNOWN';
+        try {
+          mac = await GetMac.macAddress;
+          log(mac);
+        } catch (e) {
+          log('Failed To get MAC Address');
+        }
 
         final json = {
+          'Verify Account': false,
+          'MAC': mac,
           'User Name': personName,
           'User Email': emailController.text.trim(),
           'User Password': passwordController.text.trim(),
           'User Current Status': 'Offline',
           'Status Quote': '',
           'Image URL': '',
+          'Workspaces Roles': [],
           'Joined Workspaces': [],
           'Owned Workspaces': [],
           'Created At': DateTime.now(),

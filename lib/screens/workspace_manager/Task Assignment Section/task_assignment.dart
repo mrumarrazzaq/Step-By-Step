@@ -9,7 +9,7 @@ import 'package:stepbystep/apis/firebase_api.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
 import 'package:stepbystep/screens/workspace_manager/task_view.dart';
-import 'package:stepbystep/screens/workspace_manager/workspace_members_handler.dart';
+import 'package:stepbystep/screens/workspace_manager/workspace_members/workspace_members_handler.dart';
 import 'package:stepbystep/screens/workspace_manager/workspace_roles_handler/workspace_roles_handler.dart';
 import 'package:stepbystep/screens/workspace_manager/workspace_task_tile.dart';
 import 'package:stepbystep/widgets/app_elevated_button.dart';
@@ -789,10 +789,12 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
                             };
 
                             await FireBaseApi.createCollectionAutoDoc(
+                              workspaceCode: widget.workspaceCode,
                               collection:
                                   '${widget.email} ${widget.workspaceCode}',
                               jsonData: taskJson,
                             );
+
 
                             final taskLogJson = {
                               'Workspace Task Code':
@@ -804,11 +806,13 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
                             };
 
                             await FireBaseApi.saveDataIntoFireStore(
+                              workspaceCode: widget.workspaceCode,
                               collection: 'Workspaces Task Log',
                               document:
                                   '${widget.email} ${widget.workspaceCode}',
                               jsonData: taskLogJson,
                             );
+
                             if (mounted) {
                               titleController.clear();
                               descriptionController.clear();

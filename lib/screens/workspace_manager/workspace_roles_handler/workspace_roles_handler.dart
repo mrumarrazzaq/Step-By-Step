@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 import 'package:stepbystep/apis/firebase_api.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
@@ -353,6 +354,7 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
                                   // );
 
                                   await FireBaseApi.saveDataIntoFireStore(
+                                      workspaceCode: widget.workspaceCode,
                                       collection:
                                           '${widget.workspaceCode} Roles',
                                       document:

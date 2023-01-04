@@ -11,6 +11,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mac_address/mac_address.dart';
 
 import 'package:provider/provider.dart';
 import 'package:stepbystep/authentication/authentication_with_google.dart';
@@ -341,13 +342,24 @@ class _SignInScreenState extends State<SignInScreen> {
         log('No Data found This GOOGLE Account is New');
         log('--------------------------------------');
 
+        String mac = 'UNKNOWN';
+        try {
+          mac = await GetMac.macAddress;
+          log(mac);
+        } catch (e) {
+          log('Failed To get MAC Address');
+        }
+
         final json = {
+          'Verify Account': true,
+          'MAC': mac,
           'User Name': currentUser.displayName!,
           'User Email': currentUser.email!,
           'User Password': currentUser.uid,
           'User Current Status': 'Offline',
           'Status Quote': '',
           'Image URL': currentUser.photoURL,
+          'Workspaces Roles': [],
           'Joined Workspaces': [],
           'Owned Workspaces': [],
           'Created At': DateTime.now(),

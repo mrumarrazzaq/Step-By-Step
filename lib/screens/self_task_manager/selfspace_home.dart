@@ -24,6 +24,7 @@ class SelfSpaceHome extends StatefulWidget {
 
 class _SelfSpaceHomeState extends State<SelfSpaceHome> {
   bool _isLoading = false;
+  bool isTrue = false;
   IconData taskStatusIcon = Icons.check_box_outline_blank_rounded;
   String dateFilter = '';
   DateTime initialSelectedDate = DateTime.now();
@@ -107,7 +108,10 @@ class _SelfSpaceHomeState extends State<SelfSpaceHome> {
                               final task = Provider.of<TaskCollection>(context,
                                       listen: false)
                                   .getTask[index];
-
+                              if (task['dateFilter'] != dateFilter) {
+                                isTrue = false;
+                                log('not equal');
+                              }
                               return SwipeActionCell(
                                 key: ObjectKey(task['id']),
                                 trailingActions: [
