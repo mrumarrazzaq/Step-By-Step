@@ -6,6 +6,7 @@ class RoundedInputField extends StatefulWidget {
       {Key? key,
       required this.label,
       required this.hint,
+      this.radius = 30.0,
       required this.textInputType,
       this.isFieldDisable = true,
       this.enableSuffixIcon = false,
@@ -21,6 +22,7 @@ class RoundedInputField extends StatefulWidget {
   bool isFieldDisable;
   bool enableSuffixIcon;
   bool obscureText;
+  double radius;
   TextInputType textInputType;
   final TextEditingController controller;
   String? Function(String?)? validate;
@@ -44,10 +46,10 @@ class _RoundedInputFieldState extends State<RoundedInputField> {
           // fillColor: purpleColor,
           // filled: true,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30.0),
+            borderRadius: BorderRadius.circular(widget.radius),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30.0),
+            borderRadius: BorderRadius.circular(widget.radius),
             borderSide: BorderSide(color: AppColor.grey, width: 2.0),
           ),
 

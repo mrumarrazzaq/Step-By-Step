@@ -2,6 +2,8 @@ import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
+import 'package:lottie/lottie.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
@@ -13,6 +15,9 @@ import 'package:stepbystep/screens/workspace_manager/task_holder_section/task_ho
 
 import 'package:stepbystep/screens/workspace_manager/workspace_screen_combiner.dart';
 import 'package:stepbystep/apis/send_email_api.dart';
+import 'package:stepbystep/widgets/app_input_field.dart';
+
+bool canDeleteWorkspace = false;
 
 class WorkspaceHome extends StatefulWidget {
   const WorkspaceHome({Key? key}) : super(key: key);
@@ -140,7 +145,8 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
                                   currentUserEmail) ...[
                                 GestureDetector(
                                   onLongPress: () {
-                                    DeleteWorkspace(
+                                    showWorkspaceDeletionDialog(
+                                      context: context,
                                       ownerEmail: storedWorkspaces[i]
                                           ['Workspace Owner Email'],
                                       workspaceName: storedWorkspaces[i]
@@ -148,6 +154,14 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
                                       workspaceCode: storedWorkspaces[i]
                                           ['Workspace Code'],
                                     );
+                                    // WorkspaceDeleteOperation(
+                                    //   ownerEmail: storedWorkspaces[i]
+                                    //       ['Workspace Owner Email'],
+                                    //   workspaceName: storedWorkspaces[i]
+                                    //       ['Workspace Name'],
+                                    //   workspaceCode: storedWorkspaces[i]
+                                    //       ['Workspace Code'],
+                                    // );
                                   },
                                   onTap: () {
                                     Navigator.push(
@@ -169,13 +183,18 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
                                   },
                                   child: Card(
                                     child: ListTile(
-                                        dense: true,
-                                        title: Text(storedWorkspaces[i]
-                                            ['Workspace Name']),
-                                        subtitle: Text(storedWorkspaces[i]
-                                            ['Workspace Type']),
-                                        trailing: Icon(Icons.star,
-                                            color: AppChartColor.yellow)),
+                                      dense: true,
+                                      title: Text(storedWorkspaces[i]
+                                          ['Workspace Name']),
+                                      subtitle: Text(storedWorkspaces[i]
+                                          ['Workspace Type']),
+                                      trailing: Lottie.asset(
+                                          repeat: false,
+                                          height: 30,
+                                          'animations/star.json'),
+                                      // Icon(Icons.star,
+                                      //     color: AppChartColor.yellow),
+                                    ),
                                   ),
                                 ),
                               ],
@@ -251,6 +270,120 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
           color: AppColor.white,
         ),
       ),
+    );
+  }
+
+  showWorkspaceDeletionDialog(
+      {required BuildContext context,
+      required String ownerEmail,
+      required String workspaceName,
+      required String workspaceCode}) {
+    Widget cancelButton = TextButton(
+      child: const Text("Cancel"),
+      onPressed: () {
+        Navigator.pop(context);
+      },
+    );
+
+    Widget continueButton = TextButton(
+      child: Text(
+        'Delete',
+        style: TextStyle(color: canDeleteWorkspace ? Colors.red : Colors.grey),
+      ),
+      onPressed: () {
+        Navigator.pop(context);
+        // DeleteWorkspace(
+        //   context: context,
+        //   ownerEmail: ownerEmail,
+        //   workspaceName: workspaceName,
+        //   workspaceCode: workspaceCode,
+        // );
+        // pleaseWaitDialog(context);
+      },
+    );
+
+    AlertDialog alert = AlertDialog(
+      title: Text(workspaceName),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              keyboardType: TextInputType.text,
+              cursorColor: AppColor.black,
+              style: TextStyle(color: AppColor.black),
+              decoration: InputDecoration(
+                isDense: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(5.0),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(5.0),
+                  borderSide: BorderSide(color: AppColor.grey, width: 1.5),
+                ),
+                hintText: 'Type Workspace Name',
+                // hintStyle: TextStyle(color: purpleColor),
+                label: Text(
+                  'Workspace Name',
+                  style: TextStyle(color: AppColor.black),
+                ),
+              ),
+              onChanged: (v) {
+                if (v == workspaceName) {
+                  setState(() {
+                    canDeleteWorkspace = true;
+                  });
+                } else {
+                  setState(() {
+                    canDeleteWorkspace = false;
+                  });
+                }
+                log(v);
+              },
+            ),
+            const SizedBox(height: 6),
+            const Text("Do you want to delete workspace ?"),
+            const Text(
+              'Deleted workspace cannot be recovered',
+              style: TextStyle(color: Colors.red, fontSize: 13),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  pleaseWaitDialog(
+    BuildContext context,
+  ) {
+    showDialog(
+      barrierDismissible: true,
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              CircularProgressIndicator(
+                color: AppColor.orange,
+              ),
+              const SizedBox(width: 20),
+              const Text('Please Wait...'),
+            ],
+          ),
+        );
+      },
     );
   }
 }

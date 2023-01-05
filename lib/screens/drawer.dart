@@ -66,6 +66,15 @@ class _AppDrawerState extends State<AppDrawer> {
     }
   }
 
+  void setUserStatus({required String status}) async {
+    await FirebaseFirestore.instance
+        .collection('User Data')
+        .doc('$currentUserEmail')
+        .update({
+      'User Current Status': status,
+    });
+  }
+
   @override
   void initState() {
     getData();
@@ -104,6 +113,7 @@ class _AppDrawerState extends State<AppDrawer> {
                   gravity: ToastGravity.BOTTOM, // location
                   backgroundColor: Colors.green,
                 );
+                setUserStatus(status: 'Offline');
                 if (mounted) {
                   Navigator.pushAndRemoveUntil(
                       context,

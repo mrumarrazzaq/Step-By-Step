@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_swipe_action_cell/flutter_swipe_action_cell.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 
 import 'package:stepbystep/apis/firebase_api.dart';
 import 'package:stepbystep/colors.dart';
@@ -215,6 +216,8 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
                       borderSide: BorderSide(color: AppColor.grey, width: 1.0),
                     ),
                     hintText: 'Search by email id',
+                    suffixIcon:
+                        Lottie.asset(repeat: false, 'animations/search.json'),
                     // suffixIcon: MaterialButton(
                     //   onPressed: () {
                     //     setState(() {
@@ -319,15 +322,19 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
                                     }
                                   }
                                 },
-                                textColor: AppColor.white,
-                                color:
-                                    membersList.contains(searchController.text)
-                                        ? AppColor.black
-                                        : AppColor.orange,
+                                // textColor: AppColor.white,
+                                // color:
+                                //     membersList.contains(searchController.text)
+                                //         ? AppColor.black
+                                //         : AppColor.orange,
                                 child:
                                     membersList.contains(searchController.text)
-                                        ? const Text('Added')
-                                        : const Text('Add'),
+                                        ? Lottie.asset(
+                                            'animations/remove_member.json')
+                                        // const Text('Added')
+                                        : Lottie.asset(
+                                            'animations/add_member.json'),
+                                // const Text('Add'),
                               ),
                             ),
                           ),
@@ -362,33 +369,42 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
                     iconColor: AppColor.black,
                     subtitle: Row(
                       children: [
-                        Container(
-                          width: 50,
-                          height: 10,
-                          color: AppChartColor.blue,
-                        ),
-                        Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 10),
-                          width: 50,
-                          height: 10,
-                          color: AppChartColor.yellow,
-                        ),
-                        Container(
-                          width: 50,
-                          height: 10,
-                          color: AppChartColor.grey,
-                        ),
+                        Lottie.asset(repeat: false, 'animations/blue-bar.json'),
+                        Lottie.asset(
+                            repeat: false, 'animations/yellow-bar.json'),
+                        Lottie.asset(repeat: false, 'animations/grey-bar.json'),
+                        // Container(
+                        //   width: 50,
+                        //   height: 10,
+                        //   color: AppChartColor.blue,
+                        //   child:
+                        // ),
+                        // Container(
+                        //   margin: const EdgeInsets.symmetric(horizontal: 10),
+                        //   width: 50,
+                        //   height: 10,
+                        //   color: AppChartColor.yellow,
+                        // ),
+                        // Container(
+                        //   width: 50,
+                        //   height: 10,
+                        //   color: AppChartColor.grey,
+                        // ),
                       ],
                     ),
                     onExpansionChanged: (v) async {
                       await getAssignedRole(membersList[i]);
                     },
                     children: [
-                      const Divider(
-                        thickness: 2,
-                        indent: 20,
-                        endIndent: 20,
-                      ),
+                      Lottie.asset(
+                          reverse: true,
+                          repeat: false,
+                          'animations/grey-divider.json'),
+                      // const Divider(
+                      //   thickness: 2,
+                      //   indent: 20,
+                      //   endIndent: 20,
+                      // ),
                       Visibility(
                         visible: widget.assignTaskControl,
                         child: ListTile(
@@ -414,8 +430,13 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
                           },
                           dense: true,
                           title: const Text('Assign Task'),
-                          trailing: Image.asset('assets/right-arrow3.png',
-                              height: 30),
+                          trailing: Lottie.asset(
+                              repeat: false,
+                              height: 40,
+                              'animations/add-to-box.json'),
+
+                          // Image.asset('assets/right-arrow3.png',
+                          //     height: 30),
                         ),
                       ),
                       Visibility(
@@ -438,8 +459,11 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
                           },
                           dense: true,
                           title: const Text('Check Report'),
-                          trailing:
-                              Image.asset('assets/bar-graph.png', height: 30),
+                          trailing: Lottie.asset(
+                              repeat: false,
+                              height: 35,
+                              'animations/graph.json'),
+                          // Image.asset('assets/bar-graph.png', height: 30),
                         ),
                       ),
                       ListTile(
@@ -451,11 +475,15 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
-                      const Divider(
-                        thickness: 2,
-                        indent: 20,
-                        endIndent: 20,
-                      ),
+                      Lottie.asset(
+                          reverse: true,
+                          repeat: false,
+                          'animations/grey-divider.json'),
+                      // const Divider(
+                      //   thickness: 2,
+                      //   indent: 20,
+                      //   endIndent: 20,
+                      // ),
                       Visibility(
                         visible: widget.assignRole,
                         child: Visibility(

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/screens/workspace_manager/workspace_members/workspace_members_handler.dart';
 import 'package:stepbystep/screens/workspace_manager/workspace_roles_handler/workspace_roles_handler.dart';
+import 'package:stepbystep/screens/workspace_manager/workspace_view/workspace_view_home.dart';
 
 class WorkspaceScreenCombiner extends StatefulWidget {
   String docId;
@@ -168,6 +169,11 @@ class _WorkspaceScreenCombinerState extends State<WorkspaceScreenCombiner> {
                 controlForUser: false,
                 controlForOwner: true,
               ),
+            ),
+            //Workspace View Handler Section
+            Visibility(
+              visible: tabsColor[2] == AppColor.orange,
+              child: const WorkspaceViewHome(),
             ),
           ],
         ),

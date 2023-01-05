@@ -17,17 +17,50 @@ class WorkspaceDeleteOperation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return showAlertDialog(context);
+  }
+
+  showAlertDialog(BuildContext context) {
+    // set up the buttons
+    Widget cancelButton = TextButton(
+      child: Text("Cancel"),
+      onPressed: () {},
+    );
+    Widget continueButton = TextButton(
+      child: Text("Continue"),
+      onPressed: () {},
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("AlertDialog"),
+      content: Text(
+          "Would you like to continue learning how to use Flutter alerts?"),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 }
 
 class DeleteWorkspace {
+  BuildContext context;
   String ownerEmail;
   String workspaceName;
   String workspaceCode;
 
   DeleteWorkspace(
-      {required this.ownerEmail,
+      {required this.context,
+      required this.ownerEmail,
       required this.workspaceName,
       required this.workspaceCode}) {
     showMessage();
@@ -64,6 +97,7 @@ class DeleteWorkspace {
                 .delete();
           }
           for (var member in workspacesMembers) {
+            log('log log log $member');
             await FirebaseFirestore.instance
                 .collection('User Data')
                 .doc(member)
@@ -76,12 +110,21 @@ class DeleteWorkspace {
           log(e.toString());
         }
       } else {
+        //Delete Owned Workspaces
+        await FirebaseFirestore.instance
+            .collection('User Data')
+            .doc(ownerEmail)
+            .update({
+          'Owned Workspaces': FieldValue.arrayRemove([workspaceCode]),
+        });
         runDeleteOperation(doc.id);
         await FirebaseFirestore.instance
             .collection('Workspaces')
             .doc(workspaceCode)
             .delete();
         deleteCollectionHistory();
+        // if(mounted)
+        // Navigator.pop(context);
       }
     }
   }
@@ -110,6 +153,10 @@ class DeleteWorkspace {
     } catch (e) {
       log(e.toString());
     }
+  }
+
+  void pop() {
+    Navigator.pop(context);
   }
 }
 //Collections
