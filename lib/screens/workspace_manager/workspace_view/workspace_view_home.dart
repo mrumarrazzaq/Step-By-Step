@@ -1,125 +1,180 @@
-import 'package:flutter/material.dart';
+import 'dart:developer';
 
-class WorkspaceViewHome extends StatelessWidget {
-  const WorkspaceViewHome({Key? key}) : super(key: key);
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
+import 'package:stepbystep/apis/app_functions.dart';
+import 'package:stepbystep/colors.dart';
+import 'package:stepbystep/screens/workspace_manager/workspace_view/detailed_view.dart';
+
+class WorkspaceViewHome extends StatefulWidget {
+  String workspaceCode;
+  String docId;
+  String workspaceName;
+  bool fromTaskAssignment;
+  bool fromTaskHolder;
+  bool createRole;
+  bool editRole;
+  bool deleteRole;
+  bool controlForUser;
+  bool controlForOwner;
+  WorkspaceViewHome(
+      {Key? key,
+      required this.workspaceName,
+      required this.workspaceCode,
+      required this.docId,
+      required this.fromTaskHolder,
+      required this.fromTaskAssignment,
+      required this.controlForUser,
+      required this.controlForOwner,
+      required this.createRole,
+      required this.deleteRole,
+      required this.editRole})
+      : super(key: key);
+
+  @override
+  State<WorkspaceViewHome> createState() => _WorkspaceViewHomeState();
+}
+
+class _WorkspaceViewHomeState extends State<WorkspaceViewHome> {
+  late final Stream<QuerySnapshot> rolesRecords;
+  double _height = 250;
+  bool _visibility = true;
+  @override
+  void initState() {
+    rolesRecords = FirebaseFirestore.instance
+        .collection('${widget.workspaceCode} Roles')
+        .orderBy('Role Level', descending: false)
+        .snapshots();
+    Future.delayed(const Duration(milliseconds: 1000), () {
+      setState(() {
+        _height = 150;
+      });
+    });
+    Future.delayed(const Duration(milliseconds: 12000), () {
+      setState(() {
+        _visibility = false;
+      });
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Card(
-          child: ListTile(
-            dense: true,
-            leading: Text('Level 0'),
-            title: Text('OWNER'),
-          ),
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 1000),
+          height: _height,
+          width: double.infinity,
+          curve: Curves.fastOutSlowIn,
+          child: Lottie.asset(repeat: false, 'animations/hirearchy.json'),
         ),
-        Card(
-          child: ListTile(
-            dense: true,
-            leading: Text('Level 1'),
-            title: Text('OWNER'),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            dense: true,
-            leading: Text('Level 1'),
-            title: Text('OWNER'),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            dense: true,
-            leading: Text('Level 1'),
-            title: Text('OWNER'),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            dense: true,
-            leading: Text('Level 1'),
-            title: Text('OWNER'),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            dense: true,
-            leading: Text('Level 1'),
-            title: Text('OWNER'),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            dense: true,
-            leading: Text('Level 1'),
-            title: Text('OWNER'),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            dense: true,
-            leading: Text('Level 1'),
-            title: Text('OWNER'),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            dense: true,
-            leading: Text('Level 1'),
-            title: Text('OWNER'),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            dense: true,
-            leading: Text('Level 1'),
-            title: Text('OWNER'),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            dense: true,
-            leading: Text('Level 1'),
-            title: Text('OWNER'),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            dense: true,
-            leading: Text('Level 1'),
-            title: Text('OWNER'),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            dense: true,
-            leading: Text('Level 1'),
-            title: Text('OWNER'),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            dense: true,
-            leading: Text('Level 1'),
-            title: Text('OWNER'),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            dense: true,
-            leading: Text('Level 1'),
-            title: Text('OWNER'),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            dense: true,
-            leading: Text('Level 1'),
-            title: Text('OWNER'),
-          ),
-        ),
+        StreamBuilder<QuerySnapshot>(
+            stream: rolesRecords,
+            builder:
+                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (snapshot.hasError) {
+                log('Something went wrong');
+              }
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                    child: CircularProgressIndicator(
+                  color: AppColor.orange,
+                  strokeWidth: 2.0,
+                ));
+              }
+              if (snapshot.hasData) {
+                List storedRolesData = [];
+
+                snapshot.data!.docs.map((DocumentSnapshot document) {
+                  Map id = document.data() as Map<String, dynamic>;
+                  storedRolesData.add(id);
+                  id['id'] = document.id;
+                }).toList();
+                return Column(
+                  children: [
+                    if (storedRolesData.isEmpty) ...[
+                      Lottie.asset('animations/sorry.json'),
+                    ],
+                    for (int i = 0; i < storedRolesData.length; i++) ...[
+                      ViewCard(
+                        widget: FutureBuilder(
+                          future: AppFunctions.getNameByEmail(
+                              email: storedRolesData[i]['Assigned By']),
+                          builder: (BuildContext context,
+                              AsyncSnapshot<String> snapshot) {
+                            switch (snapshot.connectionState) {
+                              case ConnectionState.waiting:
+                                return const Text('');
+                              default:
+                                if (snapshot.hasError) {
+                                  return Container();
+                                } else {
+                                  return Text('Assigned By: ${snapshot.data}');
+                                }
+                            }
+                          },
+                        ),
+                        role: storedRolesData[i]['Role'],
+                        level: storedRolesData[i]['Role Level'],
+                        totals: i,
+                        height: _height - 80,
+                      ),
+                    ],
+                  ],
+                );
+              }
+              return Center(
+                  child: CircularProgressIndicator(
+                color: AppColor.orange,
+                strokeWidth: 2.0,
+              ));
+            }),
       ],
+    );
+  }
+}
+
+class ViewCard extends StatelessWidget {
+  ViewCard(
+      {Key? key,
+      required this.role,
+      required this.widget,
+      required this.level,
+      required this.height,
+      required this.totals})
+      : super(key: key);
+  String role;
+  Widget widget;
+  int level;
+  double height;
+  int totals;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: ListTile(
+        onTap: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const DetailedView(),
+              ));
+        },
+        dense: true,
+        leading: Text('Level $level'),
+        title: Center(
+          child: Text(
+            role,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
+        ),
+        subtitle: widget,
+        trailing: Text('$totals'),
+      ),
     );
   }
 }

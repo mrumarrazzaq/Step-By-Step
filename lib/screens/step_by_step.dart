@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:stepbystep/config.dart';
 import 'package:stepbystep/screens/404_error.dart';
 
@@ -64,20 +65,25 @@ class _StepByStepState extends State<StepByStep> with WidgetsBindingObserver {
       appBar: AppBar(
         title: Image.asset('logos/StepByStep(text).png', height: 22),
         actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Visualization(
-                    workspaceName: 'Workspace Name',
-                    userName: 'User Email',
-                  ),
-                ),
-              );
-            },
-            icon: const Icon(Icons.mobile_friendly),
+          GestureDetector(
+            onTap: () {},
+            child: Lottie.asset(
+                repeat: false, height: 30, width: 30, 'animations/info.json'),
           ),
+          // IconButton(
+          //   onPressed: () {
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(
+          //         builder: (context) => Visualization(
+          //           workspaceName: 'Workspace Name',
+          //           userName: 'User Email',
+          //         ),
+          //       ),
+          //     );
+          //   },
+          //   icon: const Icon(Icons.mobile_friendly),
+          // ),
         ],
       ),
       drawer: const AppDrawer(),

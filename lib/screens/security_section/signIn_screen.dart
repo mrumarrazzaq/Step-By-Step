@@ -359,7 +359,6 @@ class _SignInScreenState extends State<SignInScreen> {
           'User Current Status': 'Offline',
           'Status Quote': '',
           'Image URL': currentUser.photoURL,
-          'Workspaces Roles': [],
           'Joined Workspaces': [],
           'Owned Workspaces': [],
           'Created At': DateTime.now(),

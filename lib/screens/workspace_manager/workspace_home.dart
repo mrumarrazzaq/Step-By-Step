@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart';
 import 'package:lottie/lottie.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -30,6 +31,7 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
   final RefreshController _refreshController =
       RefreshController(initialRefresh: false);
 
+  double _height = 0;
   bool isEmpty = false;
   bool result = false;
   List<dynamic> joinedWorkspaces = [];
@@ -88,6 +90,11 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
     getJoinedWorkspaces();
     getOwnedWorkspaces();
     log(currentUserEmail.toString());
+    Future.delayed(const Duration(milliseconds: 100), () {
+      setState(() {
+        _height = 70;
+      });
+    });
     super.initState();
   }
 
@@ -181,19 +188,28 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
                                       ),
                                     );
                                   },
-                                  child: Card(
-                                    child: ListTile(
-                                      dense: true,
-                                      title: Text(storedWorkspaces[i]
-                                          ['Workspace Name']),
-                                      subtitle: Text(storedWorkspaces[i]
-                                          ['Workspace Type']),
-                                      trailing: Lottie.asset(
-                                          repeat: false,
-                                          height: 30,
-                                          'animations/star.json'),
-                                      // Icon(Icons.star,
-                                      //     color: AppChartColor.yellow),
+                                  child: AnimatedContainer(
+                                    duration:
+                                        const Duration(milliseconds: 1000),
+                                    curve: Curves.fastOutSlowIn,
+                                    height: _height,
+                                    child: Card(
+                                      child: ListTile(
+                                        dense: true,
+                                        title: Text(
+                                          storedWorkspaces[i]['Workspace Name'],
+                                          style: GoogleFonts.robotoMono(
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        subtitle: Text(storedWorkspaces[i]
+                                            ['Workspace Type']),
+                                        trailing: Lottie.asset(
+                                            repeat: false,
+                                            height: 30,
+                                            'animations/star.json'),
+                                        // Icon(Icons.star,
+                                        //     color: AppChartColor.yellow),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -222,13 +238,22 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
                                       ),
                                     );
                                   },
-                                  child: Card(
-                                    child: ListTile(
-                                      dense: true,
-                                      title: Text(storedWorkspaces[i]
-                                          ['Workspace Name']),
-                                      subtitle: Text(storedWorkspaces[i]
-                                          ['Workspace Type']),
+                                  child: AnimatedContainer(
+                                    duration:
+                                        const Duration(milliseconds: 1000),
+                                    curve: Curves.fastOutSlowIn,
+                                    height: _height,
+                                    child: Card(
+                                      child: ListTile(
+                                        dense: true,
+                                        title: Text(
+                                          storedWorkspaces[i]['Workspace Name'],
+                                          style: GoogleFonts.robotoMono(
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        subtitle: Text(storedWorkspaces[i]
+                                            ['Workspace Type']),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -290,15 +315,19 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
         'Delete',
         style: TextStyle(color: canDeleteWorkspace ? Colors.red : Colors.grey),
       ),
-      onPressed: () {
-        Navigator.pop(context);
-        // DeleteWorkspace(
-        //   context: context,
-        //   ownerEmail: ownerEmail,
-        //   workspaceName: workspaceName,
-        //   workspaceCode: workspaceCode,
-        // );
-        // pleaseWaitDialog(context);
+      onPressed: () async {
+        DeleteWorkspace(
+          context: context,
+          ownerEmail: ownerEmail,
+          workspaceName: workspaceName,
+          workspaceCode: workspaceCode,
+        ).deleteWholeWorkspace();
+        pleaseWaitDialog(context);
+        await Future.delayed(const Duration(seconds: 3));
+        if (mounted) {
+          Navigator.pop(context);
+          Navigator.pop(context);
+        }
       },
     );
 
@@ -308,39 +337,40 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextFormField(
-              keyboardType: TextInputType.text,
-              cursorColor: AppColor.black,
-              style: TextStyle(color: AppColor.black),
-              decoration: InputDecoration(
-                isDense: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(5.0),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(5.0),
-                  borderSide: BorderSide(color: AppColor.grey, width: 1.5),
-                ),
-                hintText: 'Type Workspace Name',
-                // hintStyle: TextStyle(color: purpleColor),
-                label: Text(
-                  'Workspace Name',
-                  style: TextStyle(color: AppColor.black),
-                ),
-              ),
-              onChanged: (v) {
-                if (v == workspaceName) {
-                  setState(() {
-                    canDeleteWorkspace = true;
-                  });
-                } else {
-                  setState(() {
-                    canDeleteWorkspace = false;
-                  });
-                }
-                log(v);
-              },
-            ),
+            Lottie.asset(height: 70, 'animations/warning-red.json'),
+            // TextFormField(
+            //   keyboardType: TextInputType.text,
+            //   cursorColor: AppColor.black,
+            //   style: TextStyle(color: AppColor.black),
+            //   decoration: InputDecoration(
+            //     isDense: true,
+            //     border: OutlineInputBorder(
+            //       borderRadius: BorderRadius.circular(5.0),
+            //     ),
+            //     focusedBorder: OutlineInputBorder(
+            //       borderRadius: BorderRadius.circular(5.0),
+            //       borderSide: BorderSide(color: AppColor.grey, width: 1.5),
+            //     ),
+            //     hintText: 'Type Workspace Name',
+            //     // hintStyle: TextStyle(color: purpleColor),
+            //     label: Text(
+            //       'Workspace Name',
+            //       style: TextStyle(color: AppColor.black),
+            //     ),
+            //   ),
+            //   onChanged: (v) {
+            //     if (v == workspaceName) {
+            //       setState(() {
+            //         canDeleteWorkspace = true;
+            //       });
+            //     } else {
+            //       setState(() {
+            //         canDeleteWorkspace = false;
+            //       });
+            //     }
+            //     log(v);
+            //   },
+            // ),
             const SizedBox(height: 6),
             const Text("Do you want to delete workspace ?"),
             const Text(

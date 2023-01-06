@@ -384,7 +384,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           'User Current Status': 'Offline',
           'Status Quote': '',
           'Image URL': '',
-          'Workspaces Roles': [],
           'Joined Workspaces': [],
           'Owned Workspaces': [],
           'Created At': DateTime.now(),

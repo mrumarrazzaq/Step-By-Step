@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_swipe_action_cell/flutter_swipe_action_cell.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:stepbystep/apis/app_functions.dart';
 
 import 'package:stepbystep/apis/firebase_api.dart';
 import 'package:stepbystep/colors.dart';
@@ -50,14 +51,17 @@ class WorkspaceMembersHandler extends StatefulWidget {
       _WorkspaceMembersHandlerState();
 }
 
-class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
+class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
+    with TickerProviderStateMixin {
+  late AnimationController _animationController;
+
   String searchValue = '';
   String userName = '';
   final searchController = TextEditingController();
   List<dynamic> membersList = [];
   List<dynamic> rolesList = [];
   String selectedRoleValue = 'Assign Role';
-
+  bool toggle = true;
   String assignedBy = '';
   String assignedRole = 'No Role Assign';
   bool tA = false, tH = false;
@@ -168,6 +172,9 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
     getAddedMembers(tH: tH, tA: tA);
     getAddedRoles();
     super.initState();
+    _animationController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 2000));
+    _animationController.forward();
   }
 
   setValues() {
@@ -175,6 +182,12 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
       tA = widget.fromTaskAssignment;
       tH = widget.fromTaskHolder;
     });
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   @override
@@ -216,8 +229,24 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
                       borderSide: BorderSide(color: AppColor.grey, width: 1.0),
                     ),
                     hintText: 'Search by email id',
-                    suffixIcon:
-                        Lottie.asset(repeat: false, 'animations/search.json'),
+                    suffixIcon: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          searchController.clear();
+                          searchValue = '';
+                          toggle = !toggle;
+                          if (toggle) {
+                            _animationController.reverse();
+                          } else {
+                            _animationController.forward();
+                          }
+                        });
+                      },
+                      child: Lottie.asset(
+                          controller: _animationController,
+                          repeat: false,
+                          'animations/search.json'),
+                    ),
                     // suffixIcon: MaterialButton(
                     //   onPressed: () {
                     //     setState(() {
@@ -273,8 +302,9 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
                   children: [
                     for (int i = 0; i < storedUserData.length; i++) ...[
                       if (searchValue == storedUserData[i]['User Email'] &&
+                          storedUserData[i]['User Email'] != currentUserEmail &&
                           storedUserData[i]['User Email'] !=
-                              currentUserEmail) ...[
+                              widget.workspaceOwnerEmail) ...[
                         Card(
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.0),
@@ -522,14 +552,33 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
                                       'Assigned By': currentUserEmail,
                                       'Assigned At': DateTime.now(),
                                     };
-                                    await FireBaseApi.saveDataIntoFireStore(
-                                        workspaceCode: widget.workspaceCode,
-                                        collection:
-                                            '${widget.workspaceCode} Assigned Roles',
-                                        document: membersList[i],
-                                        jsonData: assignRoleJson);
 
-                                    log('Role Assign Successfully');
+                                    try {
+                                      await FireBaseApi.saveDataIntoFireStore(
+                                          workspaceCode: widget.workspaceCode,
+                                          collection:
+                                              '${widget.workspaceCode} Assigned Roles',
+                                          document: membersList[i],
+                                          jsonData: assignRoleJson);
+
+                                      await FirebaseFirestore.instance
+                                          .collection('User Data')
+                                          .doc(membersList[i])
+                                          .collection('Workspace Roles')
+                                          .doc(widget.workspaceCode)
+                                          .set({
+                                        'Role': AppFunctions.getStringOnly(
+                                            text: selectedRoleValue),
+                                        'Level':
+                                            AppFunctions.getNumberFromString(
+                                                text: selectedRoleValue),
+                                        'Created At': DateTime.now(),
+                                      });
+
+                                      log('Role Assign Successfully');
+                                    } catch (e) {
+                                      log('Role Assign Failed');
+                                    }
                                   },
                                 ),
                               ),
@@ -551,6 +600,14 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
                                 'Assigned By': '',
                                 'Assigned Role': 'No Role Assign',
                               });
+
+                              await FirebaseFirestore.instance
+                                  .collection('User Data')
+                                  .doc(membersList[i])
+                                  .collection('Workspace Roles')
+                                  .doc(widget.workspaceCode)
+                                  .delete();
+
                               log('Role De-Assign successfully');
                               setState(() {
                                 assignedRole = 'No Role Assign';
@@ -559,7 +616,11 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler> {
                             },
                             dense: true,
                             title: const Text('De-Assign Role'),
-                            trailing: const Icon(Icons.close),
+                            trailing: Lottie.asset(
+                                repeat: false,
+                                height: 30,
+                                'animations/crossbutton.json'),
+                            // const Icon(Icons.close),
                           ),
                         ),
                       ),

@@ -7,6 +7,7 @@ import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_date_picker_timeline/flutter_date_picker_timeline.dart';
 import 'package:flutter_swipe_action_cell/flutter_swipe_action_cell.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/providers/date_comparison.dart';
@@ -60,13 +61,21 @@ class _SelfSpaceHomeState extends State<SelfSpaceHome> {
               ListTile(
                 title: const Text('See Previous Date Task'),
                 textColor: AppColor.black,
-                trailing: IconButton(
-                  onPressed: () {
+                trailing: GestureDetector(
+                  onTap: () {
                     _pickDate();
                   },
-                  icon: Icon(Icons.date_range_sharp, color: AppColor.black),
+                  child: Lottie.asset(
+                      repeat: false, height: 30, 'animations/calendar.json'),
                 ),
+                // IconButton(
+                //   onPressed: () {
+                //     _pickDate();
+                //   },
+                //   icon: Icon(Icons.date_range_sharp, color: AppColor.black),
+                // ),
               ),
+              Lottie.asset(repeat: false, 'animations/black-divider.json'),
               DatePicker(
                 initialSelectedDate,
                 initialSelectedDate: initialSelectedDate,

@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/screens/workspace_manager/workspace_members/workspace_members_handler.dart';
 import 'package:stepbystep/screens/workspace_manager/workspace_roles_handler/workspace_roles_handler.dart';
@@ -30,6 +31,7 @@ class _WorkspaceScreenCombinerState extends State<WorkspaceScreenCombiner> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColor.scaffoldColor,
       appBar: AppBar(
         title: Text(
           widget.workspaceName,
@@ -37,6 +39,13 @@ class _WorkspaceScreenCombinerState extends State<WorkspaceScreenCombiner> {
               TextStyle(color: AppColor.darkGrey, fontWeight: FontWeight.w900),
         ),
         backgroundColor: AppColor.white,
+        actions: [
+          GestureDetector(
+            onTap: () {},
+            child: Lottie.asset(
+                repeat: false, height: 30, width: 30, 'animations/info.json'),
+          ),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size(200, 50),
           child: Row(
@@ -173,7 +182,18 @@ class _WorkspaceScreenCombinerState extends State<WorkspaceScreenCombiner> {
             //Workspace View Handler Section
             Visibility(
               visible: tabsColor[2] == AppColor.orange,
-              child: const WorkspaceViewHome(),
+              child: WorkspaceViewHome(
+                workspaceCode: widget.workspaceCode,
+                docId: widget.docId,
+                workspaceName: widget.workspaceName,
+                fromTaskAssignment: false,
+                fromTaskHolder: false,
+                createRole: true,
+                editRole: true,
+                deleteRole: true,
+                controlForUser: false,
+                controlForOwner: true,
+              ),
             ),
           ],
         ),
