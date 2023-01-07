@@ -6,6 +6,7 @@ import 'package:lottie/lottie.dart';
 import 'package:stepbystep/apis/app_functions.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/screens/workspace_manager/workspace_view/detailed_view.dart';
+import 'package:stepbystep/widgets/app_future_builder.dart';
 
 class WorkspaceViewHome extends StatefulWidget {
   String workspaceCode;
@@ -113,7 +114,10 @@ class _WorkspaceViewHomeState extends State<WorkspaceViewHome> {
                                 if (snapshot.hasError) {
                                   return Container();
                                 } else {
-                                  return Text('Assigned By: ${snapshot.data}');
+                                  return Text(
+                                    'Assigned By: ${snapshot.data}',
+                                    textAlign: TextAlign.left,
+                                  );
                                 }
                             }
                           },
@@ -122,6 +126,8 @@ class _WorkspaceViewHomeState extends State<WorkspaceViewHome> {
                         level: storedRolesData[i]['Role Level'],
                         totals: i,
                         height: _height - 80,
+                        workspaceName: widget.workspaceName,
+                        workspaceCode: widget.workspaceCode,
                       ),
                     ],
                   ],
@@ -141,12 +147,16 @@ class _WorkspaceViewHomeState extends State<WorkspaceViewHome> {
 class ViewCard extends StatelessWidget {
   ViewCard(
       {Key? key,
+      required this.workspaceName,
+      required this.workspaceCode,
       required this.role,
       required this.widget,
       required this.level,
       required this.height,
       required this.totals})
       : super(key: key);
+  String workspaceName;
+  String workspaceCode;
   String role;
   Widget widget;
   int level;
@@ -161,7 +171,12 @@ class ViewCard extends StatelessWidget {
           Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const DetailedView(),
+                builder: (context) => DetailedView(
+                  workspaceName: workspaceName,
+                  workspaceCode: workspaceCode,
+                  role: role,
+                  level: level,
+                ),
               ));
         },
         dense: true,

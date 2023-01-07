@@ -1,7 +1,9 @@
 import 'dart:developer';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:stepbystep/notificationservice/local_notification_service.dart';
 import 'package:stepbystep/providers/date_comparison.dart';
 import 'package:stepbystep/providers/taskCollection.dart';
 import 'package:stepbystep/providers/silence_operations.dart';
@@ -16,6 +18,10 @@ import 'package:stepbystep/screens/myapp.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
+Future<void> backgroundHandler(RemoteMessage message) async {
+  log(message.data.toString());
+  log(message.notification!.title.toString());
+}
 
 void main() async {
   log('APP ROOT MAIN IS IN RUNNING');
@@ -29,6 +35,8 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  FirebaseMessaging.onBackgroundMessage(backgroundHandler);
+  LocalNotificationService.initialize();
   runApp(
     MultiProvider(
       providers: [

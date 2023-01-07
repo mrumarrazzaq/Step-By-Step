@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart';
 import 'package:lottie/lottie.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:readmore/readmore.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -90,7 +91,7 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
     getJoinedWorkspaces();
     getOwnedWorkspaces();
     log(currentUserEmail.toString());
-    Future.delayed(const Duration(milliseconds: 100), () {
+    Future.delayed(const Duration(milliseconds: 500), () {
       setState(() {
         _height = 70;
       });
@@ -150,26 +151,12 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
                               if (storedWorkspaces[i]
                                       ['Workspace Owner Email'] ==
                                   currentUserEmail) ...[
-                                GestureDetector(
-                                  onLongPress: () {
-                                    showWorkspaceDeletionDialog(
-                                      context: context,
-                                      ownerEmail: storedWorkspaces[i]
-                                          ['Workspace Owner Email'],
-                                      workspaceName: storedWorkspaces[i]
-                                          ['Workspace Name'],
-                                      workspaceCode: storedWorkspaces[i]
-                                          ['Workspace Code'],
-                                    );
-                                    // WorkspaceDeleteOperation(
-                                    //   ownerEmail: storedWorkspaces[i]
-                                    //       ['Workspace Owner Email'],
-                                    //   workspaceName: storedWorkspaces[i]
-                                    //       ['Workspace Name'],
-                                    //   workspaceCode: storedWorkspaces[i]
-                                    //       ['Workspace Code'],
-                                    // );
-                                  },
+                                WorkspaceCard(
+                                  workspaceName: storedWorkspaces[i]
+                                      ['Workspace Name'],
+                                  workspaceType: storedWorkspaces[i]
+                                      ['Workspace Type'],
+                                  height: _height,
                                   onTap: () {
                                     Navigator.push(
                                       context,
@@ -188,75 +175,268 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
                                       ),
                                     );
                                   },
-                                  child: AnimatedContainer(
-                                    duration:
-                                        const Duration(milliseconds: 1000),
-                                    curve: Curves.fastOutSlowIn,
-                                    height: _height,
-                                    child: Card(
-                                      child: ListTile(
-                                        dense: true,
-                                        title: Text(
-                                          storedWorkspaces[i]['Workspace Name'],
-                                          style: GoogleFonts.robotoMono(
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                        subtitle: Text(storedWorkspaces[i]
-                                            ['Workspace Type']),
-                                        trailing: Lottie.asset(
-                                            repeat: false,
-                                            height: 30,
-                                            'animations/star.json'),
-                                        // Icon(Icons.star,
-                                        //     color: AppChartColor.yellow),
-                                      ),
-                                    ),
-                                  ),
+                                  onLongPress: () {
+                                    showWorkspaceDeletionDialog(
+                                      context: context,
+                                      ownerEmail: storedWorkspaces[i]
+                                          ['Workspace Owner Email'],
+                                      workspaceName: storedWorkspaces[i]
+                                          ['Workspace Name'],
+                                      workspaceCode: storedWorkspaces[i]
+                                          ['Workspace Code'],
+                                    );
+                                  },
                                 ),
+                                // GestureDetector(
+                                //   onLongPress: () {
+                                //     showWorkspaceDeletionDialog(
+                                //       context: context,
+                                //       ownerEmail: storedWorkspaces[i]
+                                //           ['Workspace Owner Email'],
+                                //       workspaceName: storedWorkspaces[i]
+                                //           ['Workspace Name'],
+                                //       workspaceCode: storedWorkspaces[i]
+                                //           ['Workspace Code'],
+                                //     );
+                                //     // WorkspaceDeleteOperation(
+                                //     //   ownerEmail: storedWorkspaces[i]
+                                //     //       ['Workspace Owner Email'],
+                                //     //   workspaceName: storedWorkspaces[i]
+                                //     //       ['Workspace Name'],
+                                //     //   workspaceCode: storedWorkspaces[i]
+                                //     //       ['Workspace Code'],
+                                //     // );
+                                //   },
+                                //   onTap: () {
+                                //     Navigator.push(
+                                //       context,
+                                //       MaterialPageRoute(
+                                //         builder: (context) =>
+                                //             WorkspaceScreenCombiner(
+                                //           workspaceCode:
+                                //               "${storedWorkspaces[i]['Workspace Code']}",
+                                //           docId: "${storedWorkspaces[i]['id']}",
+                                //           workspaceName: storedWorkspaces[i]
+                                //               ['Workspace Name'],
+                                //           workspaceOwnerEmail:
+                                //               storedWorkspaces[i]
+                                //                   ['Workspace Owner Email'],
+                                //         ),
+                                //       ),
+                                //     );
+                                //   },
+                                //   child: AnimatedContainer(
+                                //     duration:
+                                //         const Duration(milliseconds: 1000),
+                                //     curve: Curves.fastOutSlowIn,
+                                //     height: _height,
+                                //     child: Card(
+                                //       margin: const EdgeInsets.symmetric(
+                                //           horizontal: 10),
+                                //       shape: const RoundedRectangleBorder(
+                                //         borderRadius: BorderRadius.all(
+                                //           Radius.circular(10),
+                                //         ),
+                                //       ),
+                                //       child: ClipPath(
+                                //         clipper: ShapeBorderClipper(
+                                //           shape: RoundedRectangleBorder(
+                                //             borderRadius:
+                                //                 BorderRadius.circular(10),
+                                //           ),
+                                //         ),
+                                //         child: Container(
+                                //           decoration: BoxDecoration(
+                                //             border: Border(
+                                //               left: BorderSide(
+                                //                   color: AppColor.orange,
+                                //                   width: 10),
+                                //             ),
+                                //           ),
+                                //           child: ListTile(
+                                //             dense: true,
+                                //             title: ReadMoreText(
+                                //               storedWorkspaces[i]
+                                //                   ['Workspace Name'],
+                                //               trimLength: 2,
+                                //               trimLines: 2,
+                                //               colorClickableText:
+                                //                   AppColor.orange,
+                                //               textAlign: TextAlign.justify,
+                                //               trimMode: TrimMode.Line,
+                                //               trimCollapsedText: '  more',
+                                //               trimExpandedText: '      less',
+                                //               style: TextStyle(
+                                //                 color: AppColor.black,
+                                //                 fontWeight: FontWeight.bold,
+                                //                 fontSize: 15,
+                                //               ),
+                                //               moreStyle: TextStyle(
+                                //                   fontSize: 12,
+                                //                   fontWeight: FontWeight.bold,
+                                //                   color: AppColor.black),
+                                //               lessStyle: TextStyle(
+                                //                   fontSize: 12,
+                                //                   fontWeight: FontWeight.bold,
+                                //                   color: AppColor.black),
+                                //             ),
+                                //
+                                //             subtitle: Text(storedWorkspaces[i]
+                                //                 ['Workspace Type']),
+                                //             trailing: Lottie.asset(
+                                //                 repeat: false,
+                                //                 height: 30,
+                                //                 'animations/star.json'),
+                                //             // Icon(Icons.star,
+                                //             //     color: AppChartColor.yellow),
+                                //           ),
+                                //         ),
+                                //       ),
+                                //
+                                //       // ListTile(
+                                //       //   minLeadingWidth: 0,
+                                //       //   leading: CircleAvatar(radius: 30, backgroundColor: AppColor.orange),
+                                //       //   title: Text(
+                                //       //     'Umar',
+                                //       //     style: TextStyle(fontWeight: FontWeight.bold),
+                                //       //   ),
+                                //       // ),
+                                //     ),
+                                //
+                                //     // Card(
+                                //     //   child: ListTile(
+                                //     //     dense: true,
+                                //     //     title: ReadMoreText(
+                                //     //       storedWorkspaces[i]
+                                //     //           ['Workspace Name'],
+                                //     //       trimLength: 2,
+                                //     //       trimLines: 2,
+                                //     //       colorClickableText: AppColor.orange,
+                                //     //       textAlign: TextAlign.justify,
+                                //     //       trimMode: TrimMode.Line,
+                                //     //       trimCollapsedText: '  more',
+                                //     //       trimExpandedText: '      less',
+                                //     //       style: TextStyle(
+                                //     //         color: AppColor.black,
+                                //     //         fontWeight: FontWeight.bold,
+                                //     //         fontSize: 15,
+                                //     //       ),
+                                //     //       moreStyle: TextStyle(
+                                //     //           fontSize: 12,
+                                //     //           fontWeight: FontWeight.bold,
+                                //     //           color: AppColor.black),
+                                //     //       lessStyle: TextStyle(
+                                //     //           fontSize: 12,
+                                //     //           fontWeight: FontWeight.bold,
+                                //     //           color: AppColor.black),
+                                //     //     ),
+                                //     //
+                                //     //     subtitle: Text(storedWorkspaces[i]
+                                //     //         ['Workspace Type']),
+                                //     //     trailing: Lottie.asset(
+                                //     //         repeat: false,
+                                //     //         height: 30,
+                                //     //         'animations/star.json'),
+                                //     //     // Icon(Icons.star,
+                                //     //     //     color: AppChartColor.yellow),
+                                //     //   ),
+                                //     // ),
+                                //   ),
+                                // ),
                               ],
                               if (joinedWorkspaces.contains(
                                   storedWorkspaces[i]['Workspace Code'])) ...[
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            WorkspaceTaskHolder(
-                                          workspaceCode: storedWorkspaces[i]
-                                              ['Workspace Code'],
-                                          workspaceName: storedWorkspaces[i]
-                                              ['Workspace Name'],
-                                          docId: storedWorkspaces[i]['id'],
-                                          workspaceOwnerName:
-                                              storedWorkspaces[i]
-                                                  ['Workspace Owner Name'],
-                                          workspaceOwnerEmail:
-                                              storedWorkspaces[i]
-                                                  ['Workspace Owner Email'],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  child: AnimatedContainer(
-                                    duration:
-                                        const Duration(milliseconds: 1000),
-                                    curve: Curves.fastOutSlowIn,
+                                WorkspaceCard(
+                                    workspaceName: storedWorkspaces[i]
+                                        ['Workspace Name'],
+                                    workspaceType: storedWorkspaces[i]
+                                        ['Workspace Type'],
                                     height: _height,
-                                    child: Card(
-                                      child: ListTile(
-                                        dense: true,
-                                        title: Text(
-                                          storedWorkspaces[i]['Workspace Name'],
-                                          style: GoogleFonts.robotoMono(
-                                              fontWeight: FontWeight.bold),
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              WorkspaceTaskHolder(
+                                            workspaceCode: storedWorkspaces[i]
+                                                ['Workspace Code'],
+                                            workspaceName: storedWorkspaces[i]
+                                                ['Workspace Name'],
+                                            docId: storedWorkspaces[i]['id'],
+                                            workspaceOwnerName:
+                                                storedWorkspaces[i]
+                                                    ['Workspace Owner Name'],
+                                            workspaceOwnerEmail:
+                                                storedWorkspaces[i]
+                                                    ['Workspace Owner Email'],
+                                          ),
                                         ),
-                                        subtitle: Text(storedWorkspaces[i]
-                                            ['Workspace Type']),
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                                      );
+                                    },
+                                    onLongPress: () {}),
+                                // GestureDetector(
+                                //   onTap: () {
+                                //     Navigator.push(
+                                //       context,
+                                //       MaterialPageRoute(
+                                //         builder: (context) =>
+                                //             WorkspaceTaskHolder(
+                                //           workspaceCode: storedWorkspaces[i]
+                                //               ['Workspace Code'],
+                                //           workspaceName: storedWorkspaces[i]
+                                //               ['Workspace Name'],
+                                //           docId: storedWorkspaces[i]['id'],
+                                //           workspaceOwnerName:
+                                //               storedWorkspaces[i]
+                                //                   ['Workspace Owner Name'],
+                                //           workspaceOwnerEmail:
+                                //               storedWorkspaces[i]
+                                //                   ['Workspace Owner Email'],
+                                //         ),
+                                //       ),
+                                //     );
+                                //   },
+                                //   child: AnimatedContainer(
+                                //     duration:
+                                //         const Duration(milliseconds: 1000),
+                                //     curve: Curves.fastOutSlowIn,
+                                //     height: _height,
+                                //     child: Card(
+                                //       child: Container(
+                                //         height: 100,
+                                //         child: ListTile(
+                                //           dense: true,
+                                //           title: ReadMoreText(
+                                //             storedWorkspaces[i]
+                                //                 ['Workspace Name'],
+                                //             trimLength: 2,
+                                //             trimLines: 2,
+                                //             colorClickableText: AppColor.orange,
+                                //             textAlign: TextAlign.justify,
+                                //             trimMode: TrimMode.Line,
+                                //             trimCollapsedText: '  more',
+                                //             trimExpandedText: '      less',
+                                //             style: TextStyle(
+                                //               color: AppColor.black,
+                                //               fontWeight: FontWeight.bold,
+                                //               fontSize: 15,
+                                //             ),
+                                //             moreStyle: TextStyle(
+                                //                 fontSize: 12,
+                                //                 fontWeight: FontWeight.bold,
+                                //                 color: AppColor.black),
+                                //             lessStyle: TextStyle(
+                                //                 fontSize: 12,
+                                //                 fontWeight: FontWeight.bold,
+                                //                 color: AppColor.black),
+                                //           ),
+                                //           subtitle: Text(storedWorkspaces[i]
+                                //               ['Workspace Type']),
+                                //         ),
+                                //       ),
+                                //     ),
+                                //   ),
+                                // ),
                               ],
                             ],
                           ],
@@ -414,6 +594,88 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
           ),
         );
       },
+    );
+  }
+}
+
+class WorkspaceCard extends StatelessWidget {
+  WorkspaceCard(
+      {Key? key,
+      required this.workspaceName,
+      required this.workspaceType,
+      required this.height,
+      required this.onTap,
+      required this.onLongPress})
+      : super(key: key);
+  String workspaceName;
+  String workspaceType;
+  double height;
+  Function() onTap;
+  Function() onLongPress;
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onLongPress: onLongPress,
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 3.0),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 1000),
+          curve: Curves.fastOutSlowIn,
+          height: height,
+          child: Card(
+            margin: const EdgeInsets.symmetric(horizontal: 10),
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(
+                Radius.circular(10),
+              ),
+            ),
+            child: ClipPath(
+              clipper: ShapeBorderClipper(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    left: BorderSide(color: AppColor.orange, width: 10),
+                  ),
+                ),
+                child: ListTile(
+                  dense: true,
+                  title: ReadMoreText(
+                    workspaceName,
+                    trimLength: 2,
+                    trimLines: 2,
+                    colorClickableText: AppColor.orange,
+                    textAlign: TextAlign.justify,
+                    trimMode: TrimMode.Line,
+                    trimCollapsedText: '  more',
+                    trimExpandedText: '      less',
+                    style: TextStyle(
+                      color: AppColor.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                    moreStyle: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AppColor.black),
+                    lessStyle: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AppColor.black),
+                  ),
+                  subtitle: Text(workspaceType),
+                  trailing: Lottie.asset(
+                      repeat: false, height: 30, 'animations/star.json'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

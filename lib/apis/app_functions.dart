@@ -29,4 +29,24 @@ class AppFunctions {
     List<String> temp = text.split(' ');
     return temp[0];
   }
+
+  static Future<String> getTokenByEmail({required String email}) async {
+    String token = '';
+    try {
+      await FirebaseFirestore.instance
+          .collection('User Data')
+          .doc(email)
+          .collection('Token')
+          .doc(email)
+          .get()
+          .then((ds) {
+        token = ds['token'];
+        log(token);
+      });
+      return token;
+    } catch (e) {
+      log('Failed to get token by email');
+      return token;
+    }
+  }
 }

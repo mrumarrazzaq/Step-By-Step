@@ -43,7 +43,7 @@ class _WorkspaceScreenCombinerState extends State<WorkspaceScreenCombiner> {
           GestureDetector(
             onTap: () {},
             child: Lottie.asset(
-                repeat: false, height: 30, width: 30, 'animations/info.json'),
+                repeat: false, height: 30, width: 30, 'animations/Info.json'),
           ),
         ],
         bottom: PreferredSize(

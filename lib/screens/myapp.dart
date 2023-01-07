@@ -12,6 +12,7 @@ import 'package:overlay_support/overlay_support.dart';
 
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
+import 'package:stepbystep/notificationservice/local_notification_service.dart';
 import 'package:stepbystep/screens/404_error.dart';
 import 'package:stepbystep/screens/step_by_step.dart';
 import 'package:stepbystep/apis/notification_api.dart';
@@ -27,8 +28,8 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   FirebaseMessaging messaging = FirebaseMessaging.instance;
-  FlutterLocalNotificationsPlugin fltNotification =
-      FlutterLocalNotificationsPlugin();
+  // FlutterLocalNotificationsPlugin fltNotification =
+  //     FlutterLocalNotificationsPlugin();
   final _storage = const FlutterSecureStorage();
   bool _isLogin = false;
   bool _isWaiting = true;
@@ -63,7 +64,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     log('MY APP INIT RUNNING');
     pushFCMToken();
-    initMessaging();
+    // initMessaging();
     checkLoginStatus();
     NotificationAPI.init(initScheduled: true);
     listenNotifications();
@@ -92,6 +93,52 @@ class _MyAppState extends State<MyApp> {
         );
       },
     );
+
+    // 1. This method call when app in terminated state and you get a notification
+    // when you click on notification app open from terminated state and you can get notification data in this method
+
+    FirebaseMessaging.instance.getInitialMessage().then(
+      (message) {
+        log("FirebaseMessaging.instance.getInitialMessage");
+        if (message != null) {
+          log("New Notification");
+          if (message.data['_id'] != null) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) =>
+                    !_isLogin ? const SignInScreen() : const StepByStep(),
+              ),
+            );
+          }
+        }
+      },
+    );
+
+    // 2. This method only call when App in foreground it mean app must be opened
+    FirebaseMessaging.onMessage.listen(
+      (message) {
+        log("FirebaseMessaging.onMessage.listen");
+        if (message.notification != null) {
+          log(message.notification!.title.toString());
+          log(message.notification!.body.toString());
+          log("message.data11 ${message.data}");
+          LocalNotificationService.createAndDisplayNotification(message);
+        }
+      },
+    );
+
+    // 3. This method only call when App in background and not terminated(not closed)
+    FirebaseMessaging.onMessageOpenedApp.listen(
+      (message) {
+        log("FirebaseMessaging.onMessageOpenedApp.listen");
+        if (message.notification != null) {
+          log(message.notification!.title.toString());
+          log(message.notification!.body.toString());
+          log("message.data22 ${message.data['_id']}");
+        }
+      },
+    );
+
     super.initState();
   }
 
@@ -164,27 +211,27 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  void initMessaging() {
-    var androidInit =
-        const AndroidInitializationSettings('@mipmap/ic_launcher');
-    var iosInit = const IOSInitializationSettings();
-    var initSetting =
-        InitializationSettings(android: androidInit, iOS: iosInit);
-    fltNotification = FlutterLocalNotificationsPlugin();
-    fltNotification.initialize(initSetting);
-    var androidDetails = const AndroidNotificationDetails('1', 'channelName');
-    var iosDetails = const IOSNotificationDetails();
-    var generalNotificationDetails =
-        NotificationDetails(android: androidDetails, iOS: iosDetails);
-    FirebaseMessaging.onMessage.listen(
-      (RemoteMessage message) {
-        RemoteNotification? notification = message.notification;
-        AndroidNotification? android = message.notification?.android;
-        if (notification != null && android != null) {
-          fltNotification.show(notification.hashCode, notification.title,
-              notification.body, generalNotificationDetails);
-        }
-      },
-    );
-  }
+  // void initMessaging() {
+  //   var androidInit =
+  //       const AndroidInitializationSettings('@mipmap/ic_launcher');
+  //   var iosInit = const IOSInitializationSettings();
+  //   var initSetting =
+  //       InitializationSettings(android: androidInit, iOS: iosInit);
+  //   fltNotification = FlutterLocalNotificationsPlugin();
+  //   fltNotification.initialize(initSetting);
+  //   var androidDetails = const AndroidNotificationDetails('1', 'channelName');
+  //   var iosDetails = const IOSNotificationDetails();
+  //   var generalNotificationDetails =
+  //       NotificationDetails(android: androidDetails, iOS: iosDetails);
+  //   FirebaseMessaging.onMessage.listen(
+  //     (RemoteMessage message) {
+  //       RemoteNotification? notification = message.notification;
+  //       AndroidNotification? android = message.notification?.android;
+  //       if (notification != null && android != null) {
+  //         fltNotification.show(notification.hashCode, notification.title,
+  //             notification.body, generalNotificationDetails);
+  //       }
+  //     },
+  //   );
+  // }
 }

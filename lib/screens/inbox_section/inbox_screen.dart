@@ -15,6 +15,8 @@ import 'package:flutter_chat_bubble/chat_bubble.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_5.dart';
+import 'package:stepbystep/apis/app_functions.dart';
+import 'package:stepbystep/apis/messege_notification_api.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
 import 'package:stepbystep/providers/silence_operations.dart';
@@ -62,6 +64,10 @@ class _InboxScreenState extends State<InboxScreen> {
   Offset _tapPosition = const Offset(0, 0);
 
   saveMassages(String time, String message, int messageStatus) async {
+    String token =
+        await AppFunctions.getTokenByEmail(email: widget.receiverEmail);
+    String name =
+        await AppFunctions.getNameByEmail(email: currentUserEmail.toString());
     var senderId = await FirebaseFirestore.instance
         .collection('$currentUserEmail Chat')
         .add({
@@ -87,6 +93,9 @@ class _InboxScreenState extends State<InboxScreen> {
       'Time': time,
     });
 
+    MessageNotificationApi.send(
+        token: token, title: 'From $name', body: message);
+    log('Send Notification with message');
     await senderId.update({
       'Receiver Id': receiverId.id,
     });

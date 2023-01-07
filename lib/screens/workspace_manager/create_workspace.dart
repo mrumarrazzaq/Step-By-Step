@@ -116,9 +116,9 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
                         cursorColor: AppColor.black,
                         style: TextStyle(color: AppColor.black),
                         autofillHints: const [AutofillHints.email],
+                        maxLength: 50,
                         decoration: InputDecoration(
                           isDense: true,
-
                           // fillColor: tealColor,
                           // filled: true,
                           border: OutlineInputBorder(
