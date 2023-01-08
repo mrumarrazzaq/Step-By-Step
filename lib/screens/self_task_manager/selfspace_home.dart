@@ -119,7 +119,6 @@ class _SelfSpaceHomeState extends State<SelfSpaceHome> {
                                   .getTask[index];
                               if (task['dateFilter'] != dateFilter) {
                                 isTrue = false;
-                                log('not equal');
                               }
                               return SwipeActionCell(
                                 key: ObjectKey(task['id']),

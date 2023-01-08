@@ -12,6 +12,7 @@ import 'package:stepbystep/screens/workspace_manager/task_view.dart';
 import 'package:stepbystep/screens/workspace_manager/workspace_members/workspace_members_handler.dart';
 import 'package:stepbystep/screens/workspace_manager/workspace_roles_handler/workspace_roles_handler.dart';
 import 'package:stepbystep/screens/workspace_manager/workspace_task_tile.dart';
+import 'package:stepbystep/screens/workspace_manager/workspace_view/workspace_view_home.dart';
 import 'package:stepbystep/widgets/app_elevated_button.dart';
 
 class TaskTeamAssignment extends StatefulWidget {
@@ -530,6 +531,24 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
                 controlForOwner: true,
               ),
             ),
+            //View Section
+            Visibility(
+              visible: selectedTab == 'Team' &&
+                  viewControl &&
+                  teamTabsColor[2] == AppColor.orange,
+              child: WorkspaceViewHome(
+                fromTaskAssignment: true,
+                fromTaskHolder: false,
+                workspaceCode: widget.workspaceCode,
+                workspaceName: widget.workspaceName,
+                docId: widget.docId,
+                createRole: true,
+                editRole: true,
+                deleteRole: true,
+                controlForUser: false,
+                controlForOwner: true,
+              ),
+            ),
           ],
         ),
       ),
@@ -794,7 +813,6 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
                                   '${widget.email} ${widget.workspaceCode}',
                               jsonData: taskJson,
                             );
-
 
                             final taskLogJson = {
                               'Workspace Task Code':

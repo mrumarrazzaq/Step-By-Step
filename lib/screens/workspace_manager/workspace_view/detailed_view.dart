@@ -125,10 +125,10 @@ class Root extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.only(top: 8.0),
+          padding: const EdgeInsets.only(top: 13.0),
           child: Center(
             child: CircleAvatar(
-              radius: 50,
+              radius: 45,
               backgroundColor: AppColor.orange,
             ),
           ),
@@ -184,7 +184,7 @@ class Connector extends StatelessWidget {
           onTap: () {},
           child: Card(
             margin:
-                const EdgeInsets.only(left: 80, bottom: 10, top: 10, right: 10),
+                const EdgeInsets.only(left: 80, bottom: 10, top: 15, right: 10),
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(20),
@@ -196,14 +196,14 @@ class Connector extends StatelessWidget {
             child: ClipPath(
               clipper: ShapeBorderClipper(
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
               child: Container(
-                height: 80,
+                height: 70,
                 decoration: BoxDecoration(
                   border: Border(
-                    left: BorderSide(color: AppColor.orange, width: 20),
+                    left: BorderSide(color: AppColor.orange, width: 10),
                   ),
                 ),
                 child: Row(

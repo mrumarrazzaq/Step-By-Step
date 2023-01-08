@@ -49,4 +49,25 @@ class AppFunctions {
       return token;
     }
   }
+
+  static Future<String> getRoleByEmail(
+      {required String email, required String workspaceCode}) async {
+    String role = '';
+    try {
+      await FirebaseFirestore.instance
+          .collection('User Data')
+          .doc(email)
+          .collection('Workspace Roles')
+          .doc(workspaceCode)
+          .get()
+          .then((ds) {
+        role = ds['Role'];
+        role = '$role ${ds['Level']}';
+      });
+      return role;
+    } catch (e) {
+      log('Failed to get role by email');
+      return role;
+    }
+  }
 }

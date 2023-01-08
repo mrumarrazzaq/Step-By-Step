@@ -40,23 +40,22 @@ class WorkspaceViewHome extends StatefulWidget {
 class _WorkspaceViewHomeState extends State<WorkspaceViewHome> {
   late final Stream<QuerySnapshot> rolesRecords;
   double _height = 250;
-  bool _visibility = true;
+
   @override
   void initState() {
     rolesRecords = FirebaseFirestore.instance
         .collection('${widget.workspaceCode} Roles')
         .orderBy('Role Level', descending: false)
         .snapshots();
-    Future.delayed(const Duration(milliseconds: 1000), () {
-      setState(() {
-        _height = 150;
+    try {
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        setState(() {
+          _height = 150;
+        });
       });
-    });
-    Future.delayed(const Duration(milliseconds: 12000), () {
-      setState(() {
-        _visibility = false;
-      });
-    });
+    } catch (e) {
+      log(e.toString());
+    }
     super.initState();
   }
 

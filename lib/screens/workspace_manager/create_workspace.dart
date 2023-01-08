@@ -253,6 +253,17 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
                                   '$userEmail ${workspaceNameController.text}',
                             );
 
+                            await FirebaseFirestore.instance
+                                .collection('User Data')
+                                .doc(currentUserEmail)
+                                .collection('Workspace Roles')
+                                .doc(
+                                    '$userEmail ${workspaceNameController.text}')
+                                .set({
+                              'Role': 'Owner',
+                              'Level': 0,
+                              'Created At': DateTime.now(),
+                            });
                             if (mounted) {
                               SystemChannels.textInput
                                   .invokeMethod('TextInput.hide');

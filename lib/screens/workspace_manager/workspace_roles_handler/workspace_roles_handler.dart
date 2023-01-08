@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:stepbystep/apis/app_functions.dart';
 
 import 'package:stepbystep/apis/firebase_api.dart';
 import 'package:stepbystep/colors.dart';
@@ -45,70 +46,78 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   int roleLevel = 1;
-  String assignedRole = '';
   final roleController = TextEditingController();
   final descriptionController = TextEditingController();
   late final Stream<QuerySnapshot> rolesRecords;
   bool createRoleLoading = false;
+  bool createRoleForDecision = false;
+
+  Future<void> getSpecificRoleData() async {
+    try {
+      String assignedRole = await AppFunctions.getRoleByEmail(
+          email: currentUserEmail.toString(),
+          workspaceCode: widget.workspaceCode);
+      await FirebaseFirestore.instance
+          .collection('${widget.workspaceCode} Roles')
+          .doc(assignedRole)
+          .get()
+          .then((ds) {
+        createRoleForDecision = ds['Create Role'];
+      });
+      setState(() {});
+    } catch (e) {
+      log('Failed to get edit role and delete role.');
+    }
+  }
+
   @override
   void initState() {
+    log('fromTaskHolder ${widget.fromTaskHolder}');
+    log('fromTaskAssignment ${widget.fromTaskAssignment}');
     rolesRecords = FirebaseFirestore.instance
         .collection('${widget.workspaceCode} Roles')
         .orderBy('Role Level', descending: false)
         .snapshots();
-    getAssignRoleData();
+    // if (!widget.controlForOwner) {
+    //   getSpecificRoleData();
+    // }
     super.initState();
-  }
-
-  getAssignRoleData() async {
-    log('Role Data is fetching');
-    try {
-      await FirebaseFirestore.instance
-          .collection('${widget.workspaceCode} Assigned Roles')
-          .doc(currentUserEmail)
-          .get()
-          .then((ds) {
-        assignedRole = ds['Assigned Role'];
-      });
-      log('$currentUserEmail : assignedRole $assignedRole');
-      setState(() {});
-    } catch (e) {
-      log(e.toString());
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      //mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         StreamBuilder<QuerySnapshot>(
-            stream: rolesRecords,
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.hasError) {
-                log('Something went wrong');
-              }
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                    child: CircularProgressIndicator(
-                  color: AppColor.orange,
-                  strokeWidth: 2.0,
-                ));
-              }
-              if (snapshot.hasData) {
-                List storedRolesData = [];
+          stream: rolesRecords,
+          builder:
+              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.hasError) {
+              log('Something went wrong');
+            }
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                  child: CircularProgressIndicator(
+                color: AppColor.orange,
+                strokeWidth: 2.0,
+              ));
+            }
+            if (snapshot.hasData) {
+              List storedRolesData = [];
 
-                snapshot.data!.docs.map((DocumentSnapshot document) {
-                  Map id = document.data() as Map<String, dynamic>;
-                  storedRolesData.add(id);
-                  id['id'] = document.id;
-                }).toList();
-                return Column(
-                  children: [
-                    for (int i = 0; i < storedRolesData.length; i++) ...[
-                      /**/
-                      if (true) ...[
+              snapshot.data!.docs.map((DocumentSnapshot document) {
+                Map id = document.data() as Map<String, dynamic>;
+                storedRolesData.add(id);
+                id['id'] = document.id;
+              }).toList();
+              return Column(
+                children: [
+                  for (int i = 0; i < storedRolesData.length; i++) ...[
+                    /**/
+                    if (widget.controlForOwner &&
+                        widget.fromTaskAssignment) ...[
+                      if (storedRolesData[i]['Assigned By'] !=
+                          currentUserEmail) ...[
                         WorkspaceRoleCard(
                           id: storedRolesData[i]['id'],
                           workspaceCode: widget.workspaceCode,
@@ -118,8 +127,9 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
                           roleLevel:
                               storedRolesData[i]['Role Level'].toString(),
                           teamControl: storedRolesData[i]['Team Control'],
+                          memberControl: storedRolesData[i]['Member Control'],
                           controlForOwner: widget.controlForOwner,
-                          controlForUser: storedRolesData[i]['Control'],
+                          control: storedRolesData[i]['Control'],
                           roleControl: storedRolesData[i]['Role Control'],
                           taskControl: storedRolesData[i]['Task Control'],
                           viewControl: storedRolesData[i]['View Control'],
@@ -133,18 +143,67 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
                           deleteRole: storedRolesData[i]['Delete Role'],
                         ),
                       ],
+                    ] else if (widget.controlForOwner &&
+                        widget.fromTaskAssignment) ...[
+                      WorkspaceRoleCard(
+                        id: storedRolesData[i]['id'],
+                        workspaceCode: widget.workspaceCode,
+                        roleName: storedRolesData[i]['Role'],
+                        roleDescription: storedRolesData[i]['Role Description'],
+                        roleLevel: storedRolesData[i]['Role Level'].toString(),
+                        teamControl: storedRolesData[i]['Team Control'],
+                        memberControl: storedRolesData[i]['Member Control'],
+                        controlForOwner: widget.controlForOwner,
+                        control: storedRolesData[i]['Control'],
+                        roleControl: storedRolesData[i]['Role Control'],
+                        taskControl: storedRolesData[i]['Task Control'],
+                        viewControl: storedRolesData[i]['View Control'],
+                        reportControl: storedRolesData[i]['Report Control'],
+                        addMember: storedRolesData[i]['Add Member'],
+                        removeMember: storedRolesData[i]['Remove Member'],
+                        assignRole: storedRolesData[i]['Assign Role'],
+                        deAssignRole: storedRolesData[i]['DeAssign Role'],
+                        createRole: storedRolesData[i]['Create Role'],
+                        editRole: storedRolesData[i]['Edit Role'],
+                        deleteRole: storedRolesData[i]['Delete Role'],
+                      ),
+                    ] else ...[
+                      WorkspaceRoleCard(
+                        id: storedRolesData[i]['id'],
+                        workspaceCode: widget.workspaceCode,
+                        roleName: storedRolesData[i]['Role'],
+                        roleDescription: storedRolesData[i]['Role Description'],
+                        roleLevel: storedRolesData[i]['Role Level'].toString(),
+                        teamControl: storedRolesData[i]['Team Control'],
+                        memberControl: storedRolesData[i]['Member Control'],
+                        controlForOwner: widget.controlForOwner,
+                        control: storedRolesData[i]['Control'],
+                        roleControl: storedRolesData[i]['Role Control'],
+                        taskControl: storedRolesData[i]['Task Control'],
+                        viewControl: storedRolesData[i]['View Control'],
+                        reportControl: storedRolesData[i]['Report Control'],
+                        addMember: storedRolesData[i]['Add Member'],
+                        removeMember: storedRolesData[i]['Remove Member'],
+                        assignRole: storedRolesData[i]['Assign Role'],
+                        deAssignRole: storedRolesData[i]['DeAssign Role'],
+                        createRole: storedRolesData[i]['Create Role'],
+                        editRole: storedRolesData[i]['Edit Role'],
+                        deleteRole: storedRolesData[i]['Delete Role'],
+                      ),
                     ],
                   ],
-                );
-              }
-              return Center(
-                  child: CircularProgressIndicator(
-                color: AppColor.orange,
-                strokeWidth: 2.0,
-              ));
-            }),
+                ],
+              );
+            }
+            return Center(
+                child: CircularProgressIndicator(
+              color: AppColor.orange,
+              strokeWidth: 2.0,
+            ));
+          },
+        ),
         Visibility(
-          visible: widget.createRole && !widget.fromTaskAssignment,
+          visible: createRoleForDecision || !widget.fromTaskAssignment,
           child: Align(
             alignment: FractionalOffset.bottomCenter,
             child: AppElevatedButton(
@@ -329,6 +388,7 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
                                     'Role Level': roleLevel,
                                     'Control': false,
                                     'Team Control': false,
+                                    'Member Control': false,
                                     'Add Member': false,
                                     'Remove Member': false,
                                     'Assign Role': false,

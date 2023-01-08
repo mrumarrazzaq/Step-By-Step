@@ -11,6 +11,7 @@ import 'package:stepbystep/config.dart';
 import 'package:stepbystep/screens/workspace_manager/task_view.dart';
 import 'package:stepbystep/screens/workspace_manager/workspace_members/workspace_members_handler.dart';
 import 'package:stepbystep/screens/workspace_manager/workspace_roles_handler/workspace_roles_handler.dart';
+import 'package:stepbystep/screens/workspace_manager/workspace_view/workspace_view_home.dart';
 
 class WorkspaceTaskHolder extends StatefulWidget {
   String docId;
@@ -76,6 +77,7 @@ class _WorkspaceTaskHolderState extends State<WorkspaceTaskHolder> {
   void initState() {
     super.initState();
     log('Task Holder init State Called');
+    log('workspace_home -> task_holder');
     _assignTasksData = FirebaseFirestore.instance
         .collection('$currentUserEmail ${widget.workspaceCode}')
         .orderBy('Created At', descending: true)
@@ -433,6 +435,7 @@ class _WorkspaceTaskHolderState extends State<WorkspaceTaskHolder> {
                             visible: roleControl,
                             child: TextButton(
                               onPressed: () {
+                                log('role');
                                 setState(() {
                                   teamTabsColor[0] = AppColor.white;
                                   teamTabsColor[1] = AppColor.orange;
@@ -451,6 +454,7 @@ class _WorkspaceTaskHolderState extends State<WorkspaceTaskHolder> {
                             visible: viewControl,
                             child: TextButton(
                               onPressed: () {
+                                log('view');
                                 setState(() {
                                   teamTabsColor[0] = AppColor.white;
                                   teamTabsColor[1] = AppColor.white;
@@ -537,7 +541,25 @@ class _WorkspaceTaskHolderState extends State<WorkspaceTaskHolder> {
                 createRole: createRole,
                 editRole: editRole,
                 deleteRole: deleteRole,
-                controlForUser: control,
+                controlForUser: true, //control
+                controlForOwner: false,
+              ),
+            ),
+            //View
+            Visibility(
+              visible: selectedTab == 'Team' &&
+                  viewControl &&
+                  teamTabsColor[2] == AppColor.orange,
+              child: WorkspaceViewHome(
+                fromTaskAssignment: false,
+                fromTaskHolder: true,
+                workspaceCode: widget.workspaceCode,
+                workspaceName: widget.workspaceName,
+                docId: widget.docId,
+                createRole: createRole,
+                editRole: editRole,
+                deleteRole: deleteRole,
+                controlForUser: true, //control
                 controlForOwner: false,
               ),
             ),
