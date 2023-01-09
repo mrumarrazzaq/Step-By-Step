@@ -8,6 +8,7 @@ import 'package:lottie/lottie.dart';
 import 'package:stepbystep/apis/app_functions.dart';
 
 import 'package:stepbystep/apis/firebase_api.dart';
+import 'package:stepbystep/apis/messege_notification_api.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
 import 'package:stepbystep/screens/workspace_manager/Task%20Assignment%20Section/task_assignment.dart';
@@ -576,6 +577,19 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
                                       });
 
                                       log('Role Assign Successfully');
+
+                                      String name =
+                                          await AppFunctions.getNameByEmail(
+                                              email:
+                                                  widget.workspaceOwnerEmail);
+                                      String token =
+                                          await AppFunctions.getTokenByEmail(
+                                              email: membersList[i]);
+                                      MessageNotificationApi.send(
+                                          token: token,
+                                          title: 'Congratulations ☺',
+                                          body:
+                                              '$name assign you ${AppFunctions.getStringOnly(text: selectedRoleValue)} role of Level ${AppFunctions.getNumberFromString(text: selectedRoleValue)} in ${widget.workspaceName} workspace.');
                                     } catch (e) {
                                       log('Role Assign Failed');
                                     }
@@ -609,6 +623,16 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
                                   .delete();
 
                               log('Role De-Assign successfully');
+
+                              String name = await AppFunctions.getNameByEmail(
+                                  email: widget.workspaceOwnerEmail);
+                              String token = await AppFunctions.getTokenByEmail(
+                                  email: membersList[i]);
+                              MessageNotificationApi.send(
+                                  token: token,
+                                  title: 'Oh No 😟',
+                                  body:
+                                      '$name de-assign your role from ${widget.workspaceName} workspace.');
                               setState(() {
                                 assignedRole = 'No Role Assign';
                                 assignedBy = '';
@@ -711,6 +735,13 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
         'Joined Workspaces': FieldValue.arrayUnion([widget.workspaceCode]),
       });
       log('Workspaces added in User Data');
+      String name =
+          await AppFunctions.getNameByEmail(email: widget.workspaceOwnerEmail);
+      String token = await AppFunctions.getTokenByEmail(email: memberEmail);
+      MessageNotificationApi.send(
+          token: token,
+          title: 'Awesome ☺',
+          body: '$name added you in ${widget.workspaceName} workspace.');
     } catch (e) {
       log(e.toString());
     }
@@ -794,6 +825,13 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
           .update({
         'Workspace Members': FieldValue.arrayRemove([memberEmail]),
       });
+      String name =
+          await AppFunctions.getNameByEmail(email: widget.workspaceOwnerEmail);
+      String token = await AppFunctions.getTokenByEmail(email: memberEmail);
+      MessageNotificationApi.send(
+          token: token,
+          title: 'Oh No 😟',
+          body: '$name removed you from ${widget.workspaceName} workspace.');
       log('------------------------------------');
     } catch (e) {
       log(e.toString());

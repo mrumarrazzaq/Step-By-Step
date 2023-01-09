@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:stepbystep/config.dart';
 
 class DeleteWorkspace {
   BuildContext context;
@@ -14,39 +15,39 @@ class DeleteWorkspace {
       required this.ownerEmail,
       required this.workspaceName,
       required this.workspaceCode}) {
-    // showMessage();
-    // getCollectionsHistory();
+    log('Workspace deletion is in progress .....................');
+    runDeleteOperation();
   }
 
-  void showMessage() {
-    log(ownerEmail);
-    log(workspaceName);
-    log(workspaceCode);
-  }
-
-  Future<bool> deleteWholeWorkspace() async {
-    showMessage();
-    await getCollectionsHistory();
+  Future<bool> runDeleteOperation() async {
+    await deleteWorkspaceCompletely();
     return true;
   }
 
-  Future<void> getCollectionsHistory() async {
-    final result = await FirebaseFirestore.instance
-        .collection('Collection History $workspaceCode')
-        .get();
+  Future<void> deleteWorkspaceCompletely() async {
+    try {
+      final List<DocumentSnapshot> documents = await getCollectionsHistory();
+      for (var doc in documents) {
+        if (doc.id == 'Workspaces') {
+          log('++++++++++++++++++++++++++++++++');
 
-    final List<DocumentSnapshot> documents = result.docs;
-    for (var doc in documents) {
-      if (doc.id == 'Workspaces') {
-        try {
-          final value = await FirebaseFirestore.instance
-              .collection('Workspaces')
+          await FirebaseFirestore.instance
+              .collection('User Data')
+              .doc(ownerEmail)
+              .collection('Workspace Roles')
               .doc(workspaceCode)
-              .get();
-          List<dynamic> workspacesMembers = value.data()!['Workspace Members'];
+              .delete();
+          log('User Data -> Workspace Roles(Self) -> Delete Successfully');
+          await FirebaseFirestore.instance
+              .collection('User Data')
+              .doc(ownerEmail)
+              .update({
+            'Owned Workspaces': FieldValue.arrayRemove([workspaceCode]),
+          });
+          log('User Data -> Owned Workspaces -> Delete Successfully');
+          List<dynamic> workspacesMembers = await getWorkspaceMembers();
           log(workspacesMembers.toString());
           for (var member in workspacesMembers) {
-            log('###### $member');
             await FirebaseFirestore.instance
                 .collection('User Data')
                 .doc(member)
@@ -54,69 +55,60 @@ class DeleteWorkspace {
                 .doc(workspaceCode)
                 .delete();
           }
-        } catch (e) {
-          log(e.toString());
-        }
-      } else if (doc.id == 'Workspaces Task Log') {
-        try {
-          final value = await FirebaseFirestore.instance
-              .collection('Workspaces')
-              .doc(workspaceCode)
-              .get();
-          List<dynamic> workspacesMembers = value.data()!['Workspace Members'];
-          log(workspacesMembers.toString());
-
+          log('User Data -> Workspace Roles(Others) -> Delete Successfully');
           for (var member in workspacesMembers) {
-            await FirebaseFirestore.instance
-                .collection('Workspaces Task Log')
-                .doc('$member $workspaceCode')
-                .delete();
-          }
-          for (var member in workspacesMembers) {
-            log('@@@@@@@@ $member');
             await FirebaseFirestore.instance
                 .collection('User Data')
                 .doc(member)
                 .update({
               'Joined Workspaces': FieldValue.arrayRemove([workspaceCode]),
-              'Owned Workspaces': FieldValue.arrayRemove([workspaceCode]),
             });
-            await FirebaseFirestore.instance
-                .collection('User Data')
-                .doc(member)
-                .collection('Workspace Roles')
-                .doc(workspaceCode)
-                .delete();
           }
-        } catch (e) {
-          log(e.toString());
+          log('User Data -> Joined Workspaces -> Delete Successfully');
+        } else {
+          await deleteCollectionOneByOne(doc.id);
+          await FirebaseFirestore.instance
+              .collection('Workspaces')
+              .doc(workspaceCode)
+              .delete();
+          log('Workspaces -> Delete Successfully');
+          await deleteCollectionHistory();
         }
-      } else {
-        //Delete Owned Workspaces
-        await FirebaseFirestore.instance
-            .collection('User Data')
-            .doc(ownerEmail)
-            .update({
-          'Owned Workspaces': FieldValue.arrayRemove([workspaceCode]),
-        });
-        await runDeleteOperation(doc.id);
-        await FirebaseFirestore.instance
-            .collection('Workspaces')
-            .doc(workspaceCode)
-            .delete();
-        await deleteCollectionHistory();
       }
+    } catch (e) {
+      log(e.toString());
+      log('error error error in workspace deletion');
     }
   }
 
-  Future<void> runDeleteOperation(String id) async {
+  Future<List<dynamic>> getWorkspaceMembers() async {
+    final value = await FirebaseFirestore.instance
+        .collection('Workspaces')
+        .doc(workspaceCode)
+        .get();
+
+    List<dynamic> workspacesMembers = value.data()!['Workspace Members'];
+    return workspacesMembers;
+  }
+
+  Future<List<DocumentSnapshot>> getCollectionsHistory() async {
+    final collectionHistory = await FirebaseFirestore.instance
+        .collection('Collection History $workspaceCode')
+        .get();
+
+    List<DocumentSnapshot> documents = collectionHistory.docs;
+    log('Collections History Get Successfully');
+    return documents;
+  }
+
+  Future<void> deleteCollectionOneByOne(String id) async {
     try {
       var collection = FirebaseFirestore.instance.collection(id);
       var snapshots = await collection.get();
       for (var doc in snapshots.docs) {
         await doc.reference.delete();
       }
-      log('Deleted: $id');
+      log('$id -> Delete Successfully');
     } catch (e) {
       log(e.toString());
     }
@@ -130,13 +122,10 @@ class DeleteWorkspace {
       for (var doc in snapshots.docs) {
         await doc.reference.delete();
       }
+      log('Collection History -> Delete Successfully');
     } catch (e) {
       log(e.toString());
     }
-  }
-
-  void pop() {
-    Navigator.pop(context);
   }
 }
 //Collections

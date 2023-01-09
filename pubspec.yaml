@@ -71,6 +71,9 @@ dependencies:
   flutter_keyboard_visibility: ^5.4.0
   cached_network_image:
 
+  file_picker: ^5.2.4
+  flutter_share: ^2.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

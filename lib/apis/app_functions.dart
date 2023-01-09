@@ -70,4 +70,22 @@ class AppFunctions {
       return role;
     }
   }
+
+  static Future<String> getWorkspaceNameByWorkspaceCode(
+      {required String workspaceCode}) async {
+    String workspaceName = '';
+    try {
+      await FirebaseFirestore.instance
+          .collection('Workspaces')
+          .doc(workspaceCode)
+          .get()
+          .then((ds) {
+        workspaceName = ds['Workspace Name'];
+      });
+      return workspaceName;
+    } catch (e) {
+      log('Failed to get role by email');
+      return workspaceName;
+    }
+  }
 }

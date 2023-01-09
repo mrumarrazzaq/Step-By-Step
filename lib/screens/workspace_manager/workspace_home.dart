@@ -262,16 +262,19 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
       required String workspaceName,
       required String workspaceCode}) {
     Widget cancelButton = TextButton(
-      child: const Text("Cancel"),
+      child: const Text(
+        'Cancel',
+        style: TextStyle(color: Colors.black),
+      ),
       onPressed: () {
         Navigator.pop(context);
       },
     );
 
     Widget continueButton = TextButton(
-      child: Text(
+      child: const Text(
         'Delete',
-        style: TextStyle(color: canDeleteWorkspace ? Colors.red : Colors.grey),
+        style: TextStyle(color: Colors.red),
       ),
       onPressed: () async {
         DeleteWorkspace(
@@ -279,12 +282,15 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
           ownerEmail: ownerEmail,
           workspaceName: workspaceName,
           workspaceCode: workspaceCode,
-        ).deleteWholeWorkspace();
+        ).runDeleteOperation();
         pleaseWaitDialog(context);
-        await Future.delayed(const Duration(seconds: 3));
+        await Future.delayed(
+          const Duration(seconds: 5),
+        );
         if (mounted) {
           Navigator.pop(context);
           Navigator.pop(context);
+          _onRefresh();
         }
       },
     );
@@ -296,39 +302,6 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Lottie.asset(height: 70, 'animations/warning-red.json'),
-            // TextFormField(
-            //   keyboardType: TextInputType.text,
-            //   cursorColor: AppColor.black,
-            //   style: TextStyle(color: AppColor.black),
-            //   decoration: InputDecoration(
-            //     isDense: true,
-            //     border: OutlineInputBorder(
-            //       borderRadius: BorderRadius.circular(5.0),
-            //     ),
-            //     focusedBorder: OutlineInputBorder(
-            //       borderRadius: BorderRadius.circular(5.0),
-            //       borderSide: BorderSide(color: AppColor.grey, width: 1.5),
-            //     ),
-            //     hintText: 'Type Workspace Name',
-            //     // hintStyle: TextStyle(color: purpleColor),
-            //     label: Text(
-            //       'Workspace Name',
-            //       style: TextStyle(color: AppColor.black),
-            //     ),
-            //   ),
-            //   onChanged: (v) {
-            //     if (v == workspaceName) {
-            //       setState(() {
-            //         canDeleteWorkspace = true;
-            //       });
-            //     } else {
-            //       setState(() {
-            //         canDeleteWorkspace = false;
-            //       });
-            //     }
-            //     log(v);
-            //   },
-            // ),
             const SizedBox(height: 6),
             const Text("Do you want to delete workspace ?"),
             const Text(

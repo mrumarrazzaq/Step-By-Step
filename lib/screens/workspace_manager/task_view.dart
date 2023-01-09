@@ -9,6 +9,7 @@ class TaskView extends StatefulWidget {
   TaskView({
     Key? key,
     required this.isOwner,
+    required this.workspaceCode,
     required this.workspaceTaskCode,
     required this.taskStatusValue,
     required this.color,
@@ -17,6 +18,7 @@ class TaskView extends StatefulWidget {
     required this.rightButton,
   }) : super(key: key);
   bool isOwner;
+  String workspaceCode;
   String workspaceTaskCode;
   int taskStatusValue;
   Stream<QuerySnapshot> snapshot;
@@ -61,6 +63,7 @@ class _TaskViewState extends State<TaskView> {
                         widget.taskStatusValue) ...[
                       WorkspaceTaskTile(
                         isOwner: widget.isOwner,
+                        workspaceCode: widget.workspaceCode,
                         workspaceTaskCode: widget.workspaceTaskCode,
                         docId: storedData[i]['id'],
                         title: storedData[i]['Task Title'],

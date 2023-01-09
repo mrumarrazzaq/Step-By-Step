@@ -5,7 +5,9 @@ import 'package:date_format/date_format.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:stepbystep/apis/app_functions.dart';
 import 'package:stepbystep/apis/firebase_api.dart';
+import 'package:stepbystep/apis/messege_notification_api.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
 import 'package:stepbystep/screens/workspace_manager/task_view.dart';
@@ -60,7 +62,7 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
   bool taskControl = false;
   bool roleControl = false;
   bool viewControl = false;
-
+  bool isAssigning = false;
   List<Color> mainTabsColor = [AppColor.white, AppColor.orange];
 
   List<Color> taskTabsColor = [
@@ -484,6 +486,7 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
               visible: selectedTab == 'Task',
               child: TaskView(
                 isOwner: true,
+                workspaceCode: widget.workspaceCode,
                 workspaceTaskCode: '${widget.email} ${widget.workspaceCode}',
                 taskStatusValue: taskStatusValue,
                 snapshot: _assignTasksData,
@@ -787,59 +790,81 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
                           visible: isDateTimeChecked,
                           child: buildDateTimePicker()),
                       const SizedBox(height: 25),
-                      AppElevatedButton(
-                        text: 'Assign',
-                        width: 100,
-                        textColor: AppColor.white,
-                        backgroundColor: AppColor.orange,
-                        function: () async {
-                          if (_formKey.currentState!.validate()) {
-                            final taskJson = {
-                              'Task Title': titleController.text,
-                              'Task Description':
-                                  descriptionController.text.isEmpty
-                                      ? ''
-                                      : descriptionController.text,
-                              'Due Date':
-                                  isDateTimeChecked ? _date : 'No Due Date',
-                              'Task Status': 0,
-                              'Assigned By': currentUserEmail,
-                              'Created At': DateTime.now(),
-                            };
+                      isAssigning
+                          ? CircularProgressIndicator(
+                              color: AppColor.white,
+                              backgroundColor: AppColor.orange,
+                            )
+                          : AppElevatedButton(
+                              text: 'Assign',
+                              width: 100,
+                              textColor: AppColor.white,
+                              backgroundColor: AppColor.orange,
+                              function: () async {
+                                if (_formKey.currentState!.validate()) {
+                                  setState(() {
+                                    isAssigning = true;
+                                  });
+                                  final taskJson = {
+                                    'Task Title': titleController.text,
+                                    'Task Description':
+                                        descriptionController.text.isEmpty
+                                            ? ''
+                                            : descriptionController.text,
+                                    'Due Date': isDateTimeChecked
+                                        ? _date
+                                        : 'No Due Date',
+                                    'Task Status': 0,
+                                    'Assigned By': currentUserEmail,
+                                    'Created At': DateTime.now(),
+                                  };
 
-                            await FireBaseApi.createCollectionAutoDoc(
-                              workspaceCode: widget.workspaceCode,
-                              collection:
-                                  '${widget.email} ${widget.workspaceCode}',
-                              jsonData: taskJson,
-                            );
+                                  await FireBaseApi.createCollectionAutoDoc(
+                                    workspaceCode: widget.workspaceCode,
+                                    collection:
+                                        '${widget.email} ${widget.workspaceCode}',
+                                    jsonData: taskJson,
+                                  );
 
-                            final taskLogJson = {
-                              'Workspace Task Code':
-                                  '${widget.email} ${widget.workspaceCode}',
-                              'TODO': 0,
-                              'DOING': 0,
-                              'REVIEW': 0,
-                              'Created At': DateTime.now(),
-                            };
+                                  final taskLogJson = {
+                                    'Workspace Task Code':
+                                        '${widget.email} ${widget.workspaceCode}',
+                                    'TODO': 0,
+                                    'DOING': 0,
+                                    'REVIEW': 0,
+                                    'Created At': DateTime.now(),
+                                  };
 
-                            await FireBaseApi.saveDataIntoFireStore(
-                              workspaceCode: widget.workspaceCode,
-                              collection: 'Workspaces Task Log',
-                              document:
-                                  '${widget.email} ${widget.workspaceCode}',
-                              jsonData: taskLogJson,
-                            );
-
-                            if (mounted) {
-                              titleController.clear();
-                              descriptionController.clear();
-                              isDateTimeChecked = false;
-                              Navigator.pop(context);
-                            }
-                          }
-                        },
-                      ),
+                                  await FireBaseApi.saveDataIntoFireStore(
+                                    workspaceCode: widget.workspaceCode,
+                                    collection: 'Workspaces Task Log',
+                                    document:
+                                        '${widget.email} ${widget.workspaceCode}',
+                                    jsonData: taskLogJson,
+                                  );
+                                  String name =
+                                      await AppFunctions.getNameByEmail(
+                                          email: currentUserEmail.toString());
+                                  String token =
+                                      await AppFunctions.getTokenByEmail(
+                                          email: widget.email);
+                                  MessageNotificationApi.send(
+                                      token: token,
+                                      title: 'Task TODO 📝',
+                                      body:
+                                          '$name assign you task ${isDateTimeChecked ? 'Due Date is : \"$_date\"' : 'with \"No Due Date\"'} in ${widget.workspaceName} workspace.');
+                                  if (mounted) {
+                                    titleController.clear();
+                                    descriptionController.clear();
+                                    isDateTimeChecked = false;
+                                    setState(() {
+                                      isAssigning = false;
+                                    });
+                                    Navigator.pop(context);
+                                  }
+                                }
+                              },
+                            ),
                     ],
                   ),
                 ),
