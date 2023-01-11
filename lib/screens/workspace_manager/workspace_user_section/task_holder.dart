@@ -499,6 +499,7 @@ class _WorkspaceTaskHolderState extends State<WorkspaceTaskHolder> {
               visible: selectedTab == 'Task',
               child: TaskView(
                 isOwner: false,
+                userEmail: '',
                 workspaceCode: widget.workspaceCode,
                 workspaceTaskCode: '$currentUserEmail ${widget.workspaceCode}',
                 taskStatusValue: taskStatusValue,

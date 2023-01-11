@@ -2,9 +2,14 @@
 
 import 'dart:developer';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter_share/flutter_share.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:image_downloader/image_downloader.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:provider/provider.dart';
 import 'package:date_format/date_format.dart';
@@ -17,10 +22,14 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_5.dart';
 import 'package:stepbystep/apis/app_functions.dart';
 import 'package:stepbystep/apis/messege_notification_api.dart';
+import 'package:stepbystep/apis/pick_file_api.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
+import 'package:stepbystep/dialog_boxes/full_screen_dialog.dart';
 import 'package:stepbystep/providers/silence_operations.dart';
+import 'package:stepbystep/screens/inbox_section/voice_message.dart';
 import 'package:stepbystep/widgets/realtime_user_online_status.dart';
+import 'package:logger/logger.dart';
 
 class InboxScreen extends StatefulWidget {
   InboxScreen({
@@ -58,12 +67,16 @@ class _InboxScreenState extends State<InboxScreen> {
   ScrollController scrollController = ScrollController();
   String _message = 'default';
 
+  var rmicons = false;
+  var isDialOpen = ValueNotifier<bool>(false);
+
   final IconData _messageStatus = Icons.access_time_sharp;
 
   bool isTextFieldEmpty = true;
   Offset _tapPosition = const Offset(0, 0);
 
-  saveMassages(String time, String message, int messageStatus) async {
+  saveMassages(String time, String message, int messageStatus, bool isImage,
+      bool isFile, String url) async {
     String token =
         await AppFunctions.getTokenByEmail(email: widget.receiverEmail);
     String name =
@@ -76,6 +89,9 @@ class _InboxScreenState extends State<InboxScreen> {
       'Sender Email': currentUserEmail.toString(),
       'Receiver Email': widget.receiverEmail,
       'Message Status': messageStatus,
+      'Image': isImage,
+      'File': isFile,
+      'URL': url,
       'Receiver Id': '',
       'Created At': DateTime.now(),
       'Time': time,
@@ -88,6 +104,9 @@ class _InboxScreenState extends State<InboxScreen> {
       'Sender Email': currentUserEmail.toString(),
       'Receiver Email': widget.receiverEmail,
       'Message Status': messageStatus,
+      'Image': isImage,
+      'File': isFile,
+      'URL': url,
       'Receiver Id': senderId.id,
       'Created At': DateTime.now(),
       'Time': time,
@@ -453,93 +472,136 @@ class _InboxScreenState extends State<InboxScreen> {
                                                           selectedChatBubbleId
                                                       ? Colors.blue[100]
                                                       : AppColor.transparent,
-                                                  child: ChatBubble(
-                                                    clipper: ChatBubbleClipper5(
-                                                        type: BubbleType
-                                                            .sendBubble),
-                                                    shadowColor: Colors.black,
-                                                    elevation: 1.5,
-                                                    alignment:
-                                                        Alignment.topRight,
-                                                    margin:
-                                                        const EdgeInsets.only(
-                                                            top: 10,
-                                                            right: 10,
-                                                            bottom: 8.0),
-                                                    backGroundColor:
-                                                        AppColor.orange,
-                                                    child: Container(
-                                                      constraints:
-                                                          BoxConstraints(
-                                                        maxWidth: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width *
-                                                            0.7,
-                                                      ),
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .end,
-                                                        children: [
-                                                          Text(
-                                                            storedMassages[i]
-                                                                ['Message'],
-                                                            style:
-                                                                const TextStyle(
-                                                                    color: Colors
-                                                                        .white),
-                                                          ),
-                                                          Padding(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                        .only(
-                                                                    top: 5.0),
-                                                            child: Row(
-                                                              mainAxisSize:
-                                                                  MainAxisSize
-                                                                      .min,
-                                                              children: [
-                                                                Text(
-                                                                  storedMassages[
-                                                                          i]
-                                                                      ['Time'],
-                                                                  style: TextStyle(
-                                                                      fontStyle:
-                                                                          FontStyle
-                                                                              .italic,
-                                                                      textBaseline:
-                                                                          TextBaseline
-                                                                              .ideographic,
-                                                                      color: Colors
-                                                                              .grey[
-                                                                          400],
-                                                                      fontSize:
-                                                                          11),
+                                                  child:
+                                                      storedMassages[i]['Image']
+                                                          ? Align(
+                                                              alignment:
+                                                                  Alignment
+                                                                      .topRight,
+                                                              child:
+                                                                  GestureDetector(
+                                                                onTap: () {
+                                                                  openShowImageBox(
+                                                                    context,
+                                                                    storedMassages[
+                                                                            i]
+                                                                        ['URL'],
+                                                                  );
+                                                                },
+                                                                child:
+                                                                    Container(
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    color: AppColor
+                                                                        .orange,
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            3.0),
+                                                                  ),
+                                                                  margin:
+                                                                      const EdgeInsets
+                                                                              .all(
+                                                                          5.0),
+                                                                  padding:
+                                                                      const EdgeInsets
+                                                                              .all(
+                                                                          5.0),
+                                                                  child:
+                                                                      CachedNetworkImage(
+                                                                    imageUrl:
+                                                                        storedMassages[i]
+                                                                            [
+                                                                            'URL'],
+                                                                    progressIndicatorBuilder: (context,
+                                                                            url,
+                                                                            downloadProgress) =>
+                                                                        CircularProgressIndicator(
+                                                                            value:
+                                                                                downloadProgress.progress),
+                                                                    errorWidget: (context,
+                                                                            url,
+                                                                            error) =>
+                                                                        const Icon(
+                                                                            Icons.error),
+                                                                  ),
                                                                 ),
-                                                                Padding(
-                                                                  padding: const EdgeInsets
-                                                                          .symmetric(
-                                                                      horizontal:
-                                                                          4.0),
-                                                                  child: Icon(
-                                                                      storedMassages[i]['Message Status'] == 0
-                                                                          ? Icons
-                                                                              .check
-                                                                          : Icons
-                                                                              .access_time_sharp,
-                                                                      size: 15,
-                                                                      color: Colors
-                                                                              .grey[
-                                                                          400]),
+                                                              ),
+                                                            )
+                                                          : ChatBubble(
+                                                              clipper: ChatBubbleClipper5(
+                                                                  type: BubbleType
+                                                                      .sendBubble),
+                                                              shadowColor:
+                                                                  Colors.black,
+                                                              elevation: 1.5,
+                                                              alignment:
+                                                                  Alignment
+                                                                      .topRight,
+                                                              margin:
+                                                                  const EdgeInsets
+                                                                          .only(
+                                                                      top: 10,
+                                                                      right: 10,
+                                                                      bottom:
+                                                                          8.0),
+                                                              backGroundColor:
+                                                                  AppColor
+                                                                      .orange,
+                                                              child: Container(
+                                                                constraints:
+                                                                    BoxConstraints(
+                                                                  maxWidth: MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .width *
+                                                                      0.7,
                                                                 ),
-                                                              ],
+                                                                child: Column(
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .end,
+                                                                  children: [
+                                                                    Text(
+                                                                      storedMassages[
+                                                                              i]
+                                                                          [
+                                                                          'Message'],
+                                                                      style: const TextStyle(
+                                                                          color:
+                                                                              Colors.white),
+                                                                    ),
+                                                                    Padding(
+                                                                      padding: const EdgeInsets
+                                                                              .only(
+                                                                          top:
+                                                                              5.0),
+                                                                      child:
+                                                                          Row(
+                                                                        mainAxisSize:
+                                                                            MainAxisSize.min,
+                                                                        children: [
+                                                                          Text(
+                                                                            storedMassages[i]['Time'],
+                                                                            style: TextStyle(
+                                                                                fontStyle: FontStyle.italic,
+                                                                                textBaseline: TextBaseline.ideographic,
+                                                                                color: Colors.grey[400],
+                                                                                fontSize: 11),
+                                                                          ),
+                                                                          Padding(
+                                                                            padding:
+                                                                                const EdgeInsets.symmetric(horizontal: 4.0),
+                                                                            child: Icon(storedMassages[i]['Message Status'] == 0 ? Icons.check : Icons.access_time_sharp,
+                                                                                size: 15,
+                                                                                color: Colors.grey[400]),
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
                                                             ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ),
                                                 ),
                                               ),
                                               Visibility(
@@ -646,68 +708,99 @@ class _InboxScreenState extends State<InboxScreen> {
                                                             ? Colors.blue[100]
                                                             : AppColor
                                                                 .transparent,
-                                                        child: ChatBubble(
-                                                          clipper: ChatBubbleClipper5(
-                                                              type: BubbleType
-                                                                  .receiverBubble),
-                                                          backGroundColor:
-                                                              Colors.grey[100],
-                                                          shadowColor:
-                                                              Colors.black,
-                                                          elevation: 1.5,
-                                                          margin:
-                                                              const EdgeInsets
-                                                                      .only(
-                                                                  top: 10,
-                                                                  left: 10,
-                                                                  bottom: 8.0),
-                                                          child: Container(
-                                                            constraints:
-                                                                BoxConstraints(
-                                                              maxWidth: MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .width *
-                                                                  0.7,
-                                                            ),
-                                                            child: Column(
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .start,
-                                                              children: [
-                                                                Text(
-                                                                  storedMassages[
-                                                                          i][
-                                                                      'Message'],
-                                                                  style: const TextStyle(
-                                                                      color: Colors
-                                                                          .black),
-                                                                ),
-                                                                Padding(
-                                                                  padding: const EdgeInsets
-                                                                          .only(
-                                                                      top: 5.0),
-                                                                  child: Text(
-                                                                    storedMassages[
-                                                                            i][
-                                                                        'Time'],
-                                                                    style: TextStyle(
-                                                                        fontStyle:
-                                                                            FontStyle
-                                                                                .italic,
-                                                                        textBaseline:
-                                                                            TextBaseline
-                                                                                .ideographic,
-                                                                        color: Colors.grey[
-                                                                            500],
-                                                                        fontSize:
-                                                                            11),
+                                                        child:
+                                                            storedMassages[i]
+                                                                    ['Image']
+                                                                ? Align(
+                                                                    alignment:
+                                                                        Alignment
+                                                                            .topLeft,
+                                                                    child:
+                                                                        GestureDetector(
+                                                                      onTap:
+                                                                          () {
+                                                                        openShowImageBox(
+                                                                          context,
+                                                                          storedMassages[i]
+                                                                              [
+                                                                              'URL'],
+                                                                        );
+                                                                      },
+                                                                      child:
+                                                                          Container(
+                                                                        decoration:
+                                                                            BoxDecoration(
+                                                                          color:
+                                                                              Colors.grey[100],
+                                                                          borderRadius:
+                                                                              BorderRadius.circular(3.0),
+                                                                        ),
+                                                                        margin:
+                                                                            const EdgeInsets.all(5.0),
+                                                                        padding:
+                                                                            const EdgeInsets.all(5.0),
+                                                                        child:
+                                                                            CachedNetworkImage(
+                                                                          imageUrl:
+                                                                              storedMassages[i]['URL'],
+                                                                          progressIndicatorBuilder: (context, url, downloadProgress) =>
+                                                                              CircularProgressIndicator(value: downloadProgress.progress),
+                                                                          errorWidget: (context, url, error) =>
+                                                                              const Icon(Icons.error),
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  )
+                                                                : ChatBubble(
+                                                                    clipper: ChatBubbleClipper5(
+                                                                        type: BubbleType
+                                                                            .receiverBubble),
+                                                                    backGroundColor:
+                                                                        Colors.grey[
+                                                                            100],
+                                                                    shadowColor:
+                                                                        Colors
+                                                                            .black,
+                                                                    elevation:
+                                                                        1.5,
+                                                                    margin: const EdgeInsets
+                                                                            .only(
+                                                                        top: 10,
+                                                                        left:
+                                                                            10,
+                                                                        bottom:
+                                                                            8.0),
+                                                                    child:
+                                                                        Container(
+                                                                      constraints:
+                                                                          BoxConstraints(
+                                                                        maxWidth:
+                                                                            MediaQuery.of(context).size.width *
+                                                                                0.7,
+                                                                      ),
+                                                                      child:
+                                                                          Column(
+                                                                        crossAxisAlignment:
+                                                                            CrossAxisAlignment.start,
+                                                                        children: [
+                                                                          Text(
+                                                                            storedMassages[i]['Message'],
+                                                                            style:
+                                                                                const TextStyle(color: Colors.black),
+                                                                          ),
+                                                                          Padding(
+                                                                            padding:
+                                                                                const EdgeInsets.only(top: 5.0),
+                                                                            child:
+                                                                                Text(
+                                                                              storedMassages[i]['Time'],
+                                                                              style: TextStyle(fontStyle: FontStyle.italic, textBaseline: TextBaseline.ideographic, color: Colors.grey[500], fontSize: 11),
+                                                                            ),
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    ),
                                                                   ),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ),
-                                                        ),
                                                       ),
                                                     ),
                                                   ),
@@ -791,6 +884,77 @@ class _InboxScreenState extends State<InboxScreen> {
                       splashRadius: 10,
                       onPressed: onClickEmoji,
                     ),
+                    SpeedDial(
+                      icon: Icons.attach_file,
+                      spacing: 3,
+                      mini: false,
+                      childPadding: const EdgeInsets.all(6),
+                      spaceBetweenChildren: 4,
+                      buttonSize: const Size(56.0, 56.0),
+                      childrenButtonSize: const Size(56.0, 56.0),
+                      direction: SpeedDialDirection.up,
+                      openCloseDial: isDialOpen,
+                      closeManually: false,
+
+                      renderOverlay: false,
+                      // overlayColor: Colors.black,
+                      overlayOpacity: 0,
+
+                      useRotationAnimation: true,
+                      tooltip: 'Pick File',
+                      heroTag: 'speed-dial-hero-tag',
+                      foregroundColor: Colors.black,
+                      backgroundColor: Colors.white,
+                      elevation: 0.0,
+                      animationCurve: Curves.elasticInOut,
+                      isOpenOnStart: false,
+
+                      children: [
+                        SpeedDialChild(
+                          child: !rmicons ? const Icon(Icons.camera_alt) : null,
+                          backgroundColor: Colors.blue,
+                          foregroundColor: Colors.white,
+                          onTap: () async {
+                            setState(() => rmicons = !rmicons);
+                            var url =
+                                await PickFileApi.pickImage(ImageSource.camera);
+                            Logger().i(url);
+                            debugPrint('Camera');
+                            String time = formatDate(
+                                DateTime.now(), [hh, ':', nn, ' ', am]);
+                            await saveMassages(
+                                time, 'Receive Image', 0, true, false, url);
+                          },
+                        ),
+                        SpeedDialChild(
+                          child: !rmicons ? const Icon(Icons.camera) : null,
+                          backgroundColor: Colors.deepOrange,
+                          foregroundColor: Colors.white,
+                          onTap: () async {
+                            var url = await PickFileApi.pickImage(
+                                ImageSource.gallery);
+                            Logger().i(url);
+                            debugPrint('Gallery');
+                            String time = formatDate(
+                                DateTime.now(), [hh, ':', nn, ' ', am]);
+                            await saveMassages(
+                                time, 'Receive Image', 0, true, false, url);
+                          },
+                        ),
+                        // SpeedDialChild(
+                        //   child: !rmicons
+                        //       ? const Icon(Icons.file_present_outlined)
+                        //       : null,
+                        //   backgroundColor: Colors.indigo,
+                        //   foregroundColor: Colors.white,
+                        //   visible: true,
+                        //   onTap: () async {
+                        //     var urls = await PickFileApi.pickFile();
+                        //     Logger().i(urls);
+                        //   },
+                        // ),
+                      ],
+                    ),
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -867,7 +1031,8 @@ class _InboxScreenState extends State<InboxScreen> {
                           _message = _massageController.text;
                           _massageController.clear();
                           context.read<SilenceOperation>().setIsType(true);
-                          await saveMassages(time, _message, 0);
+                          await saveMassages(
+                              time, _message, 0, false, false, '');
                         }
                       },
                       color: AppColor.orange,
@@ -884,7 +1049,7 @@ class _InboxScreenState extends State<InboxScreen> {
                 Visibility(
                   visible: isEmojiVisible,
                   child: SizedBox(
-                    height: 250,
+                    height: MediaQuery.of(context).size.height * 0.32,
                     child: EmojiPicker(
                       textEditingController: _massageController,
                       onEmojiSelected: (Category? category, Emoji emoji) {
@@ -1060,6 +1225,57 @@ class _InboxScreenState extends State<InboxScreen> {
 
     log('isEmojiVisible : $isEmojiVisible');
   }
-}
 
-///
+  void _showImage(BuildContext context, String url) {
+    Navigator.of(context).push(FullScreenDialog(url: url));
+  }
+
+  Future<dynamic> openShowImageBox(BuildContext context, String url) {
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10.0))),
+            contentPadding: const EdgeInsets.only(top: 10.0),
+            content: CachedNetworkImage(
+              imageUrl: url,
+              fit: BoxFit.cover,
+              progressIndicatorBuilder: (context, url, downloadProgress) =>
+                  CircularProgressIndicator(value: downloadProgress.progress),
+              errorWidget: (context, url, error) => const Icon(Icons.error),
+            ),
+            actions: [
+              IconButton(
+                onPressed: () async {
+                  await FlutterShare.share(
+                    title: 'Network Image',
+                    text: 'Image URL',
+                    linkUrl: url,
+                    chooserTitle: '',
+                  );
+                },
+                icon: const Icon(Icons.share),
+              ),
+              IconButton(
+                onPressed: () async {
+                  try {
+                    var imageId = await ImageDownloader.downloadImage(url);
+                    if (imageId == null) {
+                      return;
+                    }
+                  } on PlatformException catch (error) {
+                    Logger().e(error);
+                  }
+                },
+                icon: const Icon(Icons.download),
+              ),
+              IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.close),
+              ),
+            ],
+          );
+        });
+  }
+}

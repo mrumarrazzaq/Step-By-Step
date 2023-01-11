@@ -11,6 +11,7 @@ import 'package:stepbystep/screens/404_error.dart';
 import 'package:stepbystep/screens/drawer.dart';
 import 'package:stepbystep/screens/home.dart';
 import 'package:stepbystep/screens/inbox_section/recent_inboxes.dart';
+import 'package:stepbystep/screens/inbox_section/recent_workspackes.dart';
 import 'package:stepbystep/screens/motivational_quotes.dart';
 import 'package:stepbystep/screens/search.dart';
 import 'package:stepbystep/screens/user_profile_section/user_profile.dart';
@@ -28,7 +29,8 @@ class _StepByStepState extends State<StepByStep> with WidgetsBindingObserver {
   final List<Widget> screens = [
     const HomeScreen(),
     const MotivationalQuotes(),
-    RecentInboxes(),
+    // RecentInboxes(),
+    RecentWorkspaces(),
     Search(),
     UserProfile()
   ];

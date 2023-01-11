@@ -56,6 +56,8 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
     with TickerProviderStateMixin {
   late AnimationController _animationController;
 
+  bool memberAddingWait = false;
+  bool memberRemovingWait = false;
   String searchValue = '';
   String userName = '';
   final searchController = TextEditingController();
@@ -64,9 +66,12 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
   String selectedRoleValue = 'Assign Role';
   bool toggle = true;
   String assignedBy = '';
+  List<String> assignedByList = [];
+  List<String> assignedRoleList = [];
   String assignedRole = 'No Role Assign';
   bool tA = false, tH = false;
   int selected = -1;
+  bool wait = true;
   final Stream<QuerySnapshot> userRecords = FirebaseFirestore.instance
       .collection('User Data')
       // .orderBy('Created At', descending: true)
@@ -78,6 +83,9 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
 
   getAddedMembers({required bool tH, required bool tA}) async {
     try {
+      setState(() {
+        wait = true;
+      });
       if (widget.fromTaskHolder || tH) {
         log('From Task Holder');
         final value = await FirebaseFirestore.instance
@@ -87,6 +95,9 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
         setState(() {
           membersList = value.data()!['Workspace Members'];
         });
+        for (var member in membersList) {
+          await getAssignedRole(member);
+        }
       } else if (widget.fromTaskAssignment || tA) {
         log('From Task Assignment');
         final value = await FirebaseFirestore.instance
@@ -97,6 +108,9 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
         setState(() {
           membersList = value.data()!['Workspace Members'];
         });
+        for (var member in membersList) {
+          await getAssignedRole(member);
+        }
       } else {
         log('From Home Screen');
         final value = await FirebaseFirestore.instance
@@ -107,10 +121,19 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
         setState(() {
           membersList = value.data()!['Workspace Members'];
         });
+        for (var member in membersList) {
+          log(member);
+          await getAssignedRole(member);
+        }
       }
-
       log(membersList.toString());
+      setState(() {
+        wait = false;
+      });
     } catch (e) {
+      setState(() {
+        wait = false;
+      });
       log(e.toString());
     }
   }
@@ -155,14 +178,19 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
           .doc(email)
           .get()
           .then((ds) {
-        assignedBy = ds['Assigned By'];
-        assignedRole = ds['Assigned Role'];
+        assignedByList.add(ds['Assigned By']);
+        assignedRoleList.add(ds['Assigned Role']);
       });
       setState(() {
         log(email);
-        log(assignedRole);
+        log(assignedRoleList.toString());
       });
     } catch (e) {
+      //save index mode
+      for (int i = 0; i < 100; i++) {
+        assignedByList.add('');
+        assignedRoleList.add('No Role Assign');
+      }
       log(e.toString());
     }
   }
@@ -336,37 +364,62 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
                             subtitle: Text(storedUserData[i]['User Email']),
                             trailing: Visibility(
                               visible: widget.addMember,
-                              child: MaterialButton(
-                                onPressed: () {
-                                  if (!membersList.contains(searchValue)) {
-                                    addMemberInWorkspaces(
-                                        memberEmail: storedUserData[i]
-                                            ['User Email']);
-                                    getAddedMembers(tH: tH, tA: tA);
-                                  } else if (membersList
-                                      .contains(searchValue)) {
-                                    if (widget.removeMember) {
-                                      removeMemberFromWorkspaces(
-                                          memberEmail: storedUserData[i]
-                                              ['User Email']);
-                                      getAddedMembers(tH: tH, tA: tA);
-                                    }
-                                  }
-                                },
-                                // textColor: AppColor.white,
-                                // color:
-                                //     membersList.contains(searchController.text)
-                                //         ? AppColor.black
-                                //         : AppColor.orange,
-                                child:
-                                    membersList.contains(searchController.text)
-                                        ? Lottie.asset(
-                                            'animations/remove_member.json')
-                                        // const Text('Added')
-                                        : Lottie.asset(
-                                            'animations/add_member.json'),
-                                // const Text('Add'),
-                              ),
+                              child: memberAddingWait || memberRemovingWait
+                                  ? SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        color: AppColor.orange,
+                                        strokeWidth: 1,
+                                      ),
+                                    )
+                                  : MaterialButton(
+                                      onPressed: () async {
+                                        if (!membersList
+                                            .contains(searchValue)) {
+                                          log('add members in workspace');
+                                          setState(() {
+                                            memberAddingWait = true;
+                                          });
+                                          await addMemberInWorkspaces(
+                                              memberEmail: storedUserData[i]
+                                                  ['User Email']);
+                                          await getAddedMembers(tH: tH, tA: tA);
+                                          setState(() {
+                                            memberAddingWait = false;
+                                          });
+                                        } else if (membersList
+                                            .contains(searchValue)) {
+                                          if (widget.removeMember) {
+                                            log('remove members in workspace');
+                                            setState(() {
+                                              memberRemovingWait = true;
+                                            });
+                                            await removeMemberFromWorkspaces(
+                                                memberEmail: storedUserData[i]
+                                                    ['User Email']);
+                                            await getAddedMembers(
+                                                tH: tH, tA: tA);
+                                            setState(() {
+                                              memberRemovingWait = false;
+                                            });
+                                          }
+                                        }
+                                      },
+                                      // textColor: AppColor.white,
+                                      // color:
+                                      //     membersList.contains(searchController.text)
+                                      //         ? AppColor.black
+                                      //         : AppColor.orange,
+                                      child: membersList
+                                              .contains(searchController.text)
+                                          ? Lottie.asset(
+                                              'animations/remove_member.json')
+                                          // const Text('Added')
+                                          : Lottie.asset(
+                                              'animations/add_member.json'),
+                                      // const Text('Add'),
+                                    ),
                             ),
                           ),
                         ),
@@ -384,314 +437,334 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
         Column(
           children: [
             AppDivider(text: 'Workspace Members', color: AppColor.black),
-            for (int i = 0; i < membersList.length; i++) ...[
-              if (membersList[i] != currentUserEmail) ...[
-                Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  margin:
-                      const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-                  child: ExpansionTile(
-                    title: Text(
-                      membersList[i],
-                      style: TextStyle(color: AppColor.black),
+            if (!wait) ...[
+              for (int i = 0; i < membersList.length; i++) ...[
+                if (membersList[i] != currentUserEmail) ...[
+                  Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
                     ),
-                    iconColor: AppColor.black,
-                    subtitle: Row(
+                    margin:
+                        const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+                    child: ExpansionTile(
+                      title: Text(
+                        membersList[i],
+                        style: TextStyle(color: AppColor.black),
+                      ),
+                      iconColor: AppColor.black,
+                      subtitle: Row(
+                        children: [
+                          Lottie.asset(
+                              repeat: false, 'animations/blue-bar.json'),
+                          Lottie.asset(
+                              repeat: false, 'animations/yellow-bar.json'),
+                          Lottie.asset(
+                              repeat: false, 'animations/grey-bar.json'),
+                          // Container(
+                          //   width: 50,
+                          //   height: 10,
+                          //   color: AppChartColor.blue,
+                          //   child:
+                          // ),
+                          // Container(
+                          //   margin: const EdgeInsets.symmetric(horizontal: 10),
+                          //   width: 50,
+                          //   height: 10,
+                          //   color: AppChartColor.yellow,
+                          // ),
+                          // Container(
+                          //   width: 50,
+                          //   height: 10,
+                          //   color: AppChartColor.grey,
+                          // ),
+                        ],
+                      ),
+                      onExpansionChanged: (v) async {
+                        // await getAssignedRole(membersList[i]);
+                      },
                       children: [
-                        Lottie.asset(repeat: false, 'animations/blue-bar.json'),
                         Lottie.asset(
-                            repeat: false, 'animations/yellow-bar.json'),
-                        Lottie.asset(repeat: false, 'animations/grey-bar.json'),
-                        // Container(
-                        //   width: 50,
-                        //   height: 10,
-                        //   color: AppChartColor.blue,
-                        //   child:
+                            reverse: true,
+                            repeat: false,
+                            'animations/grey-divider.json'),
+                        // const Divider(
+                        //   thickness: 2,
+                        //   indent: 20,
+                        //   endIndent: 20,
                         // ),
-                        // Container(
-                        //   margin: const EdgeInsets.symmetric(horizontal: 10),
-                        //   width: 50,
-                        //   height: 10,
-                        //   color: AppChartColor.yellow,
-                        // ),
-                        // Container(
-                        //   width: 50,
-                        //   height: 10,
-                        //   color: AppChartColor.grey,
-                        // ),
-                      ],
-                    ),
-                    onExpansionChanged: (v) async {
-                      await getAssignedRole(membersList[i]);
-                    },
-                    children: [
-                      Lottie.asset(
-                          reverse: true,
-                          repeat: false,
-                          'animations/grey-divider.json'),
-                      // const Divider(
-                      //   thickness: 2,
-                      //   indent: 20,
-                      //   endIndent: 20,
-                      // ),
-                      Visibility(
-                        visible: widget.assignTaskControl,
-                        child: ListTile(
-                          onTap: () async {
-                            await getUserData(membersList[i]);
-                            if (mounted) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => TaskTeamAssignment(
-                                    name: userName,
-                                    email: membersList[i],
-                                    workspaceCode: widget.workspaceCode,
-                                    docId: widget.docId,
-                                    workspaceName: widget.workspaceName,
-                                    workspaceOwnerEmail:
-                                        widget.workspaceOwnerEmail,
-                                    assignedRole: assignedRole,
-                                  ),
-                                ),
-                              );
-                            }
-                          },
-                          dense: true,
-                          title: const Text('Assign Task'),
-                          trailing: Lottie.asset(
-                              repeat: false,
-                              height: 40,
-                              'animations/add-to-box.json'),
-
-                          // Image.asset('assets/right-arrow3.png',
-                          //     height: 30),
-                        ),
-                      ),
-                      Visibility(
-                        visible: widget.reportControl,
-                        child: ListTile(
-                          onTap: () async {
-                            await getUserData(membersList[i]);
-                            log(userName);
-                            if (mounted) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => Visualization(
-                                    workspaceName: widget.workspaceName,
-                                    userName: userName,
-                                  ),
-                                ),
-                              );
-                            }
-                          },
-                          dense: true,
-                          title: const Text('Check Report'),
-                          trailing: Lottie.asset(
-                              repeat: false,
-                              height: 35,
-                              'animations/graph.json'),
-                          // Image.asset('assets/bar-graph.png', height: 30),
-                        ),
-                      ),
-                      ListTile(
-                        dense: true,
-                        title: const Text('Assigned Role'),
-                        subtitle: Text('By: $assignedBy'),
-                        trailing: Text(
-                          assignedRole,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Lottie.asset(
-                          reverse: true,
-                          repeat: false,
-                          'animations/grey-divider.json'),
-                      // const Divider(
-                      //   thickness: 2,
-                      //   indent: 20,
-                      //   endIndent: 20,
-                      // ),
-                      Visibility(
-                        visible: widget.assignRole,
-                        child: Visibility(
-                          visible: rolesList.isNotEmpty,
+                        Visibility(
+                          visible: widget.assignTaskControl,
                           child: ListTile(
+                            onTap: () async {
+                              await getUserData(membersList[i]);
+                              if (mounted) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => TaskTeamAssignment(
+                                      name: userName,
+                                      email: membersList[i],
+                                      workspaceCode: widget.workspaceCode,
+                                      docId: widget.docId,
+                                      workspaceName: widget.workspaceName,
+                                      workspaceOwnerEmail:
+                                          widget.workspaceOwnerEmail,
+                                      assignedRole: assignedRoleList[i],
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
                             dense: true,
-                            title: const Text('Assign Role'),
-                            subtitle: Container(
-                              margin:
-                                  const EdgeInsets.symmetric(horizontal: 20),
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: DropdownButton<dynamic>(
-                                  hint: const Text('Roles'),
-                                  isDense: true,
-                                  items: rolesList
-                                      .map<DropdownMenuItem<dynamic>>(
-                                          (dynamic value) {
-                                    return DropdownMenuItem<dynamic>(
-                                      value: value,
-                                      child: Text(value),
-                                    );
-                                  }).toList(),
-                                  value: selectedRoleValue.isEmpty
-                                      ? assignedRole
-                                      : null,
-                                  onChanged: (value) async {
-                                    setState(() {
-                                      assignedRole = value!;
-                                      assignedBy = currentUserEmail.toString();
-                                      selectedRoleValue = value!;
-                                    });
+                            title: const Text('Assign Task'),
+                            trailing: Lottie.asset(
+                                repeat: false,
+                                height: 40,
+                                'animations/add-to-box.json'),
 
-                                    final assignRoleJson = {
-                                      'Assigned Role': selectedRoleValue,
-                                      'Assigned By': currentUserEmail,
-                                      'Assigned At': DateTime.now(),
-                                    };
+                            // Image.asset('assets/right-arrow3.png',
+                            //     height: 30),
+                          ),
+                        ),
+                        Visibility(
+                          visible: widget.reportControl,
+                          child: ListTile(
+                            onTap: () async {
+                              await getUserData(membersList[i]);
+                              log(userName);
+                              if (mounted) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => Visualization(
+                                      workspaceName: widget.workspaceName,
+                                      userName: userName,
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
+                            dense: true,
+                            title: const Text('Check Report'),
+                            trailing: Lottie.asset(
+                                repeat: false,
+                                height: 35,
+                                'animations/graph.json'),
+                            // Image.asset('assets/bar-graph.png', height: 30),
+                          ),
+                        ),
+                        ListTile(
+                          dense: true,
+                          title: const Text('Assigned Role'),
+                          subtitle: Text('By: ${assignedByList[i]}'),
+                          trailing: safeDisplay(assignedRoleList[i]),
+                        ),
+                        Lottie.asset(
+                            reverse: true,
+                            repeat: false,
+                            'animations/grey-divider.json'),
+                        ExpansionTile(
+                          title: Text(
+                            'Role For Member',
+                            style: TextStyle(color: AppColor.black),
+                          ),
+                          iconColor: AppColor.black,
+                          children: [
+                            // const Divider(
+                            //   thickness: 2,
+                            //   indent: 20,
+                            //   endIndent: 20,
+                            // ),
+                            Visibility(
+                              visible: widget.assignRole,
+                              child: Visibility(
+                                visible: rolesList.isNotEmpty,
+                                child: ListTile(
+                                  dense: true,
+                                  title: const Text('Assign Role'),
+                                  subtitle: Container(
+                                    margin: const EdgeInsets.symmetric(
+                                        horizontal: 20),
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: DropdownButton<dynamic>(
+                                        hint: const Text('Roles'),
+                                        isDense: true,
+                                        items: rolesList
+                                            .map<DropdownMenuItem<dynamic>>(
+                                                (dynamic value) {
+                                          return DropdownMenuItem<dynamic>(
+                                            value: value,
+                                            child: Text(value),
+                                          );
+                                        }).toList(),
+                                        value: selectedRoleValue.isEmpty
+                                            ? assignedRoleList
+                                            : null,
+                                        onChanged: (value) async {
+                                          setState(() {
+                                            assignedRole = value!;
+                                            assignedRoleList[i] = assignedRole;
+                                            assignedByList[i] =
+                                                currentUserEmail.toString();
+                                            selectedRoleValue = value!;
+                                          });
 
-                                    try {
-                                      await FireBaseApi.saveDataIntoFireStore(
-                                          workspaceCode: widget.workspaceCode,
-                                          collection:
-                                              '${widget.workspaceCode} Assigned Roles',
-                                          document: membersList[i],
-                                          jsonData: assignRoleJson);
+                                          final assignRoleJson = {
+                                            'Assigned Role': selectedRoleValue,
+                                            'Assigned By': currentUserEmail,
+                                            'Assigned At': DateTime.now(),
+                                          };
 
-                                      await FirebaseFirestore.instance
-                                          .collection('User Data')
-                                          .doc(membersList[i])
-                                          .collection('Workspace Roles')
-                                          .doc(widget.workspaceCode)
-                                          .set({
-                                        'Role': AppFunctions.getStringOnly(
-                                            text: selectedRoleValue),
-                                        'Level':
-                                            AppFunctions.getNumberFromString(
-                                                text: selectedRoleValue),
-                                        'Created At': DateTime.now(),
-                                      });
+                                          try {
+                                            await FireBaseApi.saveDataIntoFireStore(
+                                                workspaceCode:
+                                                    widget.workspaceCode,
+                                                collection:
+                                                    '${widget.workspaceCode} Assigned Roles',
+                                                document: membersList[i],
+                                                jsonData: assignRoleJson);
 
-                                      log('Role Assign Successfully');
+                                            await FirebaseFirestore.instance
+                                                .collection('User Data')
+                                                .doc(membersList[i])
+                                                .collection('Workspace Roles')
+                                                .doc(widget.workspaceCode)
+                                                .set({
+                                              'Role':
+                                                  AppFunctions.getStringOnly(
+                                                      text: selectedRoleValue),
+                                              'Level': AppFunctions
+                                                  .getNumberFromString(
+                                                      text: selectedRoleValue),
+                                              'Created At': DateTime.now(),
+                                            });
 
-                                      String name =
-                                          await AppFunctions.getNameByEmail(
-                                              email:
-                                                  widget.workspaceOwnerEmail);
-                                      String token =
-                                          await AppFunctions.getTokenByEmail(
-                                              email: membersList[i]);
-                                      MessageNotificationApi.send(
-                                          token: token,
-                                          title: 'Congratulations ☺',
-                                          body:
-                                              '$name assign you ${AppFunctions.getStringOnly(text: selectedRoleValue)} role of Level ${AppFunctions.getNumberFromString(text: selectedRoleValue)} in ${widget.workspaceName} workspace.');
-                                    } catch (e) {
-                                      log('Role Assign Failed');
-                                    }
-                                  },
+                                            log('Role Assign Successfully');
+                                            String name = await AppFunctions
+                                                .getNameByEmail(
+                                                    email: widget
+                                                        .workspaceOwnerEmail);
+                                            String token = await AppFunctions
+                                                .getTokenByEmail(
+                                                    email: membersList[i]);
+                                            MessageNotificationApi.send(
+                                                token: token,
+                                                title: 'Congratulations ☺',
+                                                body:
+                                                    '$name assign you ${AppFunctions.getStringOnly(text: selectedRoleValue)} role of Level ${AppFunctions.getNumberFromString(text: selectedRoleValue)} in ${widget.workspaceName} workspace.');
+                                          } catch (e) {
+                                            log('Role Assign Failed');
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
+                            Visibility(
+                              visible: widget.deAssignRole,
+                              child: Visibility(
+                                visible:
+                                    assignedRoleList[i] != 'No Role Assign',
+                                child: ListTile(
+                                  onTap: () async {
+                                    await FirebaseFirestore.instance
+                                        .collection(
+                                            '${widget.workspaceCode} Assigned Roles')
+                                        .doc(membersList[i])
+                                        .update({
+                                      'Assigned By': '',
+                                      'Assigned Role': 'No Role Assign',
+                                    });
+
+                                    await FirebaseFirestore.instance
+                                        .collection('User Data')
+                                        .doc(membersList[i])
+                                        .collection('Workspace Roles')
+                                        .doc(widget.workspaceCode)
+                                        .delete();
+
+                                    log('Role De-Assign successfully');
+
+                                    String name =
+                                        await AppFunctions.getNameByEmail(
+                                            email: widget.workspaceOwnerEmail);
+                                    String token =
+                                        await AppFunctions.getTokenByEmail(
+                                            email: membersList[i]);
+                                    MessageNotificationApi.send(
+                                        token: token,
+                                        title: 'Oh No 😟',
+                                        body:
+                                            '$name de-assign your role from ${widget.workspaceName} workspace.');
+                                    setState(() {
+                                      assignedRoleList[i] = 'No Role Assign';
+                                      assignedByList[i] = '';
+                                    });
+                                  },
+                                  dense: true,
+                                  title: const Text('De-Assign Role'),
+                                  trailing: Lottie.asset(
+                                      repeat: false,
+                                      height: 30,
+                                      'animations/crossbutton.json'),
+                                  // const Icon(Icons.close),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      Visibility(
-                        visible: widget.deAssignRole,
-                        child: Visibility(
-                          visible: assignedRole != 'No Role Assign',
-                          child: ListTile(
-                            onTap: () async {
-                              await FirebaseFirestore.instance
-                                  .collection(
-                                      '${widget.workspaceCode} Assigned Roles')
-                                  .doc(membersList[i])
-                                  .update({
-                                'Assigned By': '',
-                                'Assigned Role': 'No Role Assign',
-                              });
-
-                              await FirebaseFirestore.instance
-                                  .collection('User Data')
-                                  .doc(membersList[i])
-                                  .collection('Workspace Roles')
-                                  .doc(widget.workspaceCode)
-                                  .delete();
-
-                              log('Role De-Assign successfully');
-
-                              String name = await AppFunctions.getNameByEmail(
-                                  email: widget.workspaceOwnerEmail);
-                              String token = await AppFunctions.getTokenByEmail(
-                                  email: membersList[i]);
-                              MessageNotificationApi.send(
-                                  token: token,
-                                  title: 'Oh No 😟',
-                                  body:
-                                      '$name de-assign your role from ${widget.workspaceName} workspace.');
-                              setState(() {
-                                assignedRole = 'No Role Assign';
-                                assignedBy = '';
-                              });
-                            },
-                            dense: true,
-                            title: const Text('De-Assign Role'),
-                            trailing: Lottie.asset(
-                                repeat: false,
-                                height: 30,
-                                'animations/crossbutton.json'),
-                            // const Icon(Icons.close),
-                          ),
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
+                    // ListTile(
+                    //   onTap: () async {
+                    //     await getUserData(membersList[i]);
+                    //     if (mounted) {
+                    //       Navigator.push(
+                    //         context,
+                    //         MaterialPageRoute(
+                    //           builder: (context) => TaskAssignment(
+                    //             name: userName,
+                    //             email: membersList[i],
+                    //             workspaceCode: widget.workspaceCode,
+                    //             docId: widget.docId,
+                    //             workspaceName: widget.workspaceName,
+                    //           ),
+                    //         ),
+                    //       );
+                    //     }
+                    //   },
+                    //   dense: true,
+                    //   title: Text(membersList[i]),
+                    //   subtitle: Row(children: [
+                    //     Container(
+                    //       width: 50,
+                    //       height: 10,
+                    //       color: AppChartColor.blue,
+                    //     ),
+                    //     Container(
+                    //       margin: const EdgeInsets.symmetric(horizontal: 10),
+                    //       width: 50,
+                    //       height: 10,
+                    //       color: AppChartColor.yellow,
+                    //     ),
+                    //     Container(
+                    //       width: 50,
+                    //       height: 10,
+                    //       color: AppChartColor.grey,
+                    //     ),
+                    //   ]),
+                    // ),
                   ),
-                  // ListTile(
-                  //   onTap: () async {
-                  //     await getUserData(membersList[i]);
-                  //     if (mounted) {
-                  //       Navigator.push(
-                  //         context,
-                  //         MaterialPageRoute(
-                  //           builder: (context) => TaskAssignment(
-                  //             name: userName,
-                  //             email: membersList[i],
-                  //             workspaceCode: widget.workspaceCode,
-                  //             docId: widget.docId,
-                  //             workspaceName: widget.workspaceName,
-                  //           ),
-                  //         ),
-                  //       );
-                  //     }
-                  //   },
-                  //   dense: true,
-                  //   title: Text(membersList[i]),
-                  //   subtitle: Row(children: [
-                  //     Container(
-                  //       width: 50,
-                  //       height: 10,
-                  //       color: AppChartColor.blue,
-                  //     ),
-                  //     Container(
-                  //       margin: const EdgeInsets.symmetric(horizontal: 10),
-                  //       width: 50,
-                  //       height: 10,
-                  //       color: AppChartColor.yellow,
-                  //     ),
-                  //     Container(
-                  //       width: 50,
-                  //       height: 10,
-                  //       color: AppChartColor.grey,
-                  //     ),
-                  //   ]),
-                  // ),
-                ),
-              ]
-            ]
+                ]
+              ],
+            ] else ...[
+              CircularProgressIndicator(
+                color: AppColor.orange,
+              ),
+            ],
           ],
         ),
       ],
@@ -835,6 +908,20 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
       log('------------------------------------');
     } catch (e) {
       log(e.toString());
+    }
+  }
+
+  safeDisplay(String text) {
+    try {
+      return Text(
+        text,
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      );
+    } catch (e) {
+      log(e.toString());
+      return CircularProgressIndicator(
+        strokeWidth: 1,
+      );
     }
   }
 }

@@ -11,6 +11,7 @@ import 'package:stepbystep/config.dart';
 
 class WorkspaceTaskTile extends StatefulWidget {
   bool isOwner;
+  String userEmail;
   String workspaceCode;
   String workspaceTaskCode;
   String docId;
@@ -25,6 +26,7 @@ class WorkspaceTaskTile extends StatefulWidget {
   WorkspaceTaskTile({
     Key? key,
     required this.isOwner,
+    required this.userEmail,
     required this.workspaceCode,
     required this.workspaceTaskCode,
     required this.docId,
@@ -47,12 +49,15 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onLongPress: () async {
-        showTaskDeletionDialog(
-          context: context,
-          taskTitle: widget.title,
-          workspaceTaskCode: widget.workspaceTaskCode,
-          docId: widget.docId,
-        );
+        if (widget.isOwner) {
+          showTaskDeletionDialog(
+            context: context,
+            taskTitle: widget.title,
+            workspaceTaskCode: widget.workspaceTaskCode,
+            docId: widget.docId,
+          );
+        }
+
         log(widget.docId);
       },
       child: Card(
@@ -158,22 +163,57 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
                             if (widget.leftButton) {
                               log('LB Task Status Value : ${widget.taskStatusValue - 1}');
                               if (widget.taskStatusValue - 1 == 1) {
+                                log('Review');
+                                if (widget.isOwner) {
+                                  String userName =
+                                      await AppFunctions.getNameByEmail(
+                                          email: currentUserEmail.toString());
+                                  String workspaceName = await AppFunctions
+                                      .getWorkspaceNameByWorkspaceCode(
+                                          workspaceCode: widget.workspaceCode);
+                                  String token =
+                                      await AppFunctions.getTokenByEmail(
+                                          email: widget.userEmail);
+                                  MessageNotificationApi.send(
+                                      token: token,
+                                      title: '📝 Task Do Again',
+                                      body:
+                                          '$userName remove your task from review in $workspaceName workspace.');
+                                } else {
+                                  String userName =
+                                      await AppFunctions.getNameByEmail(
+                                          email: currentUserEmail.toString());
+                                  String workspaceName = await AppFunctions
+                                      .getWorkspaceNameByWorkspaceCode(
+                                          workspaceCode: widget.workspaceCode);
+                                  String token =
+                                      await AppFunctions.getTokenByEmail(
+                                          email: widget.email);
+                                  MessageNotificationApi.send(
+                                      token: token,
+                                      title: '📝 Task Remove From Review',
+                                      body:
+                                          '$userName remove task from review in $workspaceName workspace.');
+                                }
+                              }
+                              if (widget.taskStatusValue - 1 == 2) {
+                                log('Doing');
                                 String userName =
                                     await AppFunctions.getNameByEmail(
                                         email: currentUserEmail.toString());
                                 String workspaceName = await AppFunctions
                                     .getWorkspaceNameByWorkspaceCode(
                                         workspaceCode: widget.workspaceCode);
-                                log(workspaceName);
                                 String token =
                                     await AppFunctions.getTokenByEmail(
-                                        email: widget.email);
+                                        email: widget.userEmail);
                                 MessageNotificationApi.send(
                                     token: token,
-                                    title: '📝 Task Remove From Review',
+                                    title: '📝 Task In-Completed do again',
                                     body:
-                                        '$userName remove task from review in $workspaceName workspace.');
+                                        'Your task completion failed after review by $userName in $workspaceName workspace.');
                               }
+
                               await FirebaseFirestore.instance
                                   .collection(widget.workspaceTaskCode)
                                   .doc(widget.docId)
@@ -220,6 +260,7 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
                                 'Task Status': widget.taskStatusValue + 1,
                               });
                               if (widget.taskStatusValue + 1 == 2) {
+                                log('Review');
                                 String userName =
                                     await AppFunctions.getNameByEmail(
                                         email: currentUserEmail.toString());
@@ -235,6 +276,24 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
                                     title: '📝 Task In Review ',
                                     body:
                                         'Please review a task of $userName in $workspaceName workspace.');
+                              }
+
+                              if (widget.taskStatusValue + 1 == 3) {
+                                log('Completed');
+                                String userName =
+                                    await AppFunctions.getNameByEmail(
+                                        email: currentUserEmail.toString());
+                                String workspaceName = await AppFunctions
+                                    .getWorkspaceNameByWorkspaceCode(
+                                        workspaceCode: widget.workspaceCode);
+                                String token =
+                                    await AppFunctions.getTokenByEmail(
+                                        email: widget.userEmail);
+                                MessageNotificationApi.send(
+                                    token: token,
+                                    title: '📝 Task Completed',
+                                    body:
+                                        'Great your task has been completed after review by $userName in $workspaceName workspace.');
                               }
                             }
                           },
@@ -316,7 +375,7 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
               taskTitle,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
             ),
-            Lottie.asset(height: 70, 'animations/warning-red.json'),
+            Lottie.asset(height: 70, repeat: false, 'animations/Delete.json'),
             const SizedBox(height: 6),
             const Text("Do you want to delete Task ?"),
             const SizedBox(height: 6),

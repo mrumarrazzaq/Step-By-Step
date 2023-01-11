@@ -2,12 +2,14 @@ import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:readmore/readmore.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:stepbystep/dialog_boxes/rounded_dialog.dart';
 
 import 'package:stepbystep/screens/workspace_manager/create_workspace.dart';
 import 'package:stepbystep/screens/workspace_manager/delete_workspace.dart';
@@ -99,7 +101,7 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SmartRefresher(
-        enablePullUp: true,
+        // enablePullUp: true,
         controller: _refreshController,
         onRefresh: _onRefresh,
         child: SingleChildScrollView(
@@ -123,14 +125,19 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
                 }
                 if (snapshot.hasData) {
                   final List storedWorkspaces = [];
-
+                  final List storedIdByEmail = [];
                   snapshot.data!.docs.map((DocumentSnapshot document) {
                     Map id = document.data() as Map<String, dynamic>;
                     storedWorkspaces.add(id);
                     id['id'] = document.id;
+                    List<String> newId = id['id'].split(' ');
+                    storedIdByEmail.add(newId[0]);
                   }).toList();
+
+                  log(storedIdByEmail.toString());
                   return storedWorkspaces.isEmpty
                       ? Container(
+                          height: 500,
                           decoration: const BoxDecoration(
                             image: DecorationImage(
                               scale: 1.3,
@@ -183,9 +190,13 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
                                     );
                                   },
                                 ),
-                              ],
-                              if (joinedWorkspaces.contains(
-                                  storedWorkspaces[i]['Workspace Code'])) ...[
+                              ] else if (storedWorkspaces[i]
+                                      ['Workspace Members']
+                                  .contains(currentUserEmail)
+                              // joinedWorkspaces.contains(
+                              //     storedWorkspaces[i]['Workspace Code'])
+
+                              ) ...[
                                 WorkspaceCard(
                                     isOwned: false,
                                     workspaceName: storedWorkspaces[i]
@@ -215,16 +226,28 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
                                       );
                                     },
                                     onLongPress: () {}),
-                              ],
+                              ] else ...[
+                                Container(
+                                  height: 500,
+                                  decoration: const BoxDecoration(
+                                    image: DecorationImage(
+                                      scale: 1.3,
+                                      image:
+                                          AssetImage('assets/workspace_bg.png'),
+                                    ),
+                                  ),
+                                ),
+                              ]
                             ],
                           ],
                         );
                 }
                 return Center(
-                    child: CircularProgressIndicator(
-                  color: AppColor.orange,
-                  strokeWidth: 2.0,
-                ));
+                  child: CircularProgressIndicator(
+                    color: AppColor.orange,
+                    strokeWidth: 2.0,
+                  ),
+                );
               }),
         ),
       ),
@@ -285,7 +308,7 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
         ).runDeleteOperation();
         pleaseWaitDialog(context);
         await Future.delayed(
-          const Duration(seconds: 5),
+          const Duration(seconds: 10),
         );
         if (mounted) {
           Navigator.pop(context);
@@ -296,11 +319,27 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
     );
 
     AlertDialog alert = AlertDialog(
-      title: Text(workspaceName),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(20.0),
+        ),
+      ),
+      // actionsPadding: EdgeInsets.zero,
+
+      contentPadding: const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 0.0),
+      // insetPadding: EdgeInsets.zero,
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Text(
+              workspaceName,
+              style: TextStyle(
+                color: AppColor.darkGrey,
+                fontWeight: FontWeight.w900,
+                fontSize: 20,
+              ),
+            ),
             Lottie.asset(height: 70, 'animations/warning-red.json'),
             const SizedBox(height: 6),
             const Text("Do you want to delete workspace ?"),
@@ -308,13 +347,16 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
               'Deleted workspace cannot be recovered',
               style: TextStyle(color: Colors.red, fontSize: 13),
             ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                cancelButton,
+                continueButton,
+              ],
+            ),
           ],
         ),
       ),
-      actions: [
-        cancelButton,
-        continueButton,
-      ],
     );
 
     // show the dialog
@@ -435,3 +477,13 @@ class WorkspaceCard extends StatelessWidget {
     );
   }
 }
+
+// Container(
+// height: 500,
+// decoration: const BoxDecoration(
+// image: DecorationImage(
+// scale: 1.3,
+// image: AssetImage('assets/workspace_bg.png'),
+// ),
+// ),
+// ),

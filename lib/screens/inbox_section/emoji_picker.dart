@@ -28,14 +28,14 @@ class EmojiPickerWidget extends StatelessWidget {
         enableSkinTones: true,
         showRecentsTab: true,
         recentsLimit: 28,
-        noRecents: Text(
+        noRecents: const Text(
           'No Recents',
           style: TextStyle(fontSize: 20, color: Colors.black26),
           textAlign: TextAlign.center,
         ), // Needs to be const Widget
-        loadingIndicator: SizedBox.shrink(), // Needs to be const Widget
+        loadingIndicator: const SizedBox.shrink(), // Needs to be const Widget
         tabIndicatorAnimDuration: kTabScrollDuration,
-        categoryIcons: CategoryIcons(),
+        categoryIcons: const CategoryIcons(),
         buttonMode: ButtonMode.MATERIAL,
       ),
     );

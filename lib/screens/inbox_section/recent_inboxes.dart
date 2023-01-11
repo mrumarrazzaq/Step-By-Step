@@ -10,63 +10,67 @@ import 'package:stepbystep/screens/inbox_section/inbox_screen.dart';
 import 'package:stepbystep/widgets/app_stream_builder.dart';
 
 class RecentInboxes extends StatefulWidget {
-  RecentInboxes({Key? key}) : super(key: key);
-
+  RecentInboxes({Key? key, required this.workspaceCode}) : super(key: key);
+  String workspaceCode;
   @override
   _RecentInboxesState createState() => _RecentInboxesState();
 }
 
 class _RecentInboxesState extends State<RecentInboxes> {
-//  String receiverEmail = '';
-//  String receiverName = '';
-//  String receiverProfileImageUrl = '';
-//  Timestamp timestamp = Timestamp.now();
-//  fetch() async {
-//    final user = FirebaseAuth.instance.currentUser;
-//    print(user!.email);
-//    print('-------------------------------------');
-//    print('Current user data is fetching');
-//    try {
-//      await FirebaseFirestore.instance
-//          .collection('Recent Chats ${currentUserEmail.toString()}')
-//          .doc(user.email)
-//          .get()
-//          .then((ds) {
-//        receiverEmail = ds['Receiver Email'];
-//        receiverName = ds['Receiver Name'];
-//        receiverProfileImageUrl = ds['Receiver profileImageUrl'];
-//        timestamp = ds['Created At'];
-//      });
-//      setState(() {});
-//    } catch (e) {
-//      print(e.toString());
-//    }
-//  }
+  List<dynamic> joinedWorkspaceMembers = [];
+  getJoinedWorkspaceMembers() async {
+    try {
+      final value = await FirebaseFirestore.instance
+          .collection("Workspaces")
+          .doc(widget.workspaceCode)
+          .get();
+
+      setState(() {
+        joinedWorkspaceMembers = value.data()!['Workspace Members'];
+        joinedWorkspaceMembers.add(value.data()!['Workspace Owner Email']);
+      });
+      log('Joined Workspaces Members.....');
+      log(joinedWorkspaceMembers.toString());
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
+  @override
+  void initState() {
+    getJoinedWorkspaceMembers();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     log('-------------------------------------------------------------');
     log('Recent Inbox Screen Build is Called ');
     return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Recent Inbox',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: AppColor.black,
+            fontSize: 20,
+          ),
+        ),
+      ),
       body: Stack(
         children: [
           Container(
-            color: AppColor.orange,
             width: double.infinity,
-            height: 100,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 10.0),
-              child: Text(
-                'Recent Inboxes',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: AppColor.white, fontSize: 20),
-              ),
+            height: 50,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20.0),
+              color: AppColor.orange,
             ),
           ),
           Align(
             alignment: Alignment.center,
             child: Padding(
-              padding: const EdgeInsets.only(top: 50.0),
+              padding: const EdgeInsets.only(top: 3.0),
               child: Container(
                 height: double.infinity,
                 decoration: BoxDecoration(
@@ -99,11 +103,11 @@ class _RecentInboxesState extends State<RecentInboxes> {
                               ),
                             );
                           }
-                          final List recentMassages = [];
+                          final List recentInboxes = [];
 
                           snapshot.data!.docs.map((DocumentSnapshot document) {
                             Map id = document.data() as Map<String, dynamic>;
-                            recentMassages.add(id);
+                            recentInboxes.add(id);
 //                  print('==============================================');
 //                  print(storeRequests);
 //                  print('Document id : ${document.id}');
@@ -116,32 +120,39 @@ class _RecentInboxesState extends State<RecentInboxes> {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              recentMassages.isEmpty
-                                  ? const Padding(
-                                      padding: EdgeInsets.only(top: 30.0),
+                              recentInboxes.isEmpty
+                                  ? Padding(
+                                      padding: const EdgeInsets.only(top: 50.0),
                                       child: Center(
-                                        child: Text(
-                                          'No Recent Inbox',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold),
+                                        child: Column(
+                                          children: [
+                                            const Text(
+                                              'No Recent Inbox',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            Image.asset('assets/chat.png'),
+                                          ],
                                         ),
                                       ),
                                     )
                                   : Container(),
                               for (int i = 0;
-                                  i < recentMassages.length;
+                                  i < recentInboxes.length;
                                   i++) ...[
-                                recentMassages[i]['User Email'] ==
-                                        currentUserEmail
-                                    ? Container()
-                                    : CustomRecentChatsTile(
-                                        name: recentMassages[i]['User Name'],
-                                        email: recentMassages[i]['User Email'],
-                                        imagePath: recentMassages[i]
+                                joinedWorkspaceMembers.contains(
+                                            recentInboxes[i]['User Email']) &&
+                                        recentInboxes[i]['User Email'] !=
+                                            currentUserEmail
+                                    ? CustomRecentChatsTile(
+                                        name: recentInboxes[i]['User Name'],
+                                        email: recentInboxes[i]['User Email'],
+                                        imagePath: recentInboxes[i]
                                             ['Image URL'],
-                                        currentStatus: recentMassages[i]
+                                        currentStatus: recentInboxes[i]
                                             ['User Current Status'],
-                                      ),
+                                      )
+                                    : Container(),
                               ],
                             ],
                           );

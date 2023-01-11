@@ -101,6 +101,7 @@ class _MyAppState extends State<MyApp> {
       (message) {
         log("FirebaseMessaging.instance.getInitialMessage");
         if (message != null) {
+          LocalNotificationService.createAndDisplayNotification(message);
           log("New Notification");
           if (message.data['_id'] != null) {
             Navigator.of(context).push(
@@ -135,6 +136,7 @@ class _MyAppState extends State<MyApp> {
           log(message.notification!.title.toString());
           log(message.notification!.body.toString());
           log("message.data22 ${message.data['_id']}");
+          LocalNotificationService.createAndDisplayNotification(message);
         }
       },
     );

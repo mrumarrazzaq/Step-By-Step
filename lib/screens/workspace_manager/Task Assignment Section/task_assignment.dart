@@ -45,6 +45,7 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
   DateTime dateTime = DateTime.now();
 
   String _date = '';
+  DateTime _rawDate = DateTime.now();
   String selectedTab = 'Task';
   bool isDateTimeChecked = false;
   final titleController = TextEditingController();
@@ -486,6 +487,7 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
               visible: selectedTab == 'Task',
               child: TaskView(
                 isOwner: true,
+                userEmail: widget.email,
                 workspaceCode: widget.workspaceCode,
                 workspaceTaskCode: '${widget.email} ${widget.workspaceCode}',
                 taskStatusValue: taskStatusValue,
@@ -814,6 +816,10 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
                                     'Due Date': isDateTimeChecked
                                         ? _date
                                         : 'No Due Date',
+                                    'Raw Date':
+                                        isDateTimeChecked ? _rawDate : '',
+                                    'Date Filter': formatDate(DateTime.now(),
+                                        [yyyy, '-', mm, '-', dd]),
                                     'Task Status': 0,
                                     'Assigned By': currentUserEmail,
                                     'Created At': DateTime.now(),
@@ -896,6 +902,8 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
                     '-',
                     yyyy
                   ])} ${formatDate(pickDate, [hh, ':', nn, ' ', am])}';
+              _rawDate = pickDate;
+              log(pickDate.toString());
               log(_date);
             });
           },
