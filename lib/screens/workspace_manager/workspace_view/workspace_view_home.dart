@@ -174,6 +174,7 @@ class ViewCard extends StatelessWidget {
                   workspaceName: workspaceName,
                   workspaceCode: workspaceCode,
                   role: role,
+                  assignedBy: 'assignedBy',
                   level: level,
                 ),
               ));
@@ -187,7 +188,7 @@ class ViewCard extends StatelessWidget {
           ),
         ),
         subtitle: widget,
-        trailing: Text('$totals'),
+        trailing: Text(''),
       ),
     );
   }

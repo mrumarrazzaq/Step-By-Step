@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:numberpicker/numberpicker.dart';
@@ -24,6 +25,7 @@ class WorkspaceRoleCard extends StatefulWidget {
     required this.roleName,
     required this.roleDescription,
     required this.roleLevel,
+    required this.roleColor,
     required this.controlForOwner,
     required this.control,
     required this.teamControl,
@@ -45,6 +47,7 @@ class WorkspaceRoleCard extends StatefulWidget {
   String roleName;
   String roleDescription;
   String roleLevel;
+  String roleColor;
   bool controlForOwner;
   bool teamControl;
   bool memberControl;
@@ -88,9 +91,32 @@ class _WorkspaceRoleCardState extends State<WorkspaceRoleCard> {
   List<bool> roleSubAuth = [false, false, false];
   Offset _tapPosition = const Offset(0, 0);
   String assignedRole = '';
-
+  Color roleColor = Colors.white;
+  List<Color> colorList = [
+    Colors.white,
+    Colors.grey,
+    Colors.blueGrey,
+    Colors.black,
+    const Color(0xffff0000),
+    Colors.deepOrange,
+    Colors.pink,
+    Colors.orange,
+    Colors.yellow,
+    Colors.purple,
+    Colors.purpleAccent,
+    Colors.blue,
+    Colors.cyan,
+    Colors.teal,
+    Colors.green,
+    Colors.lime,
+    Colors.lightGreen,
+  ];
+  late String hexColorCode;
   @override
   void initState() {
+    roleColor = Color(int.parse(widget.roleColor));
+    hexColorCode = '0x${roleColor.value.toRadixString(16)}';
+    hexColorCode = widget.roleColor;
     setValues();
     super.initState();
   }
@@ -1137,6 +1163,28 @@ class _WorkspaceRoleCardState extends State<WorkspaceRoleCard> {
                           ),
                         ],
                       ),
+                      ExpansionTile(
+                        title: Text(
+                          'Select Role Color',
+                          style: TextStyle(color: AppColor.black),
+                        ),
+                        children: [
+                          SizedBox(
+                            height: 200,
+                            width: 200,
+                            child: BlockPicker(
+                              pickerColor: roleColor,
+                              onColorChanged: (color) {
+                                hexColorCode =
+                                    '0x${color.value.toRadixString(16)}';
+                                print(hexColorCode);
+                              },
+                              availableColors: colorList,
+                              useInShowDialog: true,
+                            ),
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 25),
                       updateRoleLoading
                           ? AppProgressIndicator(
@@ -1199,8 +1247,10 @@ class _WorkspaceRoleCardState extends State<WorkspaceRoleCard> {
                                             ? ''
                                             : descriptionController.text.trim(),
                                     'Role Level': roleLevel,
+                                    'Role Color': hexColorCode,
                                     'Control': widget.control,
                                     'Team Control': widget.teamControl,
+                                    'Member Control': widget.memberControl,
                                     'Add Member': widget.addMember,
                                     'Remove Member': widget.removeMember,
                                     'Assign Role': widget.assignRole,

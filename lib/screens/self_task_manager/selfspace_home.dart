@@ -120,6 +120,7 @@ class _SelfSpaceHomeState extends State<SelfSpaceHome> {
                               if (task['dateFilter'] != dateFilter) {
                                 isTrue = false;
                               }
+
                               return SwipeActionCell(
                                 key: ObjectKey(task['id']),
                                 trailingActions: [

@@ -1,8 +1,11 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:dotted_line/dotted_line.dart';
+import 'package:stepbystep/visualization/visualization.dart';
 
 class DetailedView extends StatefulWidget {
   DetailedView(
@@ -10,17 +13,69 @@ class DetailedView extends StatefulWidget {
       required this.workspaceName,
       required this.workspaceCode,
       required this.role,
-      required this.level})
+      required this.assignedBy,
+      required this.level,
+      })
       : super(key: key);
   String workspaceCode;
   String workspaceName;
   String role;
+  String assignedBy;
   int level;
   @override
   State<DetailedView> createState() => _DetailedViewState();
 }
 
 class _DetailedViewState extends State<DetailedView> {
+  List<dynamic> membersList = [];
+  List<dynamic> allowedMembers = [];
+
+  final Stream<QuerySnapshot> userRecords = FirebaseFirestore.instance
+      .collection('User Data')
+      // .orderBy('Created At', descending: true)
+      .snapshots();
+
+  String assignedRole = '';
+  getWorkspaceMembers() async {
+    final value = await FirebaseFirestore.instance
+        .collection("Workspaces")
+        .doc(widget.workspaceCode)
+        .get();
+
+    setState(() {
+      membersList = value.data()!['Workspace Members'];
+      print(membersList.toString());
+    });
+    for (var member in membersList) {
+      getUserRole(member);
+    }
+  }
+
+  getUserRole(String email) async {
+    await FirebaseFirestore.instance
+        .collection('User Data')
+        .doc(email)
+        .collection('Workspace Roles')
+        .doc(widget.workspaceCode)
+        .get()
+        .then((ds) {
+      assignedRole = ds['Role'];
+      assignedRole = '$assignedRole ${ds['Level']}';
+      print(assignedRole);
+      if (assignedRole == '${widget.role} ${widget.level}') {
+        allowedMembers.add(email);
+      }
+    });
+    setState(() {});
+    print(allowedMembers);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getWorkspaceMembers();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,20 +126,51 @@ class _DetailedViewState extends State<DetailedView> {
               // crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Root(role: widget.role),
-                Connector(),
-                Connector(),
-                Connector(),
-                Connector(),
-                Connector(),
-                Connector(),
-                Connector(),
-                Connector(),
-                Connector(),
-                Connector(),
-                Connector(),
-                Connector(),
-                Connector(),
-                Connector(),
+                StreamBuilder<QuerySnapshot>(
+                  stream: userRecords,
+                  builder: (BuildContext context,
+                      AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (snapshot.hasError) {
+                      print('Something went wrong');
+                    }
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(
+                          child: CircularProgressIndicator(
+                        color: AppColor.orange,
+                        strokeWidth: 2.0,
+                      ));
+                    }
+                    if (snapshot.hasData) {
+                      List storedUserData = [];
+
+                      snapshot.data!.docs.map((DocumentSnapshot document) {
+                        Map id = document.data() as Map<String, dynamic>;
+                        storedUserData.add(id);
+                        id['id'] = document.id;
+                      }).toList();
+                      return Column(
+                        children: [
+                          for (int i = 0; i < storedUserData.length; i++) ...[
+                            if (allowedMembers
+                                .contains(storedUserData[i]['User Email'])) ...[
+                              Connector(
+                                workspaceName: widget.workspaceName,
+                                name: storedUserData[i]['User Name'],
+                                imageUrl: storedUserData[i]['Image URL'],
+                              ),
+                            ],
+                          ],
+                        ],
+                      );
+                    }
+                    return Center(
+                      child: CircularProgressIndicator(
+                        color: AppColor.orange,
+                        strokeWidth: 2.0,
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
           ],
@@ -151,8 +237,15 @@ class Root extends StatelessWidget {
 }
 
 class Connector extends StatelessWidget {
-  const Connector({Key? key}) : super(key: key);
-
+  Connector(
+      {Key? key,
+      required this.workspaceName,
+      required this.name,
+      required this.imageUrl})
+      : super(key: key);
+  String workspaceName;
+  String name;
+  String imageUrl;
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -181,7 +274,15 @@ class Connector extends StatelessWidget {
           ),
         ),
         GestureDetector(
-          onTap: () {},
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    Visualization(workspaceName: workspaceName, userName: name),
+              ),
+            );
+          },
           child: Card(
             margin:
                 const EdgeInsets.only(left: 80, bottom: 10, top: 15, right: 10),
@@ -214,12 +315,23 @@ class Connector extends StatelessWidget {
                       child: CircleAvatar(
                         backgroundColor: AppColor.orange.withOpacity(0.2),
                         radius: 32,
+                        child: imageUrl.isNotEmpty
+                            ? CachedNetworkImage(
+                                imageUrl: imageUrl,
+                                progressIndicatorBuilder:
+                                    (context, url, downloadProgress) =>
+                                        CircularProgressIndicator(
+                                            value: downloadProgress.progress),
+                                errorWidget: (context, url, error) =>
+                                    Icon(Icons.error, color: AppColor.white),
+                              )
+                            : null,
                       ),
                     ),
-                    const Text(
-                      'Person Name',
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                    Text(
+                      name,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 20),
                     ),
                     Lottie.asset(
                         repeat: false, height: 30, 'animations/graph.json'),

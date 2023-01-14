@@ -154,6 +154,21 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
     }
   }
 
+  getRolesColor() async {
+    try {
+      final value = await FirebaseFirestore.instance
+          .collection("${widget.workspaceCode} Roles")
+          .get();
+
+      // setState(() {
+      //   rolesList = value.data()!['Workspace Roles'];
+      // });
+      log(value.docs.toString());
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
   getUserData(String docId) async {
     try {
       await FirebaseFirestore.instance
@@ -446,277 +461,304 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
                     ),
                     margin:
                         const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-                    child: ExpansionTile(
-                      title: Text(
-                        membersList[i],
-                        style: TextStyle(color: AppColor.black),
+                    child: ClipPath(
+                      clipper: ShapeBorderClipper(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
-                      iconColor: AppColor.black,
-                      subtitle: Row(
-                        children: [
-                          Lottie.asset(
-                              repeat: false, 'animations/blue-bar.json'),
-                          Lottie.asset(
-                              repeat: false, 'animations/yellow-bar.json'),
-                          Lottie.asset(
-                              repeat: false, 'animations/grey-bar.json'),
-                          // Container(
-                          //   width: 50,
-                          //   height: 10,
-                          //   color: AppChartColor.blue,
-                          //   child:
-                          // ),
-                          // Container(
-                          //   margin: const EdgeInsets.symmetric(horizontal: 10),
-                          //   width: 50,
-                          //   height: 10,
-                          //   color: AppChartColor.yellow,
-                          // ),
-                          // Container(
-                          //   width: 50,
-                          //   height: 10,
-                          //   color: AppChartColor.grey,
-                          // ),
-                        ],
-                      ),
-                      onExpansionChanged: (v) async {
-                        // await getAssignedRole(membersList[i]);
-                      },
-                      children: [
-                        Lottie.asset(
-                            reverse: true,
-                            repeat: false,
-                            'animations/grey-divider.json'),
-                        // const Divider(
-                        //   thickness: 2,
-                        //   indent: 20,
-                        //   endIndent: 20,
-                        // ),
-                        Visibility(
-                          visible: widget.assignTaskControl,
-                          child: ListTile(
-                            onTap: () async {
-                              await getUserData(membersList[i]);
-                              if (mounted) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => TaskTeamAssignment(
-                                      name: userName,
-                                      email: membersList[i],
-                                      workspaceCode: widget.workspaceCode,
-                                      docId: widget.docId,
-                                      workspaceName: widget.workspaceName,
-                                      workspaceOwnerEmail:
-                                          widget.workspaceOwnerEmail,
-                                      assignedRole: assignedRoleList[i],
-                                    ),
-                                  ),
-                                );
-                              }
-                            },
-                            dense: true,
-                            title: const Text('Assign Task'),
-                            trailing: Lottie.asset(
-                                repeat: false,
-                                height: 40,
-                                'animations/add-to-box.json'),
-
-                            // Image.asset('assets/right-arrow3.png',
-                            //     height: 30),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border(
+                            left: BorderSide(color: AppColor.white, width: 10),
                           ),
                         ),
-                        Visibility(
-                          visible: widget.reportControl,
-                          child: ListTile(
-                            onTap: () async {
-                              await getUserData(membersList[i]);
-                              log(userName);
-                              if (mounted) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => Visualization(
-                                      workspaceName: widget.workspaceName,
-                                      userName: userName,
-                                    ),
-                                  ),
-                                );
-                              }
-                            },
-                            dense: true,
-                            title: const Text('Check Report'),
-                            trailing: Lottie.asset(
-                                repeat: false,
-                                height: 35,
-                                'animations/graph.json'),
-                            // Image.asset('assets/bar-graph.png', height: 30),
-                          ),
-                        ),
-                        ListTile(
-                          dense: true,
-                          title: const Text('Assigned Role'),
-                          subtitle: Text('By: ${assignedByList[i]}'),
-                          trailing: safeDisplay(assignedRoleList[i]),
-                        ),
-                        Lottie.asset(
-                            reverse: true,
-                            repeat: false,
-                            'animations/grey-divider.json'),
-                        ExpansionTile(
+                        child: ExpansionTile(
                           title: Text(
-                            'Role For Member',
+                            membersList[i],
                             style: TextStyle(color: AppColor.black),
                           ),
                           iconColor: AppColor.black,
+                          subtitle: Row(
+                            children: [
+                              Lottie.asset(
+                                  repeat: false, 'animations/blue-bar.json'),
+                              Lottie.asset(
+                                  repeat: false, 'animations/yellow-bar.json'),
+                              Lottie.asset(
+                                  repeat: false, 'animations/grey-bar.json'),
+                              // Container(
+                              //   width: 50,
+                              //   height: 10,
+                              //   color: AppChartColor.blue,
+                              //   child:
+                              // ),
+                              // Container(
+                              //   margin: const EdgeInsets.symmetric(horizontal: 10),
+                              //   width: 50,
+                              //   height: 10,
+                              //   color: AppChartColor.yellow,
+                              // ),
+                              // Container(
+                              //   width: 50,
+                              //   height: 10,
+                              //   color: AppChartColor.grey,
+                              // ),
+                            ],
+                          ),
+                          onExpansionChanged: (v) async {
+                            // await getAssignedRole(membersList[i]);
+                          },
                           children: [
+                            Lottie.asset(
+                                reverse: true,
+                                repeat: false,
+                                'animations/grey-divider.json'),
                             // const Divider(
                             //   thickness: 2,
                             //   indent: 20,
                             //   endIndent: 20,
                             // ),
                             Visibility(
-                              visible: widget.assignRole,
-                              child: Visibility(
-                                visible: rolesList.isNotEmpty,
-                                child: ListTile(
-                                  dense: true,
-                                  title: const Text('Assign Role'),
-                                  subtitle: Container(
-                                    margin: const EdgeInsets.symmetric(
-                                        horizontal: 20),
-                                    child: SingleChildScrollView(
-                                      scrollDirection: Axis.horizontal,
-                                      child: DropdownButton<dynamic>(
-                                        hint: const Text('Roles'),
-                                        isDense: true,
-                                        items: rolesList
-                                            .map<DropdownMenuItem<dynamic>>(
-                                                (dynamic value) {
-                                          return DropdownMenuItem<dynamic>(
-                                            value: value,
-                                            child: Text(value),
-                                          );
-                                        }).toList(),
-                                        value: selectedRoleValue.isEmpty
-                                            ? assignedRoleList
-                                            : null,
-                                        onChanged: (value) async {
-                                          setState(() {
-                                            assignedRole = value!;
-                                            assignedRoleList[i] = assignedRole;
-                                            assignedByList[i] =
-                                                currentUserEmail.toString();
-                                            selectedRoleValue = value!;
-                                          });
+                              visible: widget.assignTaskControl,
+                              child: ListTile(
+                                onTap: () async {
+                                  await getUserData(membersList[i]);
+                                  if (mounted) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            TaskTeamAssignment(
+                                          name: userName,
+                                          email: membersList[i],
+                                          workspaceCode: widget.workspaceCode,
+                                          docId: widget.docId,
+                                          workspaceName: widget.workspaceName,
+                                          workspaceOwnerEmail:
+                                              widget.workspaceOwnerEmail,
+                                          assignedRole: assignedRoleList[i],
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
+                                dense: true,
+                                title: const Text('Assign Task'),
+                                trailing: Lottie.asset(
+                                    repeat: false,
+                                    height: 40,
+                                    'animations/add-to-box.json'),
 
-                                          final assignRoleJson = {
-                                            'Assigned Role': selectedRoleValue,
-                                            'Assigned By': currentUserEmail,
-                                            'Assigned At': DateTime.now(),
-                                          };
+                                // Image.asset('assets/right-arrow3.png',
+                                //     height: 30),
+                              ),
+                            ),
+                            Visibility(
+                              visible: widget.reportControl,
+                              child: ListTile(
+                                onTap: () async {
+                                  await getUserData(membersList[i]);
+                                  log(userName);
+                                  if (mounted) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => Visualization(
+                                          workspaceName: widget.workspaceName,
+                                          userName: userName,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
+                                dense: true,
+                                title: const Text('Check Report'),
+                                trailing: Lottie.asset(
+                                    repeat: false,
+                                    height: 35,
+                                    'animations/graph.json'),
+                                // Image.asset('assets/bar-graph.png', height: 30),
+                              ),
+                            ),
+                            ListTile(
+                              dense: true,
+                              title: const Text('Assigned Role'),
+                              subtitle: Text('By: ${assignedByList[i]}'),
+                              trailing: safeDisplay(assignedRoleList[i]),
+                            ),
+                            Lottie.asset(
+                                reverse: true,
+                                repeat: false,
+                                'animations/grey-divider.json'),
+                            ExpansionTile(
+                              title: Text(
+                                'Role For Member',
+                                style: TextStyle(color: AppColor.black),
+                              ),
+                              iconColor: AppColor.black,
+                              children: [
+                                // const Divider(
+                                //   thickness: 2,
+                                //   indent: 20,
+                                //   endIndent: 20,
+                                // ),
+                                Visibility(
+                                  visible: widget.assignRole,
+                                  child: Visibility(
+                                    visible: rolesList.isNotEmpty,
+                                    child: ListTile(
+                                      dense: true,
+                                      title: const Text('Assign Role'),
+                                      subtitle: Container(
+                                        margin: const EdgeInsets.symmetric(
+                                            horizontal: 20),
+                                        child: SingleChildScrollView(
+                                          scrollDirection: Axis.horizontal,
+                                          child: DropdownButton<dynamic>(
+                                            hint: const Text('Roles'),
+                                            isDense: true,
+                                            items: rolesList
+                                                .map<DropdownMenuItem<dynamic>>(
+                                                    (dynamic value) {
+                                              return DropdownMenuItem<dynamic>(
+                                                value: value,
+                                                child: Text(value),
+                                              );
+                                            }).toList(),
+                                            value: selectedRoleValue.isEmpty
+                                                ? assignedRoleList
+                                                : null,
+                                            onChanged: (value) async {
+                                              setState(() {
+                                                assignedRole = value!;
+                                                assignedRoleList[i] =
+                                                    assignedRole;
+                                                assignedByList[i] =
+                                                    currentUserEmail.toString();
+                                                selectedRoleValue = value!;
+                                              });
 
-                                          try {
-                                            await FireBaseApi.saveDataIntoFireStore(
-                                                workspaceCode:
-                                                    widget.workspaceCode,
-                                                collection:
-                                                    '${widget.workspaceCode} Assigned Roles',
-                                                document: membersList[i],
-                                                jsonData: assignRoleJson);
+                                              final assignRoleJson = {
+                                                'Assigned Role':
+                                                    selectedRoleValue,
+                                                'Assigned By': currentUserEmail,
+                                                'Assigned At': DateTime.now(),
+                                              };
 
-                                            await FirebaseFirestore.instance
-                                                .collection('User Data')
-                                                .doc(membersList[i])
-                                                .collection('Workspace Roles')
-                                                .doc(widget.workspaceCode)
-                                                .set({
-                                              'Role':
-                                                  AppFunctions.getStringOnly(
-                                                      text: selectedRoleValue),
-                                              'Level': AppFunctions
-                                                  .getNumberFromString(
-                                                      text: selectedRoleValue),
-                                              'Created At': DateTime.now(),
-                                            });
+                                              try {
+                                                await FireBaseApi
+                                                    .saveDataIntoFireStore(
+                                                        workspaceCode: widget
+                                                            .workspaceCode,
+                                                        collection:
+                                                            '${widget.workspaceCode} Assigned Roles',
+                                                        document:
+                                                            membersList[i],
+                                                        jsonData:
+                                                            assignRoleJson);
 
-                                            log('Role Assign Successfully');
-                                            String name = await AppFunctions
-                                                .getNameByEmail(
-                                                    email: widget
-                                                        .workspaceOwnerEmail);
-                                            String token = await AppFunctions
-                                                .getTokenByEmail(
-                                                    email: membersList[i]);
-                                            MessageNotificationApi.send(
-                                                token: token,
-                                                title: 'Congratulations ☺',
-                                                body:
-                                                    '$name assign you ${AppFunctions.getStringOnly(text: selectedRoleValue)} role of Level ${AppFunctions.getNumberFromString(text: selectedRoleValue)} in ${widget.workspaceName} workspace.');
-                                          } catch (e) {
-                                            log('Role Assign Failed');
-                                          }
-                                        },
+                                                await FirebaseFirestore.instance
+                                                    .collection('User Data')
+                                                    .doc(membersList[i])
+                                                    .collection(
+                                                        'Workspace Roles')
+                                                    .doc(widget.workspaceCode)
+                                                    .set({
+                                                  'Role': AppFunctions
+                                                      .getStringOnly(
+                                                          text:
+                                                              selectedRoleValue),
+                                                  'Level': AppFunctions
+                                                      .getNumberFromString(
+                                                          text:
+                                                              selectedRoleValue),
+                                                  'Created At': DateTime.now(),
+                                                });
+
+                                                log('Role Assign Successfully');
+                                                String name = await AppFunctions
+                                                    .getNameByEmail(
+                                                        email: widget
+                                                            .workspaceOwnerEmail);
+                                                String token =
+                                                    await AppFunctions
+                                                        .getTokenByEmail(
+                                                            email:
+                                                                membersList[i]);
+                                                MessageNotificationApi.send(
+                                                    token: token,
+                                                    title: 'Congratulations ☺',
+                                                    body:
+                                                        '$name assign you ${AppFunctions.getStringOnly(text: selectedRoleValue)} role of Level ${AppFunctions.getNumberFromString(text: selectedRoleValue)} in ${widget.workspaceName} workspace.');
+                                              } catch (e) {
+                                                log('Role Assign Failed');
+                                              }
+                                            },
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ),
-                            Visibility(
-                              visible: widget.deAssignRole,
-                              child: Visibility(
-                                visible:
-                                    assignedRoleList[i] != 'No Role Assign',
-                                child: ListTile(
-                                  onTap: () async {
-                                    await FirebaseFirestore.instance
-                                        .collection(
-                                            '${widget.workspaceCode} Assigned Roles')
-                                        .doc(membersList[i])
-                                        .update({
-                                      'Assigned By': '',
-                                      'Assigned Role': 'No Role Assign',
-                                    });
+                                Visibility(
+                                  visible: widget.deAssignRole,
+                                  child: Visibility(
+                                    visible:
+                                        assignedRoleList[i] != 'No Role Assign',
+                                    child: ListTile(
+                                      onTap: () async {
+                                        await FirebaseFirestore.instance
+                                            .collection(
+                                                '${widget.workspaceCode} Assigned Roles')
+                                            .doc(membersList[i])
+                                            .update({
+                                          'Assigned By': '',
+                                          'Assigned Role': 'No Role Assign',
+                                        });
 
-                                    await FirebaseFirestore.instance
-                                        .collection('User Data')
-                                        .doc(membersList[i])
-                                        .collection('Workspace Roles')
-                                        .doc(widget.workspaceCode)
-                                        .delete();
+                                        await FirebaseFirestore.instance
+                                            .collection('User Data')
+                                            .doc(membersList[i])
+                                            .collection('Workspace Roles')
+                                            .doc(widget.workspaceCode)
+                                            .delete();
 
-                                    log('Role De-Assign successfully');
+                                        log('Role De-Assign successfully');
 
-                                    String name =
-                                        await AppFunctions.getNameByEmail(
-                                            email: widget.workspaceOwnerEmail);
-                                    String token =
-                                        await AppFunctions.getTokenByEmail(
-                                            email: membersList[i]);
-                                    MessageNotificationApi.send(
-                                        token: token,
-                                        title: 'Oh No 😟',
-                                        body:
-                                            '$name de-assign your role from ${widget.workspaceName} workspace.');
-                                    setState(() {
-                                      assignedRoleList[i] = 'No Role Assign';
-                                      assignedByList[i] = '';
-                                    });
-                                  },
-                                  dense: true,
-                                  title: const Text('De-Assign Role'),
-                                  trailing: Lottie.asset(
-                                      repeat: false,
-                                      height: 30,
-                                      'animations/crossbutton.json'),
-                                  // const Icon(Icons.close),
+                                        String name =
+                                            await AppFunctions.getNameByEmail(
+                                                email:
+                                                    widget.workspaceOwnerEmail);
+                                        String token =
+                                            await AppFunctions.getTokenByEmail(
+                                                email: membersList[i]);
+                                        MessageNotificationApi.send(
+                                            token: token,
+                                            title: 'Oh No 😟',
+                                            body:
+                                                '$name de-assign your role from ${widget.workspaceName} workspace.');
+                                        setState(() {
+                                          assignedRoleList[i] =
+                                              'No Role Assign';
+                                          assignedByList[i] = '';
+                                        });
+                                      },
+                                      dense: true,
+                                      title: const Text('De-Assign Role'),
+                                      trailing: Lottie.asset(
+                                          repeat: false,
+                                          height: 30,
+                                          'animations/crossbutton.json'),
+                                      // const Icon(Icons.close),
+                                    ),
+                                  ),
                                 ),
-                              ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
+                      ),
                     ),
                     // ListTile(
                     //   onTap: () async {

@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
-class SpeechApi {
+class SpeechToTextService {
   static final _speech = SpeechToText();
 
   static Future<bool> toggleRecording({

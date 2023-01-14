@@ -1,9 +1,13 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:stepbystep/bot_data/questions.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Command {
-  static final all = [email, browser1, browser2];
+  static final all = [appName, email, browser1, browser2];
 
+  static const appName = 'Step By Step';
   static const email = 'write email';
   static const browser1 = 'open';
   static const browser2 = 'go to';
@@ -11,8 +15,34 @@ class Command {
 
 class Utils {
   static void scanText(String rawText) {
+    log('Text is Scanning.....................');
     final text = rawText.toLowerCase();
+    List<String> questions = [
+      'purpose application',
+      'need create workspace',
+      'Who are you',
+    ];
+    List<String> answers = [
+      'the application is design for manage the organizations so productivity will enhance',
+      'You need to create workspace to handle members and task in the organization',
+      'i am your assistant you can clear your queries by asking questions from me',
+    ];
+    // for (var key in botData.keys) {
+    //   log('$text                      $key');
+    //   if (text.toString() == key.toString()) {
+    //     print('botData[key]');
+    //   }
+    // }
 
+    for (int i = 0; i < questions.length; i++) {
+      List<String> words = questions[i].split(' ');
+      for (var word in words) {
+        if (text.contains(word)) {
+          print(answers[i]);
+          break;
+        }
+      }
+    }
     if (text.contains(Command.email)) {
       final body = _getTextAfterCommand(text: text, command: Command.email);
 

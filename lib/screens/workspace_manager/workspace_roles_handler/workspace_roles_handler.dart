@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stepbystep/apis/app_functions.dart';
 
@@ -51,7 +52,27 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
   late final Stream<QuerySnapshot> rolesRecords;
   bool createRoleLoading = false;
   bool createRoleForDecision = false;
-
+  Color roleColor = Colors.white;
+  List<Color> colorList = [
+    Colors.white,
+    Colors.grey,
+    Colors.blueGrey,
+    Colors.black,
+    const Color(0xffff0000),
+    Colors.deepOrange,
+    Colors.pink,
+    Colors.orange,
+    Colors.yellow,
+    Colors.purple,
+    Colors.purpleAccent,
+    Colors.blue,
+    Colors.cyan,
+    Colors.teal,
+    Colors.green,
+    Colors.lime,
+    Colors.lightGreen,
+  ];
+  late String hexColorCode;
   Future<void> getSpecificRoleData() async {
     try {
       String assignedRole = await AppFunctions.getRoleByEmail(
@@ -72,6 +93,7 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
 
   @override
   void initState() {
+    hexColorCode = '0x${roleColor.value.toRadixString(16)}';
     log('fromTaskHolder ${widget.fromTaskHolder}');
     log('fromTaskAssignment ${widget.fromTaskAssignment}');
     rolesRecords = FirebaseFirestore.instance
@@ -126,6 +148,7 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
                               ['Role Description'],
                           roleLevel:
                               storedRolesData[i]['Role Level'].toString(),
+                          roleColor: storedRolesData[i]['Role Color'],
                           teamControl: storedRolesData[i]['Team Control'],
                           memberControl: storedRolesData[i]['Member Control'],
                           controlForOwner: widget.controlForOwner,
@@ -151,6 +174,7 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
                         roleName: storedRolesData[i]['Role'],
                         roleDescription: storedRolesData[i]['Role Description'],
                         roleLevel: storedRolesData[i]['Role Level'].toString(),
+                        roleColor: storedRolesData[i]['Role Color'],
                         teamControl: storedRolesData[i]['Team Control'],
                         memberControl: storedRolesData[i]['Member Control'],
                         controlForOwner: widget.controlForOwner,
@@ -174,6 +198,7 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
                         roleName: storedRolesData[i]['Role'],
                         roleDescription: storedRolesData[i]['Role Description'],
                         roleLevel: storedRolesData[i]['Role Level'].toString(),
+                        roleColor: storedRolesData[i]['Role Color'],
                         teamControl: storedRolesData[i]['Team Control'],
                         memberControl: storedRolesData[i]['Member Control'],
                         controlForOwner: widget.controlForOwner,
@@ -362,6 +387,28 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
                           ),
                         ],
                       ),
+                      ExpansionTile(
+                        title: Text(
+                          'Select Role Color',
+                          style: TextStyle(color: AppColor.black),
+                        ),
+                        children: [
+                          SizedBox(
+                            height: 200,
+                            width: 200,
+                            child: BlockPicker(
+                              pickerColor: roleColor,
+                              onColorChanged: (color) {
+                                hexColorCode =
+                                    '0x${color.value.toRadixString(16)}';
+                                print(hexColorCode);
+                              },
+                              availableColors: colorList,
+                              useInShowDialog: true,
+                            ),
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 25),
                       createRoleLoading
                           ? AppProgressIndicator(
@@ -386,6 +433,7 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
                                             ? ''
                                             : descriptionController.text.trim(),
                                     'Role Level': roleLevel,
+                                    'Role Color': hexColorCode,
                                     'Control': false,
                                     'Team Control': false,
                                     'Member Control': false,

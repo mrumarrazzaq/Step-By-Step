@@ -13,7 +13,7 @@ import 'package:stepbystep/screens/home.dart';
 import 'package:stepbystep/screens/inbox_section/recent_inboxes.dart';
 import 'package:stepbystep/screens/inbox_section/recent_workspackes.dart';
 import 'package:stepbystep/screens/motivational_quotes.dart';
-import 'package:stepbystep/screens/search.dart';
+import 'package:stepbystep/screens/ai_bot.dart';
 import 'package:stepbystep/screens/user_profile_section/user_profile.dart';
 
 class StepByStep extends StatefulWidget {
@@ -31,7 +31,7 @@ class _StepByStepState extends State<StepByStep> with WidgetsBindingObserver {
     const MotivationalQuotes(),
     // RecentInboxes(),
     RecentWorkspaces(),
-    Search(),
+    BotUI(),
     UserProfile()
   ];
 
@@ -112,8 +112,8 @@ class _StepByStepState extends State<StepByStep> with WidgetsBindingObserver {
             label: 'Inbox',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Search',
+            icon: Icon(Icons.adb),
+            label: 'Bot',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),

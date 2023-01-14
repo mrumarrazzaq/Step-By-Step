@@ -78,15 +78,19 @@ dependencies:
   speech_to_text: ^6.1.1
   url_launcher: ^6.1.7
   record: ^4.4.4
-  audioplayers: ^2.0.0
+  audioplayers: ^0.20.1
   assets_audio_player: ^3.0.4+3
   flutter_sound: ^9.2.13
+  path_provider: ^2.0.11
+  flutter_audio_recorder2: ^0.0.2
 
   image_downloader: ^0.31.0
   flutter_speed_dial: ^6.2.0
+  flutter_colorpicker: ^1.0.3
 
   logger: ^1.1.0
   permission_handler: ^10.2.0
+  flutter_tts: ^3.6.3
 #  alan_voice: 3.0.0
 
 dev_dependencies:

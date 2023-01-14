@@ -61,7 +61,7 @@ class _RecentWorkspacesState extends State<RecentWorkspaces> {
           Align(
             alignment: Alignment.center,
             child: Padding(
-              padding: const EdgeInsets.only(top: 60.0),
+              padding: const EdgeInsets.only(top: 45.0),
               child: Container(
                 height: double.infinity,
                 decoration: BoxDecoration(
