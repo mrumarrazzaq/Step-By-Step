@@ -36,7 +36,7 @@ class TaskView extends StatefulWidget {
 }
 
 class _TaskViewState extends State<TaskView> {
-  String dateFilter = '';
+  String dateFilter = formatDate(DateTime.now(), [yyyy, '-', mm, '-', dd]);
   DateTime initialSelectedDate = DateTime.now();
 
   @override

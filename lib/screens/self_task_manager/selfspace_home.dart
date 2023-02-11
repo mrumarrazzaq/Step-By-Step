@@ -27,7 +27,7 @@ class _SelfSpaceHomeState extends State<SelfSpaceHome> {
   bool _isLoading = false;
   bool isTrue = false;
   IconData taskStatusIcon = Icons.check_box_outline_blank_rounded;
-  String dateFilter = '';
+  String dateFilter = formatDate(DateTime.now(), [yyyy, '-', mm, '-', dd]);
   DateTime initialSelectedDate = DateTime.now();
   @override
   void initState() {

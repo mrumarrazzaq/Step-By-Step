@@ -73,71 +73,73 @@ class _WorkspaceViewHomeState extends State<WorkspaceViewHome> {
           child: Lottie.asset(repeat: false, 'animations/hirearchy.json'),
         ),
         StreamBuilder<QuerySnapshot>(
-            stream: rolesRecords,
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.hasError) {
-                log('Something went wrong');
-              }
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                    child: CircularProgressIndicator(
-                  color: AppColor.orange,
-                  strokeWidth: 2.0,
-                ));
-              }
-              if (snapshot.hasData) {
-                List storedRolesData = [];
-
-                snapshot.data!.docs.map((DocumentSnapshot document) {
-                  Map id = document.data() as Map<String, dynamic>;
-                  storedRolesData.add(id);
-                  id['id'] = document.id;
-                }).toList();
-                return Column(
-                  children: [
-                    if (storedRolesData.isEmpty) ...[
-                      Lottie.asset('animations/sorry.json'),
-                    ],
-                    for (int i = 0; i < storedRolesData.length; i++) ...[
-                      ViewCard(
-                        widget: FutureBuilder(
-                          future: AppFunctions.getNameByEmail(
-                              email: storedRolesData[i]['Assigned By']),
-                          builder: (BuildContext context,
-                              AsyncSnapshot<String> snapshot) {
-                            switch (snapshot.connectionState) {
-                              case ConnectionState.waiting:
-                                return const Text('');
-                              default:
-                                if (snapshot.hasError) {
-                                  return Container();
-                                } else {
-                                  return Text(
-                                    'Assigned By: ${snapshot.data}',
-                                    textAlign: TextAlign.left,
-                                  );
-                                }
-                            }
-                          },
-                        ),
-                        role: storedRolesData[i]['Role'],
-                        level: storedRolesData[i]['Role Level'],
-                        totals: i,
-                        height: _height - 80,
-                        workspaceName: widget.workspaceName,
-                        workspaceCode: widget.workspaceCode,
-                      ),
-                    ],
-                  ],
-                );
-              }
+          stream: rolesRecords,
+          builder:
+              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.hasError) {
+              log('Something went wrong');
+            }
+            if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
                   child: CircularProgressIndicator(
                 color: AppColor.orange,
                 strokeWidth: 2.0,
               ));
-            }),
+            }
+            if (snapshot.hasData) {
+              List storedRolesData = [];
+
+              snapshot.data!.docs.map((DocumentSnapshot document) {
+                Map id = document.data() as Map<String, dynamic>;
+                storedRolesData.add(id);
+                id['id'] = document.id;
+              }).toList();
+              return Column(
+                children: [
+                  if (storedRolesData.isEmpty) ...[
+                    Lottie.asset('animations/sorry.json'),
+                  ],
+                  for (int i = 0; i < storedRolesData.length; i++) ...[
+                    ViewCard(
+                      widget: FutureBuilder(
+                        future: AppFunctions.getNameByEmail(
+                            email: storedRolesData[i]['Assigned By']),
+                        builder: (BuildContext context,
+                            AsyncSnapshot<String> snapshot) {
+                          switch (snapshot.connectionState) {
+                            case ConnectionState.waiting:
+                              return const Text('');
+                            default:
+                              if (snapshot.hasError) {
+                                return Container();
+                              } else {
+                                return Text(
+                                  'Assigned By: ${snapshot.data}',
+                                  textAlign: TextAlign.left,
+                                );
+                              }
+                          }
+                        },
+                      ),
+                      role: storedRolesData[i]['Role'],
+                      level: storedRolesData[i]['Role Level'],
+                      totals: i,
+                      height: _height - 80,
+                      workspaceName: widget.workspaceName,
+                      workspaceCode: widget.workspaceCode,
+                    ),
+                  ],
+                ],
+              );
+            }
+            return Center(
+              child: CircularProgressIndicator(
+                color: AppColor.orange,
+                strokeWidth: 2.0,
+              ),
+            );
+          },
+        ),
       ],
     );
   }
@@ -168,16 +170,17 @@ class ViewCard extends StatelessWidget {
       child: ListTile(
         onTap: () {
           Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => DetailedView(
-                  workspaceName: workspaceName,
-                  workspaceCode: workspaceCode,
-                  role: role,
-                  assignedBy: 'assignedBy',
-                  level: level,
-                ),
-              ));
+            context,
+            MaterialPageRoute(
+              builder: (context) => DetailedView(
+                workspaceName: workspaceName,
+                workspaceCode: workspaceCode,
+                role: role,
+                assignedBy: 'assignedBy',
+                level: level,
+              ),
+            ),
+          );
         },
         dense: true,
         leading: Text('Level $level'),

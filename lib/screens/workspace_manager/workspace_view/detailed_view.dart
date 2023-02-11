@@ -8,15 +8,14 @@ import 'package:dotted_line/dotted_line.dart';
 import 'package:stepbystep/visualization/visualization.dart';
 
 class DetailedView extends StatefulWidget {
-  DetailedView(
-      {Key? key,
-      required this.workspaceName,
-      required this.workspaceCode,
-      required this.role,
-      required this.assignedBy,
-      required this.level,
-      })
-      : super(key: key);
+  DetailedView({
+    Key? key,
+    required this.workspaceName,
+    required this.workspaceCode,
+    required this.role,
+    required this.assignedBy,
+    required this.level,
+  }) : super(key: key);
   String workspaceCode;
   String workspaceName;
   String role;
@@ -237,12 +236,12 @@ class Root extends StatelessWidget {
 }
 
 class Connector extends StatelessWidget {
-  Connector(
-      {Key? key,
-      required this.workspaceName,
-      required this.name,
-      required this.imageUrl})
-      : super(key: key);
+  Connector({
+    Key? key,
+    required this.workspaceName,
+    required this.name,
+    required this.imageUrl,
+  }) : super(key: key);
   String workspaceName;
   String name;
   String imageUrl;
@@ -315,17 +314,8 @@ class Connector extends StatelessWidget {
                       child: CircleAvatar(
                         backgroundColor: AppColor.orange.withOpacity(0.2),
                         radius: 32,
-                        child: imageUrl.isNotEmpty
-                            ? CachedNetworkImage(
-                                imageUrl: imageUrl,
-                                progressIndicatorBuilder:
-                                    (context, url, downloadProgress) =>
-                                        CircularProgressIndicator(
-                                            value: downloadProgress.progress),
-                                errorWidget: (context, url, error) =>
-                                    Icon(Icons.error, color: AppColor.white),
-                              )
-                            : null,
+                        backgroundImage:
+                            imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
                       ),
                     ),
                     Text(

@@ -97,6 +97,7 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
     super.initState();
   }
 
+  bool checkForImage = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -226,7 +227,7 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
                                       );
                                     },
                                     onLongPress: () {}),
-                              ] else ...[
+                              ] else if (storedWorkspaces.length < 2) ...[
                                 Container(
                                   height: 500,
                                   decoration: const BoxDecoration(
@@ -361,6 +362,7 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
 
     // show the dialog
     showDialog(
+      barrierDismissible: false,
       context: context,
       builder: (BuildContext context) {
         return alert;
@@ -372,7 +374,7 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
     BuildContext context,
   ) {
     showDialog(
-      barrierDismissible: true,
+      barrierDismissible: false,
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
