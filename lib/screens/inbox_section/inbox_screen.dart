@@ -139,7 +139,21 @@ class _InboxScreenState extends State<InboxScreen> {
   CollectionReference chatEvent =
       FirebaseFirestore.instance.collection('$currentUserEmail Chat');
 
-  Future<void> deleteChatBubble(id) {
+  Future<void> deleteChatBubble(id) async {
+    String url = '';
+    try {
+      await chatEvent.doc(id).get().then((ds) {
+        url = ds['URL'];
+        if (url != '') {
+          log(url);
+          FirebaseStorage.instance.refFromURL(url).delete();
+        }
+      });
+    } catch (e) {
+      log('+++++++++++++++++================');
+      log(e.toString());
+    }
+
     return chatEvent
         .doc(id)
         .delete()

@@ -1,13 +1,23 @@
 import 'dart:developer';
+import 'dart:io';
+import 'dart:isolate';
+import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_downloader/image_downloader.dart';
 import 'package:lottie/lottie.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:stepbystep/apis/app_functions.dart';
 import 'package:stepbystep/apis/messege_notification_api.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:dio/dio.dart';
 
 class WorkspaceTaskTile extends StatefulWidget {
   bool isOwner;
@@ -21,6 +31,8 @@ class WorkspaceTaskTile extends StatefulWidget {
   String date;
   int taskStatusValue;
   Color color;
+  String fileURL;
+  String fileName;
   bool leftButton;
   bool rightButton;
   WorkspaceTaskTile({
@@ -35,6 +47,8 @@ class WorkspaceTaskTile extends StatefulWidget {
     required this.email,
     required this.date,
     required this.taskStatusValue,
+    required this.fileName,
+    required this.fileURL,
     required this.color,
     required this.leftButton,
     required this.rightButton,
@@ -45,6 +59,65 @@ class WorkspaceTaskTile extends StatefulWidget {
 }
 
 class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
+  final dio = Dio();
+  final ReceivePort _port = ReceivePort();
+
+  @override
+  void initState() {
+    super.initState();
+
+    IsolateNameServer.registerPortWithName(
+        _port.sendPort, 'downloader_send_port');
+    _port.listen((dynamic data) {
+      String id = data[0];
+      DownloadTaskStatus status = data[1];
+      int progress = data[2];
+      if (status == DownloadTaskStatus.complete) {
+        log('Download Complete');
+      }
+      setState(() {});
+    });
+    FlutterDownloader.registerCallback(downloadCallback);
+  }
+
+  @override
+  void dispose() {
+    IsolateNameServer.removePortNameMapping('downloader_send_port');
+    super.dispose();
+  }
+
+  @pragma('vm:entry-point')
+  static void downloadCallback(
+      String id, DownloadTaskStatus status, int progress) {
+    final SendPort? send =
+        IsolateNameServer.lookupPortByName('downloader_send_port');
+    send!.send([id, status, progress]);
+  }
+
+  Future download(String url, String fileName) async {
+    try {
+      var status = await Permission.storage.request();
+      if (status.isGranted) {
+        final baseStorage = await getExternalStorageDirectory();
+        // String appDocPath = baseStorage!.path;
+        if (!Directory("${baseStorage!.path}/SBS").existsSync()) {
+          Directory("${baseStorage.path}/SBS").createSync(recursive: true);
+        }
+        final taskId = await FlutterDownloader.enqueue(
+          url: url,
+          savedDir: '${baseStorage.path}/SBS',
+          showNotification: true,
+          openFileFromNotification: true,
+        );
+        // if (taskId == null) {
+        //   return;
+        // }
+      }
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -52,6 +125,7 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
         if (widget.isOwner) {
           showTaskDeletionDialog(
             context: context,
+            fileURL: widget.fileURL,
             taskTitle: widget.title,
             workspaceTaskCode: widget.workspaceTaskCode,
             docId: widget.docId,
@@ -148,6 +222,27 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
                           text: widget.date,
                           style: TextStyle(
                             color: AppColor.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Visibility(
+                    visible: widget.fileName.isNotEmpty,
+                    child: ExpansionTile(
+                      collapsedTextColor: AppColor.black,
+                      textColor: AppColor.black,
+                      collapsedIconColor: AppColor.black,
+                      title: const Text('Attachment'),
+                      children: [
+                        ListTile(
+                          title: Text(widget.fileName),
+                          trailing: IconButton(
+                            onPressed: () async {
+                              download(widget.fileURL, widget.fileName);
+                            },
+                            splashRadius: 30,
+                            icon: const Icon(Icons.download),
                           ),
                         ),
                       ],
@@ -330,6 +425,7 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
 
   showTaskDeletionDialog(
       {required BuildContext context,
+      required String fileURL,
       required String taskTitle,
       required String workspaceTaskCode,
       required String docId}) {
@@ -352,16 +448,21 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
       ),
       onPressed: () async {
         Navigator.pop(context);
-        await FirebaseFirestore.instance
-            .collection(workspaceTaskCode)
-            .doc(docId)
-            .delete();
-        await Fluttertoast.showToast(
-          msg: 'Task Deleted Successfully', // message
-          toastLength: Toast.LENGTH_SHORT, // length
-          gravity: ToastGravity.BOTTOM, // location
-          backgroundColor: AppColor.black,
-        );
+        try {
+          await FirebaseFirestore.instance
+              .collection(workspaceTaskCode)
+              .doc(docId)
+              .delete();
+          await FirebaseStorage.instance.refFromURL(fileURL).delete();
+          await Fluttertoast.showToast(
+            msg: 'Task Deleted Successfully', // message
+            toastLength: Toast.LENGTH_SHORT, // length
+            gravity: ToastGravity.BOTTOM, // location
+            backgroundColor: AppColor.black,
+          );
+        } catch (e) {
+          log(e.toString());
+        }
       },
     );
 
@@ -398,5 +499,35 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
         return alert;
       },
     );
+  }
+
+  Future openDownloadedFile(
+      {required String url, required String fileName}) async {
+    final file = await downloadFile(url, fileName);
+    if (file == null) return;
+    log('Path : ${file.path}');
+    // OpenFile.open(file.path);
+  }
+
+  Future<File?> downloadFile(String url, String name) async {
+    try {
+      Directory appDocDir = await getApplicationDocumentsDirectory();
+      final file = File('${appDocDir.path}/$name');
+      final response = await dio.get(
+        url,
+        options: Options(
+          responseType: ResponseType.bytes,
+          followRedirects: false,
+        ),
+      );
+
+      final raf = file.openSync(mode: FileMode.write);
+      raf.writeByteSync(response.data);
+      await raf.close();
+      return file;
+    } catch (e) {
+      log(e.toString());
+      return null;
+    }
   }
 }

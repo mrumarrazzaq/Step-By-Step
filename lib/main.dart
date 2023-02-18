@@ -16,6 +16,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'package:stepbystep/screens/myapp.dart';
 
+import 'package:flutter_downloader/flutter_downloader.dart';
+
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 Future<void> backgroundHandler(RemoteMessage message) async {
@@ -26,6 +28,7 @@ Future<void> backgroundHandler(RemoteMessage message) async {
 void main() async {
   log('APP ROOT MAIN IS IN RUNNING');
   WidgetsFlutterBinding.ensureInitialized();
+  await FlutterDownloader.initialize(debug: true, ignoreSsl: true);
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,

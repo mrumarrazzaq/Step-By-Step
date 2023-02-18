@@ -88,4 +88,22 @@ class AppFunctions {
       return workspaceName;
     }
   }
+
+  static Future<String> getColorCodeByRole(
+      {required String workspaceCode, required String role}) async {
+    String colorCode = '0xffffffff';
+    try {
+      await FirebaseFirestore.instance
+          .collection(workspaceCode)
+          .doc(role)
+          .get()
+          .then((ds) {
+        colorCode = ds['Role Color'];
+      });
+      return colorCode;
+    } catch (e) {
+      log('Failed to get role by email');
+      return colorCode;
+    }
+  }
 }

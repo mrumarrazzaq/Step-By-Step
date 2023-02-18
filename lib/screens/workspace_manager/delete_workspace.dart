@@ -63,6 +63,11 @@ class DeleteWorkspace {
                 .update({
               'Joined Workspaces': FieldValue.arrayRemove([workspaceCode]),
             });
+
+            await FirebaseFirestore.instance
+                .collection('$workspaceCode Members')
+                .doc(member)
+                .delete();
           }
           log('User Data -> Joined Workspaces -> Delete Successfully');
         } else {

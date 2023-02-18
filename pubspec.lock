@@ -211,6 +211,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.7.8"
+  dio:
+    dependency: "direct main"
+    description:
+      name: dio
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "5.0.0"
   dotted_line:
     dependency: "direct main"
     description:
@@ -384,6 +391,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.3.3"
+  flutter_downloader:
+    dependency: "direct main"
+    description:
+      name: flutter_downloader
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.10.2"
   flutter_keyboard_visibility:
     dependency: "direct main"
     description:

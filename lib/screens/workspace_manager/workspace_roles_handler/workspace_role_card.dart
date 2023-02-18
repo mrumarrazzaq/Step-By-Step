@@ -1207,15 +1207,15 @@ class _WorkspaceRoleCardState extends State<WorkspaceRoleCard> {
                                       .collection('Workspaces')
                                       .doc(widget.workspaceCode)
                                       .update({
-                                    'Workspace Roles': FieldValue.arrayUnion(
-                                        ['${roleController.text} $roleLevel']),
+                                    'Workspace Roles':
+                                        FieldValue.arrayRemove([id]),
                                   });
                                   await FirebaseFirestore.instance
                                       .collection('Workspaces')
                                       .doc(widget.workspaceCode)
                                       .update({
-                                    'Workspace Roles':
-                                        FieldValue.arrayRemove([id]),
+                                    'Workspace Roles': FieldValue.arrayUnion(
+                                        ['${roleController.text} $roleLevel']),
                                   });
                                   // Add and Remove From Workspace Code Collection
                                   await FirebaseFirestore.instance

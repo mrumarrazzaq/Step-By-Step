@@ -116,6 +116,8 @@ class _TaskViewState extends State<TaskView> {
                         taskStatusValue: widget.taskStatusValue,
                         email: storedData[i]['Assigned By'],
                         date: storedData[i]['Due Date'],
+                        fileName: storedData[i]['File Name'],
+                        fileURL: storedData[i]['File URL'],
                         color: widget.color,
                         leftButton: widget.leftButton,
                         rightButton: widget.rightButton,

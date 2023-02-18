@@ -73,6 +73,7 @@ class _WorkspaceTaskHolderState extends State<WorkspaceTaskHolder> {
 
   List<Color> teamTabsColor = [AppColor.orange, AppColor.white, AppColor.white];
   double _height = 130;
+  double _fontSize = 40;
   double _radius = 40;
   double _text = 20;
   bool loading = true;
@@ -97,6 +98,7 @@ class _WorkspaceTaskHolderState extends State<WorkspaceTaskHolder> {
           _height = 0;
           _text = 18;
           _radius = 25;
+          _fontSize = 25;
         });
       });
       Future.delayed(const Duration(milliseconds: 3800), () {
@@ -213,7 +215,7 @@ class _WorkspaceTaskHolderState extends State<WorkspaceTaskHolder> {
                           widget.workspaceOwnerName[0],
                           style: TextStyle(
                               fontWeight: FontWeight.w800,
-                              fontSize: 40,
+                              fontSize: _fontSize,
                               color: AppColor.white),
                         ),
                       ),
@@ -606,52 +608,55 @@ class _WorkspaceTaskHolderState extends State<WorkspaceTaskHolder> {
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 800),
                           height: _height,
-                          child: Flex(
-                            direction: axis,
-                            // crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              AnimatedContainer(
-                                duration: const Duration(milliseconds: 800),
-                                child: CircleAvatar(
-                                  backgroundColor: AppColor.orange,
-                                  radius: _radius,
-                                  foregroundImage: imageURL.isEmpty
-                                      ? null
-                                      : NetworkImage(imageURL),
-                                  child: Center(
-                                    child: Text(
-                                      widget.workspaceOwnerName[0],
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: 40,
-                                          color: AppColor.white),
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Flex(
+                              direction: axis,
+                              // crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                AnimatedContainer(
+                                  duration: const Duration(milliseconds: 800),
+                                  child: CircleAvatar(
+                                    backgroundColor: AppColor.orange,
+                                    radius: _radius,
+                                    foregroundImage: imageURL.isEmpty
+                                        ? null
+                                        : NetworkImage(imageURL),
+                                    child: Center(
+                                      child: Text(
+                                        widget.workspaceOwnerName[0],
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: _fontSize,
+                                            color: AppColor.white),
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              AnimatedContainer(
-                                duration: const Duration(milliseconds: 800),
-                                child: Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 3.0),
-                                  child: Text(
-                                    widget.workspaceOwnerName,
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: _text),
+                                AnimatedContainer(
+                                  duration: const Duration(milliseconds: 800),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 3.0),
+                                    child: Text(
+                                      widget.workspaceOwnerName,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: _text),
+                                    ),
                                   ),
                                 ),
-                              ),
-                              AnimatedContainer(
-                                duration: const Duration(milliseconds: 800),
-                                child: Text(
-                                  widget.workspaceOwnerEmail,
-                                  style: TextStyle(
-                                      color: AppColor.grey,
-                                      fontSize: _text - 2),
+                                AnimatedContainer(
+                                  duration: const Duration(milliseconds: 800),
+                                  child: Text(
+                                    widget.workspaceOwnerEmail,
+                                    style: TextStyle(
+                                        color: AppColor.grey,
+                                        fontSize: _text - 2),
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),

@@ -2,12 +2,14 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date_format/date_format.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stepbystep/apis/app_functions.dart';
 import 'package:stepbystep/apis/firebase_api.dart';
 import 'package:stepbystep/apis/messege_notification_api.dart';
+import 'package:stepbystep/apis/pick_file_api.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
 import 'package:stepbystep/screens/workspace_manager/task_view.dart';
@@ -16,6 +18,7 @@ import 'package:stepbystep/screens/workspace_manager/workspace_roles_handler/wor
 import 'package:stepbystep/screens/workspace_manager/workspace_task_tile.dart';
 import 'package:stepbystep/screens/workspace_manager/workspace_view/workspace_view_home.dart';
 import 'package:stepbystep/widgets/app_elevated_button.dart';
+import 'package:velocity_x/velocity_x.dart';
 
 class TaskTeamAssignment extends StatefulWidget {
   String name;
@@ -76,11 +79,18 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
   List<Color> teamTabsColor = [AppColor.orange, AppColor.white, AppColor.white];
 
   double _height = 130;
+  double _fontSize = 40;
   double _radius = 40;
   double _text = 20;
   bool loading = true;
   var axis = Axis.vertical;
   bool isVisible = true;
+
+  bool fileGetting = false;
+  String filePath = '';
+  String fileName = '';
+
+  List<String> url = ['', '', ''];
 
   @override
   void initState() {
@@ -105,6 +115,7 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
           _height = 0;
           _text = 18;
           _radius = 25;
+          _fontSize = 25;
         });
       });
       Future.delayed(const Duration(milliseconds: 3800), () {
@@ -193,7 +204,7 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
                           widget.name[0],
                           style: TextStyle(
                             fontWeight: FontWeight.w800,
-                            fontSize: 25,
+                            fontSize: _fontSize,
                             color: AppColor.white,
                           ),
                         ),
@@ -575,51 +586,54 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 800),
                           height: _height,
-                          child: Flex(
-                            direction: axis,
-                            children: [
-                              AnimatedContainer(
-                                duration: const Duration(milliseconds: 800),
-                                child: CircleAvatar(
-                                  backgroundColor: AppColor.orange,
-                                  radius: _radius,
-                                  foregroundImage: imageURL.isEmpty
-                                      ? null
-                                      : NetworkImage(imageURL),
-                                  child: Center(
-                                    child: Text(
-                                      widget.name[0],
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: 40,
-                                          color: AppColor.white),
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Flex(
+                              direction: axis,
+                              children: [
+                                AnimatedContainer(
+                                  duration: const Duration(milliseconds: 800),
+                                  child: CircleAvatar(
+                                    backgroundColor: AppColor.orange,
+                                    radius: _radius,
+                                    foregroundImage: imageURL.isEmpty
+                                        ? null
+                                        : NetworkImage(imageURL),
+                                    child: Center(
+                                      child: Text(
+                                        widget.name[0],
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: _fontSize,
+                                            color: AppColor.white),
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              AnimatedContainer(
-                                duration: const Duration(milliseconds: 800),
-                                child: Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 3.0),
-                                  child: Text(
-                                    widget.name,
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: _text),
+                                AnimatedContainer(
+                                  duration: const Duration(milliseconds: 800),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 3.0),
+                                    child: Text(
+                                      widget.name,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: _text),
+                                    ),
                                   ),
                                 ),
-                              ),
-                              AnimatedContainer(
-                                duration: const Duration(milliseconds: 800),
-                                child: Text(
-                                  widget.email,
-                                  style: TextStyle(
-                                      color: AppColor.grey,
-                                      fontSize: _text - 2),
+                                AnimatedContainer(
+                                  duration: const Duration(milliseconds: 800),
+                                  child: Text(
+                                    widget.email,
+                                    style: TextStyle(
+                                        color: AppColor.grey,
+                                        fontSize: _text - 2),
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -1102,6 +1116,9 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
                 textColor: AppColor.white,
                 backgroundColor: AppColor.orange,
                 function: () {
+                  setState(() {
+                    fileName = '';
+                  });
                   taskAssignmentDialog();
                 },
               ),
@@ -1225,6 +1242,60 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
                         ),
                       ),
                       const SizedBox(height: 25),
+                      ListTile(
+                        onTap: () async {
+                          setState(() {
+                            fileGetting = true;
+                          });
+
+                          url = await PickFileApi.pickSingleFile();
+
+                          log('File Name : ${url[1]}');
+                          log('File URL : ${url[0]}');
+
+                          setState(() {
+                            fileName = url[1];
+                            fileGetting = false;
+                          });
+                        },
+                        title: const Text('Attach File'),
+                        subtitle: Visibility(
+                          visible: fileName.isNotEmpty,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(fileName),
+                                IconButton(
+                                    onPressed: () async {
+                                      try {
+                                        await FirebaseStorage.instance
+                                            .refFromURL(url[0])
+                                            .delete();
+                                      } catch (e) {
+                                        log(e.toString());
+                                      }
+                                      setState(() {
+                                        fileName = '';
+                                      });
+                                    },
+                                    icon: const Icon(Icons.close)),
+                              ],
+                            ),
+                          ),
+                        ),
+                        trailing: fileGetting
+                            ? SizedBox(
+                                width: 15,
+                                height: 15,
+                                child: CircularProgressIndicator(
+                                  color: AppColor.orange,
+                                  strokeWidth: 1,
+                                ),
+                              )
+                            : const Icon(Icons.attach_file),
+                      ),
                       CheckboxListTile(
                         title: const Text('Due Date'),
                         value: isDateTimeChecked,
@@ -1253,6 +1324,7 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
                                   setState(() {
                                     isAssigning = true;
                                   });
+
                                   final taskJson = {
                                     'Task Title': titleController.text,
                                     'Task Description':
@@ -1267,6 +1339,8 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
                                     'Date Filter': formatDate(DateTime.now(),
                                         [yyyy, '-', mm, '-', dd]),
                                     'Task Status': 0,
+                                    'File Name': fileName,
+                                    'File URL': url[0],
                                     'Assigned By': currentUserEmail,
                                     'Created At': DateTime.now(),
                                   };

@@ -69,6 +69,63 @@ class PickFileApi {
     return urls;
   }
 
+  static Future<List<String>> pickSingleFile() async {
+    List<String> urls = [];
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: [
+        'jpg',
+        'pdf',
+        'doc',
+        'png',
+        'zip',
+        'ppt',
+        'docx',
+        'xlsx'
+      ],
+      allowMultiple: false,
+    );
+    if (result != null) {
+      Uint8List? fileBytes = result.files.first.bytes;
+      final filesPath = result.paths;
+      log('__________________________');
+      log(fileBytes.toString());
+      log('__________________________');
+      List<String> filesName = [];
+      for (var path in filesPath) {
+        filesName.add(path!.split('/').last);
+      }
+      log(filesPath.toString());
+      log(filesName.toString());
+      urls = await uploadSingleFiles(filesPath, filesName);
+      urls.add(filesName.toString());
+      return urls;
+    }
+    return urls;
+  }
+
+  static Future<List<String>> uploadSingleFiles(
+      List<String?> filesPath, List<String> filesName) async {
+    List<String> urlList = [];
+    FirebaseStorage storage = FirebaseStorage.instance;
+    for (int i = 0; i < filesPath.length; i++) {
+      Reference ref = storage
+          .ref()
+          .child("UploadedTaskFiles/${filesName[i]} $currentUserEmail");
+      UploadTask uploadTask = ref.putFile(File(filesPath[i]!));
+      await uploadTask.whenComplete(() async {
+        String url = await ref.getDownloadURL();
+        urlList.add(url);
+        log('----------------------------------');
+        log('url : $url');
+      }).catchError((onError) {
+        log('Error while uploading file');
+        log(onError);
+      });
+    }
+    return urlList;
+  }
+
   static Future<List<String>> uploadFiles(
       List<String?> filesPath, List<String> filesName) async {
     List<String> urlList = [];
