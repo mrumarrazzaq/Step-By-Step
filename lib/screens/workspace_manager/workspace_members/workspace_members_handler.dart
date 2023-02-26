@@ -257,7 +257,7 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
       children: [
         //Search Bar
         Visibility(
-          visible: !widget.fromTaskAssignment,
+          visible: !widget.fromTaskAssignment && widget.addMember,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
@@ -445,6 +445,7 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
                                             .contains(searchController.text)
                                         ? Lottie.asset(
                                             'animations/remove_member.json')
+
                                         // const Text('Added')
                                         : Lottie.asset(
                                             'animations/add_member.json'),
@@ -488,7 +489,7 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
               ),
             ],
           ),
-          trailing: Icon(Icons.filter_alt_outlined),
+          trailing: const Icon(Icons.filter_alt_outlined),
           children: [
             ListTile(
               onTap: () {
@@ -530,6 +531,7 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
             ),
           ],
         ),
+
         // Display Members
         StreamBuilder<QuerySnapshot>(
           stream: members,
@@ -561,7 +563,9 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
                 children: [
                   for (int i = 0; i < storedMembersData.length; i++) ...[
                     if (storedMembersData[i]['Workspace Member'] !=
-                        currentUserEmail) ...[
+                            currentUserEmail &&
+                        storedMembersData[i]['Workspace Member'] !=
+                            widget.extraEmail) ...[
                       if (storedMembersData[i]['Assigned Role'] ==
                           roleFilterValue) ...[
                         Card(

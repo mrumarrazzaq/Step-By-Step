@@ -2,15 +2,15 @@
 
 import 'dart:developer';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date_format/date_format.dart';
 import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_date_picker_timeline/flutter_date_picker_timeline.dart';
 import 'package:flutter_swipe_action_cell/flutter_swipe_action_cell.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
+import 'package:stepbystep/calc.dart';
 import 'package:stepbystep/colors.dart';
-import 'package:stepbystep/providers/date_comparison.dart';
 import 'package:stepbystep/providers/taskCollection.dart';
 import 'package:stepbystep/screens/self_task_manager/add_task.dart';
 import 'package:stepbystep/screens/self_task_manager/update_task.dart';
@@ -58,6 +58,15 @@ class _SelfSpaceHomeState extends State<SelfSpaceHome> {
         child: Center(
           child: Column(
             children: [
+              // TextButton(
+              //     onPressed: () {
+              //       Navigator.push(
+              //           context,
+              //           MaterialPageRoute(
+              //             builder: (context) => Calc(),
+              //           ));
+              //     },
+              //     child: Text('Press')),
               ListTile(
                 title: const Text('See Previous Date Task'),
                 textColor: AppColor.black,

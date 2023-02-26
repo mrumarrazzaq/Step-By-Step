@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_intro/flutter_intro.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 
@@ -14,6 +15,7 @@ import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
 import 'package:stepbystep/notificationservice/local_notification_service.dart';
 import 'package:stepbystep/screens/404_error.dart';
+import 'package:stepbystep/screens/onboarding_screen/onboading_screen.dart';
 import 'package:stepbystep/screens/step_by_step.dart';
 import 'package:stepbystep/apis/notification_api.dart';
 import 'package:stepbystep/screens/security_section/signIn_screen.dart';
@@ -198,8 +200,21 @@ class _MyAppState extends State<MyApp> {
                   ),
                 )
               : !_isLogin
-                  ? const SignInScreen()
+                  ? const OnBoardingScreen()
+                  // const SignInScreen()
                   : const StepByStep(),
+          // : Intro(
+          //     padding: const EdgeInsets.all(8),
+          //     borderRadius: const BorderRadius.all(
+          //       Radius.circular(4),
+          //     ),
+          //     maskColor: const Color.fromRGBO(0, 0, 0, .6),
+          //     noAnimation: true,
+          //     maskClosable: false,
+          //     buttonTextBuilder: (order) =>
+          //         order == 3 ? 'Custom Button Text' : 'Next',
+          //     child: const StepByStep(),
+          //   ),
 
           // !_isLogin
           //     ? !_internetConnectionStatus

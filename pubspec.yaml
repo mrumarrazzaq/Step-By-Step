@@ -86,7 +86,7 @@ dependencies:
   assets_audio_player: ^3.0.4+3
   flutter_sound: ^9.2.13
   path_provider: ^2.0.11
-  flutter_audio_recorder2: ^0.0.2
+  flutter_audio_recorder2:
 
   image_downloader: ^0.31.0
   flutter_speed_dial: ^6.2.0
@@ -94,6 +94,9 @@ dependencies:
 
   logger: ^1.1.0
   permission_handler: ^10.2.0
+  smooth_page_indicator: ^1.0.0+2
+  flutter_intro: ^3.0.2
+
   flutter_tts: ^3.6.3
 #  alan_voice: 3.0.0
 

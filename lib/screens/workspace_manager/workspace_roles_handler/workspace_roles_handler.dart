@@ -228,7 +228,8 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
           },
         ),
         Visibility(
-          visible: createRoleForDecision || !widget.fromTaskAssignment,
+          // createRoleForDecision || !widget.fromTaskAssignment
+          visible: widget.createRole && !widget.fromTaskAssignment,
           child: Align(
             alignment: FractionalOffset.bottomCenter,
             child: AppElevatedButton(
