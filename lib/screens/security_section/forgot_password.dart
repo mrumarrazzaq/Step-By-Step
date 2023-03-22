@@ -6,6 +6,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:stepbystep/screens/security_section/registeration_screen2.dart';
+import 'package:stepbystep/screens/security_section/signIn_screen2.dert.dart';
 
 import 'signIn_screen.dart';
 import 'registration_screen.dart';
@@ -65,7 +67,12 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 30),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const Text(
+                'Email',
+                style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14.0),
+              ),
               Container(
                 margin: const EdgeInsets.symmetric(vertical: 10.0),
                 child: TextFormField(
@@ -77,15 +84,15 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                     enabled: _isLoading ? false : true,
 //                          labelText: 'Email',
                     prefixText: '  ',
-                    label:
-                        Text('Email', style: TextStyle(color: AppColor.black)),
+                    // label:
+                    //     Text('Email', style: TextStyle(color: AppColor.black),),
                     hintText: 'Enter email address',
                     // labelStyle: const TextStyle(fontSize: 20.0),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30.0),
+                      borderRadius: BorderRadius.circular(10.0),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30.0),
+                      borderRadius: BorderRadius.circular(10.0),
                       borderSide: BorderSide(color: AppColor.black, width: 1.5),
                     ),
                     errorStyle: TextStyle(color: AppColor.red, fontSize: 15),
@@ -99,10 +106,10 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               ),
               Material(
                 color: AppColor.orange,
-                borderRadius: BorderRadius.circular(30.0),
+                borderRadius: BorderRadius.circular(10.0),
                 clipBehavior: Clip.antiAlias,
                 child: MaterialButton(
-                  minWidth: _isLoading ? 50.0 : 160.0,
+                  minWidth: _isLoading ? 50.0 : double.infinity,
                   elevation: 3.0,
                   height: 40.0,
                   padding: const EdgeInsets.symmetric(vertical: 10.0),
@@ -132,48 +139,48 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                         ),
                 ),
               ),
-              Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text("Don't have Account? "),
-                      TextButton(
-                        onPressed: () => {
-                          Navigator.pushAndRemoveUntil(
-                              context,
-                              PageRouteBuilder(
-                                pageBuilder: (context, a, b) =>
-                                    const RegistrationScreen(),
-                                transitionDuration: const Duration(seconds: 1),
-                              ),
-                              (route) => false)
-                        },
-                        child: const Text('Register'),
-                      )
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text("Already have an account? "),
-                      TextButton(
-                          onPressed: () => {
-                                Navigator.pushAndRemoveUntil(
-                                    context,
-                                    PageRouteBuilder(
-                                      pageBuilder: (context, a, b) =>
-                                          const SignInScreen(),
-                                      transitionDuration:
-                                          const Duration(seconds: 1),
-                                    ),
-                                    (route) => false)
-                              },
-                          child: const Text('SignIn'))
-                    ],
-                  ),
-                ],
-              )
+              // Column(
+              //   children: [
+              //     Row(
+              //       mainAxisAlignment: MainAxisAlignment.center,
+              //       children: [
+              //         const Text("Don't have Account? "),
+              //         TextButton(
+              //           onPressed: () => {
+              //             Navigator.pushAndRemoveUntil(
+              //                 context,
+              //                 PageRouteBuilder(
+              //                   pageBuilder: (context, a, b) =>
+              //                       const RegistrationScreen2(),
+              //                   transitionDuration: const Duration(seconds: 1),
+              //                 ),
+              //                 (route) => false)
+              //           },
+              //           child: const Text('Register'),
+              //         )
+              //       ],
+              //     ),
+              //     Row(
+              //       mainAxisAlignment: MainAxisAlignment.center,
+              //       children: [
+              //         const Text("Already have an account? "),
+              //         TextButton(
+              //           onPressed: () => {
+              //             Navigator.pushAndRemoveUntil(
+              //                 context,
+              //                 PageRouteBuilder(
+              //                   pageBuilder: (context, a, b) =>
+              //                       const SignInScreen2(),
+              //                   transitionDuration: const Duration(seconds: 1),
+              //                 ),
+              //                 (route) => false)
+              //           },
+              //           child: const Text('Sign in'),
+              //         )
+              //       ],
+              //     ),
+              //   ],
+              // ),
             ],
           ),
         ),

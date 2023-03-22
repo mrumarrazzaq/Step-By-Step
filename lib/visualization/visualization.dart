@@ -8,9 +8,16 @@ import 'package:stepbystep/visualization/doughnut_chart.dart';
 import 'package:stepbystep/visualization/line_carts.dart';
 
 class Visualization extends StatefulWidget {
-  Visualization({Key? key, required this.workspaceName, required this.userName})
-      : super(key: key);
+  Visualization({
+    Key? key,
+    required this.workspaceCode,
+    required this.workspaceName,
+    required this.userEmail,
+    required this.userName,
+  }) : super(key: key);
+  String workspaceCode;
   String workspaceName;
+  String userEmail;
   String userName;
   @override
   State<Visualization> createState() => _VisualizationState();
@@ -254,6 +261,8 @@ class _VisualizationState extends State<Visualization> {
                     ],
                   ),
                   LineChart(
+                    workspaceCode: widget.workspaceCode,
+                    userEmail: widget.userEmail,
                     mainFilterValue: mainFilterValue,
                     subFilterValue: subFilterValue,
                   ),

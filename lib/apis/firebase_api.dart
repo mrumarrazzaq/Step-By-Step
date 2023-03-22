@@ -71,4 +71,26 @@ class FireBaseApi {
         collectionName: mainCollection,
         docName: mainDocument);
   }
+
+  static Future<String> getDocIdByField(
+      {required String collectionName,
+      required String fieldName,
+      required String fieldValue}) async {
+    String documentID = '';
+
+    CollectionReference doc =
+        FirebaseFirestore.instance.collection(collectionName);
+
+    QuerySnapshot querySnapshot =
+        await doc.where(fieldName, isEqualTo: fieldValue).get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      documentID = querySnapshot.docs.first.id;
+      print('Document ID: $documentID');
+      return documentID;
+    } else {
+      print('No matching documents found');
+      return documentID;
+    }
+  }
 }

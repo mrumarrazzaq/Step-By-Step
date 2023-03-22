@@ -223,6 +223,7 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
 
   @override
   void initState() {
+    log('WORKSPACE MEMBER HANDLER INIT CALLED');
     setValues();
     getAddedMembers(tH: tH, tA: tA);
     getAddedRoles();
@@ -253,6 +254,7 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
 
   @override
   Widget build(BuildContext context) {
+    log('WORKSPACE MEMBER HANDLER BUILD CALLED');
     return Column(
       children: [
         //Search Bar
@@ -667,6 +669,7 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
                                     visible: widget.reportControl,
                                     child: ListTile(
                                       onTap: () async {
+                                        print('CARD NO 1');
                                         String userName =
                                             await AppFunctions.getNameByEmail(
                                                 email: storedMembersData[i]
@@ -677,8 +680,12 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
                                             MaterialPageRoute(
                                               builder: (context) =>
                                                   Visualization(
+                                                workspaceCode:
+                                                    widget.workspaceCode,
                                                 workspaceName:
                                                     widget.workspaceName,
+                                                userEmail: storedMembersData[i]
+                                                    ['Workspace Member'],
                                                 userName: userName,
                                               ),
                                             ),
@@ -897,6 +904,7 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
                                     visible: widget.reportControl,
                                     child: ListTile(
                                       onTap: () async {
+                                        print('CARD NO 2');
                                         String userName =
                                             await AppFunctions.getNameByEmail(
                                                 email: storedMembersData[i]
@@ -907,9 +915,13 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
                                             MaterialPageRoute(
                                               builder: (context) =>
                                                   Visualization(
+                                                workspaceCode:
+                                                    widget.workspaceCode,
                                                 workspaceName:
                                                     widget.workspaceName,
                                                 userName: userName,
+                                                userEmail: storedMembersData[i]
+                                                    ['Workspace Member'],
                                               ),
                                             ),
                                           );

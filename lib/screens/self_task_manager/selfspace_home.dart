@@ -7,6 +7,7 @@ import 'package:date_format/date_format.dart';
 import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_swipe_action_cell/flutter_swipe_action_cell.dart';
+import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:stepbystep/calc.dart';
@@ -59,14 +60,16 @@ class _SelfSpaceHomeState extends State<SelfSpaceHome> {
           child: Column(
             children: [
               // TextButton(
-              //     onPressed: () {
-              //       Navigator.push(
-              //           context,
-              //           MaterialPageRoute(
-              //             builder: (context) => Calc(),
-              //           ));
-              //     },
-              //     child: Text('Press')),
+              //   onPressed: () {
+              //     Navigator.push(
+              //       context,
+              //       MaterialPageRoute(
+              //         builder: (context) => Calc(),
+              //       ),
+              //     );
+              //   },
+              //   child: Text('Press'),
+              // ),
               ListTile(
                 title: const Text('See Previous Date Task'),
                 textColor: AppColor.black,
@@ -85,19 +88,24 @@ class _SelfSpaceHomeState extends State<SelfSpaceHome> {
                 // ),
               ),
               Lottie.asset(repeat: false, 'animations/black-divider.json'),
-              DatePicker(
-                initialSelectedDate,
-                initialSelectedDate: initialSelectedDate,
-                selectionColor: Colors.black,
-                selectedTextColor: Colors.white,
-                width: 60,
-                onDateChange: (dateTime) {
-                  setState(() {
-                    dateFilter = formatDate(dateTime, [yyyy, '-', mm, '-', dd]);
-                    log(dateFilter);
-                  });
-                },
+              Visibility(
+                visible: true,
+                child: DatePicker(
+                  initialSelectedDate,
+                  initialSelectedDate: initialSelectedDate,
+                  selectionColor: Colors.black,
+                  selectedTextColor: Colors.white,
+                  width: 60,
+                  onDateChange: (dateTime) {
+                    setState(() {
+                      dateFilter =
+                          formatDate(dateTime, [yyyy, '-', mm, '-', dd]);
+                      log(dateFilter);
+                    });
+                  },
+                ),
               ),
+
               // FlutterDatePickerTimeline(
               //   initialSelectedDate: DateTime.now(),
               //   startDate: DateTime.now(),
@@ -332,7 +340,7 @@ class TaskTile extends StatelessWidget {
                           : TextDecoration.lineThrough),
                 ),
                 subtitle: Text(
-                  task['taskTime'], //taskDescription
+                  '${task['taskDate']}  ${task['taskTime']}', //taskDescription
                   style: TextStyle(
                       decoration: task['taskStatus'] == 'TODO'
                           ? TextDecoration.none

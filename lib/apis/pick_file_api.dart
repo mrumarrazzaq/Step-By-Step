@@ -25,6 +25,42 @@ class PickFileApi {
     return url;
   }
 
+  static Future<String> pickImageSpecial(ImageSource imageSource) async {
+    String image = '';
+    final ImagePicker picker = ImagePicker();
+    final result = await picker.pickImage(
+      source: imageSource,
+    );
+    final path = result!.path;
+    log('------------------------------------');
+    log('Image Path : $path');
+    image = path;
+    String imageName = path.split('/').last;
+    log(imageName);
+    String url =
+        await uploadImageToSpecifiedLocation('profileImages', path, imageName);
+    return url;
+  }
+
+  static Future<String> uploadImageToSpecifiedLocation(
+      String directoryName, String path, String imageName) async {
+    String url = '';
+    FirebaseStorage storage = FirebaseStorage.instance;
+    Reference ref = storage.ref().child("$directoryName/$currentUserEmail");
+    UploadTask uploadTask = ref.putFile(File(path));
+    await uploadTask.whenComplete(() async {
+      url = await ref.getDownloadURL();
+      log('----------------------------------');
+      log('url : $url');
+      return url;
+    }).catchError((onError) {
+      log('---------------------------------------');
+      log('Error while uploading image');
+      log(onError);
+    });
+    return url;
+  }
+
   static Future<String> uploadImage(String path, String imageName) async {
     String url = '';
     FirebaseStorage storage = FirebaseStorage.instance;

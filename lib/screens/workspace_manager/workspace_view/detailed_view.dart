@@ -153,7 +153,9 @@ class _DetailedViewState extends State<DetailedView> {
                             if (allowedMembers
                                 .contains(storedUserData[i]['User Email'])) ...[
                               Connector(
+                                workspaceCode: widget.workspaceCode,
                                 workspaceName: widget.workspaceName,
+                                email: storedUserData[i]['User Email'],
                                 name: storedUserData[i]['User Name'],
                                 imageUrl: storedUserData[i]['Image URL'],
                               ),
@@ -238,12 +240,16 @@ class Root extends StatelessWidget {
 class Connector extends StatelessWidget {
   Connector({
     Key? key,
+    required this.workspaceCode,
     required this.workspaceName,
     required this.name,
+    required this.email,
     required this.imageUrl,
   }) : super(key: key);
+  String workspaceCode;
   String workspaceName;
   String name;
+  String email;
   String imageUrl;
   @override
   Widget build(BuildContext context) {
@@ -277,8 +283,11 @@ class Connector extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) =>
-                    Visualization(workspaceName: workspaceName, userName: name),
+                builder: (context) => Visualization(
+                    workspaceCode: workspaceCode,
+                    userEmail: email,
+                    workspaceName: workspaceName,
+                    userName: name),
               ),
             );
           },

@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import 'package:stepbystep/colors.dart';
+import 'package:stepbystep/screens/security_section/registeration_screen2.dart';
 import 'package:stepbystep/screens/security_section/registration_screen.dart';
 
 class OnBoardingScreen extends StatefulWidget {
@@ -167,7 +168,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const RegistrationScreen(),
+                    builder: (context) => const RegistrationScreen2(),
                   ),
                 );
               },

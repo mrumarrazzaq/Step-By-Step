@@ -100,14 +100,14 @@ class _CalcState extends State<Calc> {
                       .doc('Month ${DateTime.now().month.toString()}')
                       .collection('Weeks')
                       .doc('Week $week')
-                      .collection('Days')
+                      .collection('Day ${DateTime.now().day.toString()}')
                       .doc(DateTime.now().toString())
                       .set(json);
 
                   await FirebaseFirestore.instance
                       .collection('Report Report')
                       .doc(
-                          'idno ${DateTime.now().year.toString()} ${DateTime.now().month.toString()} $week ${DateTime.now().day.toString()}')
+                          'idno y${DateTime.now().year.toString()} m${DateTime.now().month.toString()} w$week d${DateTime.now().day.toString()}')
                       .set(json);
                 },
                 child: Text('Press to save data')),

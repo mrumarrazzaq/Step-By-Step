@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -5,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:stepbystep/authentication/authentication_with_google.dart';
@@ -12,6 +15,7 @@ import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
 import 'package:stepbystep/screens/privacy_policy.dart';
 import 'package:stepbystep/screens/security_section/signIn_screen.dart';
+import 'package:stepbystep/screens/security_section/signIn_screen2.dert.dart';
 
 class AppDrawer extends StatefulWidget {
   const AppDrawer({Key? key}) : super(key: key);
@@ -107,18 +111,26 @@ class _AppDrawerState extends State<AppDrawer> {
               onPressed: () async {
                 signInWith == 'GOOGLE' ? googleSignOut() : signOut();
                 log('SignOut called');
-                await Fluttertoast.showToast(
-                  msg: 'User Logout Successfully', // message
-                  toastLength: Toast.LENGTH_SHORT, // length
-                  gravity: ToastGravity.BOTTOM, // location
+                Get.snackbar(
+                  "Logout",
+                  "You logout successfully",
+                  colorText: Colors.white,
+                  icon: const Icon(Icons.person, color: Colors.white),
+                  snackPosition: SnackPosition.BOTTOM,
                   backgroundColor: Colors.green,
                 );
+                // await Fluttertoast.showToast(
+                //   msg: 'User Logout Successfully', // message
+                //   toastLength: Toast.LENGTH_SHORT, // length
+                //   gravity: ToastGravity.BOTTOM, // location
+                //   backgroundColor: Colors.green,
+                // );
                 setUserStatus(status: 'Offline');
                 if (mounted) {
                   Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const SignInScreen(),
+                        builder: (context) => const SignInScreen2(),
                       ),
                       (route) => false);
                 }

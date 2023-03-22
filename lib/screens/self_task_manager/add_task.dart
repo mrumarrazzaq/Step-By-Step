@@ -129,7 +129,7 @@ class _TaskState extends State<Task> {
                       body: _taskTitleController.text,
                       payload: _taskDescriptionController.text,
                       scheduledDate: DateTime.parse(dateTimeString).add(
-                        const Duration(microseconds: 10),
+                        const Duration(milliseconds: 100),
                       ),
                     );
                   } catch (e) {

@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_intro/flutter_intro.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:get/get.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 
 import 'package:provider/provider.dart';
@@ -161,7 +162,7 @@ class _MyAppState extends State<MyApp> {
     return ChangeNotifierProvider(
       create: (context) => GoogleSignInProvider(),
       child: OverlaySupport.global(
-        child: MaterialApp(
+        child: GetMaterialApp(
           title: 'Step By Step',
           debugShowCheckedModeBanner: false,
           builder: BotToastInit(), //1. call BotToastInit

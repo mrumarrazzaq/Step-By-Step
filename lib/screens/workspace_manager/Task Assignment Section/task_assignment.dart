@@ -10,6 +10,7 @@ import 'package:stepbystep/apis/app_functions.dart';
 import 'package:stepbystep/apis/firebase_api.dart';
 import 'package:stepbystep/apis/messege_notification_api.dart';
 import 'package:stepbystep/apis/pick_file_api.dart';
+import 'package:stepbystep/black_box.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
 import 'package:stepbystep/screens/workspace_manager/task_view.dart';
@@ -1352,6 +1353,19 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
                                     jsonData: taskJson,
                                   );
 
+                                  String taskDocId =
+                                      await FireBaseApi.getDocIdByField(
+                                          collectionName:
+                                              '${widget.email} ${widget.workspaceCode}',
+                                          fieldName: 'Task Title',
+                                          fieldValue: titleController.text);
+                                  if (taskDocId.isNotEmpty) {
+                                    BlackBox.createReport(
+                                        workspaceCode: widget.workspaceCode,
+                                        collectionName:
+                                            'Report ${widget.email} ${widget.workspaceCode}',
+                                        taskDocId: taskDocId);
+                                  }
                                   final taskLogJson = {
                                     'Workspace Task Code':
                                         '${widget.email} ${widget.workspaceCode}',
@@ -1360,7 +1374,6 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
                                     'REVIEW': 0,
                                     'Created At': DateTime.now(),
                                   };
-
                                   await FireBaseApi.saveDataIntoFireStore(
                                     workspaceCode: widget.workspaceCode,
                                     collection: 'Workspaces Task Log',
@@ -1379,6 +1392,7 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
                                       title: 'Task TODO 📝',
                                       body:
                                           '$name assign you task ${isDateTimeChecked ? 'Due Date is : \"$_date\"' : 'with \"No Due Date\"'} in ${widget.workspaceName} workspace.');
+
                                   if (mounted) {
                                     titleController.clear();
                                     descriptionController.clear();

@@ -13,6 +13,7 @@ import 'package:lottie/lottie.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:stepbystep/apis/app_functions.dart';
+import 'package:stepbystep/apis/firebase_api.dart';
 import 'package:stepbystep/apis/messege_notification_api.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
@@ -453,7 +454,21 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
               .collection(workspaceTaskCode)
               .doc(docId)
               .delete();
-          await FirebaseStorage.instance.refFromURL(fileURL).delete();
+          String reportId = await FireBaseApi.getDocIdByField(
+              collectionName:
+                  'Report ${widget.userEmail} ${widget.workspaceCode}',
+              fieldName: 'Task Id',
+              fieldValue: docId);
+          await FirebaseFirestore.instance
+              .collection('Report ${widget.userEmail} ${widget.workspaceCode}')
+              .doc(reportId)
+              .delete();
+
+          if(fileURL.isNotEmpty)
+            {
+              await FirebaseStorage.instance.refFromURL(fileURL).delete();
+            }
+          
           await Fluttertoast.showToast(
             msg: 'Task Deleted Successfully', // message
             toastLength: Toast.LENGTH_SHORT, // length
