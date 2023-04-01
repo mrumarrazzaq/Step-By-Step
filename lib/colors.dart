@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class AppColor {
-  static Color orange = const Color(0xFFFF4C00);
-  static Color lightOrange = const Color(0xffffb38a);
+  static Color orange = const Color(0xFFFF4C00); // 0xffF26E01
+  static Color lightOrange = const Color(0xffffbf8a);
   static Color chatBubbleColor = const Color(0xFFfcae8d);
   static Color white = const Color(0xFFFFFFFF);
   static Color scaffoldColor = const Color(0xFFFFFFFF);

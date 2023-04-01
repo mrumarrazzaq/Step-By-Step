@@ -1,9 +1,11 @@
 import 'dart:developer';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'package:stepbystep/colors.dart';
@@ -44,6 +46,8 @@ class _WorkspaceTaskHolderState extends State<WorkspaceTaskHolder> {
   Color tileColor = AppChartColor.blue;
   String imageURL = '';
   String assignedRole = '';
+  String upperRole = '';
+  int upperLevel = 0;
 
   bool leftButton = false;
   bool rightButton = true;
@@ -96,6 +100,7 @@ class _WorkspaceTaskHolderState extends State<WorkspaceTaskHolder> {
         .snapshots();
     fetchData();
     getAssignRoleData();
+    getUpperLevelRole();
     try {
       Future.delayed(const Duration(milliseconds: 3000), () {
         setState(() {
@@ -216,6 +221,24 @@ class _WorkspaceTaskHolderState extends State<WorkspaceTaskHolder> {
     // }).onError((e) => print(e));
   }
 
+  getUpperLevelRole() async {
+    log('Upper Role Data is fetching');
+    try {
+      await FirebaseFirestore.instance
+          .collection('User Data')
+          .doc(widget.workspaceOwnerEmail)
+          .collection('Workspace Roles')
+          .doc(widget.workspaceCode)
+          .get()
+          .then((ds) {
+        upperRole = ds['Role'];
+        upperLevel = ds['Level'];
+      });
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
   void listenForRolesData() {
     print('listenForData..............');
     try {
@@ -275,18 +298,28 @@ class _WorkspaceTaskHolderState extends State<WorkspaceTaskHolder> {
                       },
                       icon: const Icon(Icons.arrow_back),
                     ),
-                    CircleAvatar(
-                      backgroundColor: AppColor.orange,
-                      radius: 25,
-                      foregroundImage:
-                          imageURL.isEmpty ? null : NetworkImage(imageURL),
-                      child: Center(
-                        child: Text(
-                          widget.workspaceOwnerName[0],
-                          style: TextStyle(
-                            fontWeight: FontWeight.w800,
-                            fontSize: _fontSize,
-                            color: AppColor.white,
+                    GestureDetector(
+                      onTap: () {
+                        profileViewDialog(
+                          name: widget.workspaceOwnerName,
+                          role: upperRole,
+                          level: upperLevel,
+                          imageURL: imageURL,
+                        );
+                      },
+                      child: CircleAvatar(
+                        backgroundColor: AppColor.orange,
+                        radius: 25,
+                        foregroundImage:
+                            imageURL.isEmpty ? null : NetworkImage(imageURL),
+                        child: Center(
+                          child: Text(
+                            widget.workspaceOwnerName[0],
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: _fontSize,
+                              color: AppColor.white,
+                            ),
                           ),
                         ),
                       ),
@@ -296,25 +329,35 @@ class _WorkspaceTaskHolderState extends State<WorkspaceTaskHolder> {
               ),
               title: Visibility(
                 visible: !isVisible,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.workspaceOwnerName,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 18,
+                child: GestureDetector(
+                  onTap: () {
+                    profileViewDialog(
+                      name: widget.workspaceOwnerName,
+                      role: upperRole,
+                      level: upperLevel,
+                      imageURL: imageURL,
+                    );
+                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.workspaceOwnerName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 18,
+                        ),
                       ),
-                    ),
-                    Text(
-                      widget.workspaceOwnerEmail,
-                      style: TextStyle(
-                        color: AppColor.grey,
-                        fontSize: 16,
+                      Text(
+                        widget.workspaceOwnerEmail,
+                        style: TextStyle(
+                          color: AppColor.grey,
+                          fontSize: 16,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               // bottom: PreferredSize(
@@ -1114,6 +1157,82 @@ class _WorkspaceTaskHolderState extends State<WorkspaceTaskHolder> {
                 ),
               ),
             ),
+    );
+  }
+
+  profileViewDialog({
+    required String name,
+    required String role,
+    required int level,
+    required String imageURL,
+  }) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(10.0),
+          ),
+        ),
+        titlePadding: imageURL.isEmpty ? null : const EdgeInsets.all(0),
+        contentPadding: const EdgeInsets.all(0),
+        alignment: Alignment.center,
+        backgroundColor: AppColor.lightOrange,
+        title: ClipRRect(
+          borderRadius: const BorderRadius.only(
+            topRight: Radius.circular(10.0),
+            topLeft: Radius.circular(10.0),
+          ),
+          child: CachedNetworkImage(
+            imageUrl: imageURL.toString(),
+            // maxWidthDiskCache: 500,
+            // maxHeightDiskCache: 500,
+            height: imageURL.isEmpty ? 80 : 200,
+            width: imageURL.isEmpty ? 80 : double.infinity,
+            fit: BoxFit.cover,
+            placeholder: (context, url) => Container(
+              height: 200,
+              width: double.infinity,
+              color: AppColor.white,
+            ),
+            errorWidget: (context, url, error) => Container(
+              height: 80,
+              width: 80,
+              decoration: BoxDecoration(
+                color: AppColor.orange,
+                shape: BoxShape.circle,
+                border: Border.all(width: 2, color: Colors.white),
+              ),
+              child: Align(
+                alignment: Alignment.center,
+                child: Image.asset(
+                  'logos/user.png',
+                  width: 50,
+                  color: AppColor.white,
+                ),
+              ),
+            ),
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              name,
+              style: GoogleFonts.kanit(
+                fontWeight: FontWeight.w500,
+                fontSize: 20,
+              ),
+            ),
+            Text(
+              'Workspace $role',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.titilliumWeb(),
+            ),
+            const SizedBox(height: 5),
+          ],
+        ),
+      ),
     );
   }
 }

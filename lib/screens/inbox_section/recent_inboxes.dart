@@ -186,16 +186,17 @@ class CustomRecentChatsTile extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => InboxScreen(
-                name: name,
-                currentStatus: currentStatus,
-                imageURL: imagePath,
-                receiverEmail: email,
-                internetConnectionStatus: false,
-              ),
-            ));
+          context,
+          MaterialPageRoute(
+            builder: (context) => InboxScreen(
+              name: name,
+              currentStatus: currentStatus,
+              imageURL: imagePath,
+              receiverEmail: email,
+              internetConnectionStatus: false,
+            ),
+          ),
+        );
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -262,7 +263,11 @@ class CustomRecentChatsTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(30.0),
               ),
               child: Center(
-                  child: Text('0', style: TextStyle(color: AppColor.white))),
+                child: Text(
+                  '0',
+                  style: TextStyle(color: AppColor.white),
+                ),
+              ),
             ),
           ),
         ],

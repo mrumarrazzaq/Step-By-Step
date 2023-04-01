@@ -28,13 +28,14 @@ class DetailedView extends StatefulWidget {
 class _DetailedViewState extends State<DetailedView> {
   List<dynamic> membersList = [];
   List<dynamic> allowedMembers = [];
-
+  bool isLoading = true;
   final Stream<QuerySnapshot> userRecords = FirebaseFirestore.instance
       .collection('User Data')
       // .orderBy('Created At', descending: true)
       .snapshots();
 
   String assignedRole = '';
+  double _width = 0;
   getWorkspaceMembers() async {
     final value = await FirebaseFirestore.instance
         .collection("Workspaces")
@@ -43,6 +44,7 @@ class _DetailedViewState extends State<DetailedView> {
 
     setState(() {
       membersList = value.data()!['Workspace Members'];
+      isLoading = true;
       print(membersList.toString());
     });
     for (var member in membersList) {
@@ -65,7 +67,10 @@ class _DetailedViewState extends State<DetailedView> {
         allowedMembers.add(email);
       }
     });
-    setState(() {});
+    setState(() {
+      isLoading = false;
+    });
+    print('Allowed Members');
     print(allowedMembers);
   }
 
@@ -73,6 +78,11 @@ class _DetailedViewState extends State<DetailedView> {
   void initState() {
     super.initState();
     getWorkspaceMembers();
+    Future.delayed(const Duration(milliseconds: 500), () {
+      setState(() {
+        _width = double.infinity;
+      });
+    });
   }
 
   @override
@@ -125,53 +135,71 @@ class _DetailedViewState extends State<DetailedView> {
               // crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Root(role: widget.role),
-                StreamBuilder<QuerySnapshot>(
-                  stream: userRecords,
-                  builder: (BuildContext context,
-                      AsyncSnapshot<QuerySnapshot> snapshot) {
-                    if (snapshot.hasError) {
-                      print('Something went wrong');
-                    }
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(
-                          child: CircularProgressIndicator(
-                        color: AppColor.orange,
-                        strokeWidth: 2.0,
-                      ));
-                    }
-                    if (snapshot.hasData) {
-                      List storedUserData = [];
-
-                      snapshot.data!.docs.map((DocumentSnapshot document) {
-                        Map id = document.data() as Map<String, dynamic>;
-                        storedUserData.add(id);
-                        id['id'] = document.id;
-                      }).toList();
-                      return Column(
-                        children: [
-                          for (int i = 0; i < storedUserData.length; i++) ...[
-                            if (allowedMembers
-                                .contains(storedUserData[i]['User Email'])) ...[
-                              Connector(
-                                workspaceCode: widget.workspaceCode,
-                                workspaceName: widget.workspaceName,
-                                email: storedUserData[i]['User Email'],
-                                name: storedUserData[i]['User Name'],
-                                imageUrl: storedUserData[i]['Image URL'],
+                isLoading
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 160.0,
+                          vertical: 20.0,
+                        ),
+                        child: SizedBox(
+                          height: 40,
+                          child:
+                              CircularProgressIndicator(color: AppColor.orange),
+                        ),
+                      )
+                    : StreamBuilder<QuerySnapshot>(
+                        stream: userRecords,
+                        builder: (BuildContext context,
+                            AsyncSnapshot<QuerySnapshot> snapshot) {
+                          if (snapshot.hasError) {
+                            print('Something went wrong');
+                          }
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Center(
+                              child: CircularProgressIndicator(
+                                color: AppColor.orange,
+                                strokeWidth: 2.0,
                               ),
-                            ],
-                          ],
-                        ],
-                      );
-                    }
-                    return Center(
-                      child: CircularProgressIndicator(
-                        color: AppColor.orange,
-                        strokeWidth: 2.0,
+                            );
+                          }
+                          if (snapshot.hasData) {
+                            List storedUserData = [];
+
+                            snapshot.data!.docs
+                                .map((DocumentSnapshot document) {
+                              Map id = document.data() as Map<String, dynamic>;
+                              storedUserData.add(id);
+                              id['id'] = document.id;
+                            }).toList();
+                            return Column(
+                              children: [
+                                for (int i = 0;
+                                    i < storedUserData.length;
+                                    i++) ...[
+                                  if (allowedMembers.contains(
+                                      storedUserData[i]['User Email'])) ...[
+                                    Connector(
+                                      workspaceCode: widget.workspaceCode,
+                                      workspaceName: widget.workspaceName,
+                                      email: storedUserData[i]['User Email'],
+                                      name: storedUserData[i]['User Name'],
+                                      imageUrl: storedUserData[i]['Image URL'],
+                                      width: _width,
+                                    ),
+                                  ],
+                                ],
+                              ],
+                            );
+                          }
+                          return Center(
+                            child: CircularProgressIndicator(
+                              color: AppColor.orange,
+                              strokeWidth: 2.0,
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
               ],
             ),
           ],
@@ -221,13 +249,15 @@ class Root extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.only(top: 120.0),
+          padding: const EdgeInsets.only(top: 120.0, right: 2, left: 2),
           child: Center(
             child: Text(
               role,
+              textAlign: TextAlign.center,
               style: GoogleFonts.kanit(
-                fontSize: 28,
+                fontSize: 25,
                 fontWeight: FontWeight.bold,
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               ),
             ),
           ),
@@ -245,111 +275,157 @@ class Connector extends StatelessWidget {
     required this.name,
     required this.email,
     required this.imageUrl,
+    required this.width,
   }) : super(key: key);
   String workspaceCode;
   String workspaceName;
   String name;
   String email;
   String imageUrl;
+  double width;
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 48, left: 40.0),
-          child: DottedLine(
-            direction: Axis.horizontal,
-            lineLength: double.infinity,
-            lineThickness: 5.0,
-            dashLength: 8.0,
-            dashColor: Colors.black,
-            dashGradient: [AppColor.grey, AppColor.grey],
-            dashRadius: 0.0,
-            dashGapLength: 7.0,
-            dashGapColor: Colors.transparent,
-            dashGapGradient: [AppColor.transparent, AppColor.transparent],
-            dashGapRadius: 0.0,
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(left: 32.0, top: 40),
-          child: CircleAvatar(
-            radius: 10,
-            backgroundColor: AppColor.grey,
-          ),
-        ),
-        GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => Visualization(
-                    workspaceCode: workspaceCode,
-                    userEmail: email,
-                    workspaceName: workspaceName,
-                    userName: name),
-              ),
-            );
-          },
-          child: Card(
-            margin:
-                const EdgeInsets.only(left: 80, bottom: 10, top: 15, right: 10),
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(20),
-                bottomLeft: Radius.circular(20),
-                topRight: Radius.circular(5),
-                bottomRight: Radius.circular(5),
-              ),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 1000),
+      curve: Curves.fastOutSlowIn,
+      width: width,
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 48, left: 40.0),
+            child: DottedLine(
+              direction: Axis.horizontal,
+              lineLength: double.infinity,
+              lineThickness: 5.0,
+              dashLength: 8.0,
+              dashColor: Colors.black,
+              dashGradient: [AppColor.grey, AppColor.grey],
+              dashRadius: 0.0,
+              dashGapLength: 7.0,
+              dashGapColor: Colors.transparent,
+              dashGapGradient: [AppColor.transparent, AppColor.transparent],
+              dashGapRadius: 0.0,
             ),
-            child: ClipPath(
-              clipper: ShapeBorderClipper(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 32.0, top: 40),
+            child: CircleAvatar(
+              radius: 10,
+              backgroundColor: AppColor.grey,
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Visualization(
+                      workspaceCode: workspaceCode,
+                      userEmail: email,
+                      workspaceName: workspaceName,
+                      userName: name),
+                ),
+              );
+            },
+            child: Card(
+              margin: const EdgeInsets.only(
+                left: 80,
+                bottom: 10,
+                top: 15,
+                right: 10,
+              ),
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  bottomLeft: Radius.circular(20),
+                  topRight: Radius.circular(5),
+                  bottomRight: Radius.circular(5),
                 ),
               ),
-              child: Container(
-                height: 70,
-                decoration: BoxDecoration(
-                  border: Border(
-                    left: BorderSide(color: AppColor.orange, width: 10),
+              child: ClipPath(
+                clipper: ShapeBorderClipper(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      child: CircleAvatar(
-                        backgroundColor: AppColor.orange.withOpacity(0.2),
-                        radius: 32,
-                        backgroundImage:
-                            imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
+                child: Container(
+                  height: 70,
+                  decoration: BoxDecoration(
+                    border: Border(
+                      left: BorderSide(color: AppColor.orange, width: 10),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10000.0),
+                          child: CachedNetworkImage(
+                              imageUrl: imageUrl,
+                              // maxWidthDiskCache: 500,
+                              // maxHeightDiskCache: 500,
+                              height: 60,
+                              width: 60,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => Container(
+                                    height: 200,
+                                    width: 200,
+                                    color: AppColor.white,
+                                  ),
+                              errorWidget: (context, url, error) => Container(
+                                    height: 80,
+                                    width: 80,
+                                    decoration: BoxDecoration(
+                                      color: AppColor.orange.withOpacity(0.2),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Align(
+                                      alignment: Alignment.center,
+                                      child: Image.asset(
+                                        'logos/user.png',
+                                        width: 50,
+                                        color: AppColor.white,
+                                      ),
+                                    ),
+                                  )),
+                        ),
+                        // CircleAvatar(
+                        //   backgroundColor: AppColor.orange.withOpacity(0.2),
+                        //   radius: 32,
+                        //   backgroundImage: AssetImage(
+                        //     'logos/user.png',
+                        //   ),
+                        //   foregroundImage: imageUrl.isNotEmpty
+                        //       ? NetworkImage(imageUrl)
+                        //       : null,
+                        // ),
                       ),
-                    ),
-                    Text(
-                      name,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 20),
-                    ),
-                    Lottie.asset(
-                        repeat: false, height: 30, 'animations/graph.json'),
-                  ],
+                      Text(
+                        name,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 20),
+                      ),
+                      Lottie.asset(
+                          repeat: false, height: 30, 'animations/graph.json'),
+                    ],
+                  ),
                 ),
               ),
-            ),
 
-            // ListTile(
-            //   minLeadingWidth: 0,
-            //   leading: CircleAvatar(radius: 30, backgroundColor: AppColor.orange),
-            //   title: Text(
-            //     'Umar',
-            //     style: TextStyle(fontWeight: FontWeight.bold),
-            //   ),
-            // ),
+              // ListTile(
+              //   minLeadingWidth: 0,
+              //   leading: CircleAvatar(radius: 30, backgroundColor: AppColor.orange),
+              //   title: Text(
+              //     'Umar',
+              //     style: TextStyle(fontWeight: FontWeight.bold),
+              //   ),
+              // ),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

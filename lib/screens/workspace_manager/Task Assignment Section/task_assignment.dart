@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date_format/date_format.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -195,18 +196,21 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
                       },
                       icon: const Icon(Icons.arrow_back),
                     ),
-                    CircleAvatar(
-                      backgroundColor: AppColor.orange,
-                      radius: _radius,
-                      foregroundImage:
-                          imageURL.isEmpty ? null : NetworkImage(imageURL),
-                      child: Center(
-                        child: Text(
-                          widget.name[0],
-                          style: TextStyle(
-                            fontWeight: FontWeight.w800,
-                            fontSize: _fontSize,
-                            color: AppColor.white,
+                    GestureDetector(
+                      onTap: () {},
+                      child: CircleAvatar(
+                        backgroundColor: AppColor.orange,
+                        radius: _radius,
+                        foregroundImage:
+                            imageURL.isEmpty ? null : NetworkImage(imageURL),
+                        child: Center(
+                          child: Text(
+                            widget.name[0],
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: _fontSize,
+                              color: AppColor.white,
+                            ),
                           ),
                         ),
                       ),
@@ -1441,6 +1445,82 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
               log(_date);
             });
           },
+        ),
+      ),
+    );
+  }
+
+  profileViewDialog({
+    required String name,
+    required String role,
+    required int level,
+    required String imageURL,
+  }) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(10.0),
+          ),
+        ),
+        titlePadding: imageURL.isEmpty ? null : const EdgeInsets.all(0),
+        contentPadding: const EdgeInsets.all(0),
+        alignment: Alignment.center,
+        backgroundColor: AppColor.lightOrange,
+        title: ClipRRect(
+          borderRadius: const BorderRadius.only(
+            topRight: Radius.circular(10.0),
+            topLeft: Radius.circular(10.0),
+          ),
+          child: CachedNetworkImage(
+            imageUrl: imageURL.toString(),
+            // maxWidthDiskCache: 500,
+            // maxHeightDiskCache: 500,
+            height: imageURL.isEmpty ? 80 : 200,
+            width: imageURL.isEmpty ? 80 : double.infinity,
+            fit: BoxFit.cover,
+            placeholder: (context, url) => Container(
+              height: 200,
+              width: double.infinity,
+              color: AppColor.white,
+            ),
+            errorWidget: (context, url, error) => Container(
+              height: 80,
+              width: 80,
+              decoration: BoxDecoration(
+                color: AppColor.orange,
+                shape: BoxShape.circle,
+                border: Border.all(width: 2, color: Colors.white),
+              ),
+              child: Align(
+                alignment: Alignment.center,
+                child: Image.asset(
+                  'logos/user.png',
+                  width: 50,
+                  color: AppColor.white,
+                ),
+              ),
+            ),
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              name,
+              style: GoogleFonts.kanit(
+                fontWeight: FontWeight.w500,
+                fontSize: 20,
+              ),
+            ),
+            Text(
+              'Workspace $role',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.titilliumWeb(),
+            ),
+            const SizedBox(height: 5),
+          ],
         ),
       ),
     );

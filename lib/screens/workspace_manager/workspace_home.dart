@@ -3,9 +3,12 @@ import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:lottie/lottie.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:readmore/readmore.dart';
+import 'package:stepbystep/ads/ad_mob_service.dart';
+import 'package:stepbystep/apis/get_apis.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -29,6 +32,8 @@ class WorkspaceHome extends StatefulWidget {
 class _WorkspaceHomeState extends State<WorkspaceHome> {
   final RefreshController _refreshController =
       RefreshController(initialRefresh: false);
+
+  InterstitialAd? _interstitialAd;
 
   double _height = 0;
   bool isEmpty = false;
@@ -84,6 +89,43 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
     log('-------------------------------------');
   }
 
+  void _loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: AdMobService.interstitialAdUnitId!,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        // Called when an ad is successfully received.
+        onAdLoaded: (ad) {
+          debugPrint('$ad loaded.');
+          // Keep a reference to the ad so you can show it later.
+          _interstitialAd = ad;
+        },
+        // Called when an ad request failed.
+        onAdFailedToLoad: (LoadAdError error) {
+          debugPrint('InterstitialAd failed to load: $error');
+          _interstitialAd = null;
+        },
+      ),
+    );
+  }
+
+  void _showInterstitialAd() {
+    if (_interstitialAd != null) {
+      _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+        onAdDismissedFullScreenContent: (ad) {
+          ad.dispose();
+          _loadInterstitialAd();
+        },
+        onAdFailedToShowFullScreenContent: (ad, err) {
+          ad.dispose();
+          _loadInterstitialAd();
+        },
+      );
+      _interstitialAd!.show();
+      _interstitialAd = null;
+    }
+  }
+
   @override
   void initState() {
     getJoinedWorkspaces();
@@ -94,6 +136,7 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
         _height = 70;
       });
     });
+    _loadInterstitialAd();
     super.initState();
   }
 
@@ -161,7 +204,11 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
                                   workspaceType: storedWorkspaces[i]
                                       ['Workspace Type'],
                                   height: _height,
-                                  onTap: () {
+                                  onTap: () async {
+                                    bool isTrue = await GetApi.isPaidAccount();
+                                    if (!isTrue) {
+                                      _showInterstitialAd();
+                                    }
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -205,7 +252,13 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
                                     workspaceType: storedWorkspaces[i]
                                         ['Workspace Type'],
                                     height: _height,
-                                    onTap: () {
+                                    onTap: () async {
+                                      bool isTrue =
+                                          await GetApi.isPaidAccount();
+                                      if (!isTrue) {
+                                        _showInterstitialAd();
+                                      }
+
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(

@@ -2,19 +2,22 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:lottie/lottie.dart';
-import 'package:stepbystep/apis/app_functions.dart';
-import 'package:stepbystep/apis/messege_notification_api.dart';
+import 'package:stepbystep/ads/ad_mob_service.dart';
 import 'package:stepbystep/config.dart';
-import 'package:stepbystep/screens/404_error.dart';
+import 'package:stepbystep/listeners/firebase_listener.dart';
 
 import 'package:stepbystep/screens/drawer.dart';
 import 'package:stepbystep/screens/home.dart';
-import 'package:stepbystep/screens/inbox_section/recent_inboxes.dart';
 import 'package:stepbystep/screens/inbox_section/recent_workspackes.dart';
 import 'package:stepbystep/screens/motivational_quotes.dart';
 import 'package:stepbystep/screens/ai_bot.dart';
 import 'package:stepbystep/screens/user_profile_section/user_profile.dart';
+
+String sbsName = '';
+String sbsEmail = '';
+String sbsImageURL = '';
 
 class StepByStep extends StatefulWidget {
   const StepByStep({Key? key}) : super(key: key);
@@ -25,7 +28,8 @@ class StepByStep extends StatefulWidget {
 
 class _StepByStepState extends State<StepByStep> with WidgetsBindingObserver {
   int _currentIndex = 0;
-
+  BannerAd? _bannerAd;
+  InterstitialAd? _interstitialAd;
   final List<Widget> screens = [
     const HomeScreen(),
     const MotivationalQuotes(),
@@ -35,11 +39,80 @@ class _StepByStepState extends State<StepByStep> with WidgetsBindingObserver {
     UserProfile()
   ];
 
+  getData() async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('User Data')
+          .doc(currentUserEmail)
+          .get()
+          .then((ds) {
+        sbsName = ds['User Name'];
+        sbsEmail = ds['User Email'];
+        sbsImageURL = ds['Image URL'];
+        log(sbsName);
+        log(sbsEmail);
+        log(sbsImageURL);
+      });
+      setState(() {});
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    _loadBannerAd();
+    _loadInterstitialAd();
+    _showInterstitialAd();
     WidgetsBinding.instance.addObserver(this);
     setUserStatus(status: 'Online');
+  }
+
+  void _loadBannerAd() {
+    _bannerAd = BannerAd(
+      adUnitId: AdMobService.bannerAdUnitId!,
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: AdMobService.bannerAdListener,
+    )..load();
+  }
+
+  void _loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: AdMobService.interstitialAdUnitId!,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        // Called when an ad is successfully received.
+        onAdLoaded: (ad) {
+          debugPrint('$ad loaded.');
+          // Keep a reference to the ad so you can show it later.
+          _interstitialAd = ad;
+        },
+        // Called when an ad request failed.
+        onAdFailedToLoad: (LoadAdError error) {
+          debugPrint('InterstitialAd failed to load: $error');
+          _interstitialAd = null;
+        },
+      ),
+    );
+  }
+
+  void _showInterstitialAd() {
+    if (_interstitialAd != null) {
+      _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+        onAdDismissedFullScreenContent: (ad) {
+          ad.dispose();
+          _loadInterstitialAd();
+        },
+        onAdFailedToShowFullScreenContent: (ad, err) {
+          ad.dispose();
+          _loadInterstitialAd();
+        },
+      );
+      _interstitialAd!.show();
+      _interstitialAd = null;
+    }
   }
 
   @override
@@ -74,50 +147,53 @@ class _StepByStepState extends State<StepByStep> with WidgetsBindingObserver {
             child: Lottie.asset(
                 repeat: false, height: 30, width: 30, 'animations/Info.json'),
           ),
-          // IconButton(
-          //   onPressed: () {
-          //     Navigator.push(
-          //       context,
-          //       MaterialPageRoute(
-          //         builder: (context) => Visualization(
-          //           workspaceName: 'Workspace Name',
-          //           userName: 'User Email',
-          //         ),
-          //       ),
-          //     );
-          //   },
-          //   icon: const Icon(Icons.mobile_friendly),
-          // ),
         ],
       ),
-      drawer: const AppDrawer(),
+      drawer: AppDrawer(),
       body: screens[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_filled),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              IconData(0xf0a9, fontFamily: 'MaterialIcons'),
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // ElevatedButton(
+          //   onPressed: () {
+          //   },
+          //   child: Text('Press'),
+          // ),
+          Visibility(
+            visible: _bannerAd != null,
+            child: SizedBox(
+              height: 52,
+              child: AdWidget(ad: _bannerAd!),
             ),
-            label: 'Quotes',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications_none_outlined),
-            label: 'Inbox',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.adb),
-            label: 'Bot',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Account',
+          BottomNavigationBar(
+            currentIndex: _currentIndex,
+            onTap: (index) => setState(() => _currentIndex = index),
+            type: BottomNavigationBarType.fixed,
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home_filled),
+                label: 'Home',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(
+                  IconData(0xf0a9, fontFamily: 'MaterialIcons'),
+                ),
+                label: 'Quotes',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.notifications_none_outlined),
+                label: 'Inbox',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.adb),
+                label: 'Bot',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person),
+                label: 'Account',
+              ),
+            ],
           ),
         ],
       ),

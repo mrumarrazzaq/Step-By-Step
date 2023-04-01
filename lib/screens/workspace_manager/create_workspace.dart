@@ -24,14 +24,14 @@ class CreateWorkspace extends StatefulWidget {
 class _CreateWorkspaceState extends State<CreateWorkspace> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   List<String> workspaceTypes = <String>[
-    'School',
-    'University',
-    'Software House',
-    'Government Organization',
-    'Private Organization',
-    'Multinational Organization',
-    'Local Organization',
-    'Other'
+    'School', //D
+    'University', //D
+    'Software House', //D
+    'Government Organization', //D
+    'Private Organization', //
+    'Multinational Organization', //D
+    'Local Organization', //D
+    'Other' //
   ];
   String dropdownValue = '';
   late FToast fToast;

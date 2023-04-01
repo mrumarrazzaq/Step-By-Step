@@ -99,7 +99,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 18.0),
+      padding: const EdgeInsets.symmetric(horizontal: 15.0),
       child: SingleChildScrollView(
         child: profileHead(),
       ),
@@ -142,11 +142,16 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                           ),
                           child: Align(
                             alignment: Alignment.center,
-                            child: Text(
-                              widget.userName[0],
-                              style: GoogleFonts.righteous(
-                                  fontSize: 20, color: Colors.white),
+                            child: Image.asset(
+                              'logos/user.png',
+                              width: 70,
+                              color: AppColor.white,
                             ),
+                            // Text(
+                            //   widget.userName[0],
+                            //   style: GoogleFonts.righteous(
+                            //       fontSize: 20, color: Colors.white),
+                            // ),
                           ),
                         )
                       : Container(
@@ -164,6 +169,39 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                         ),
                 ),
               ),
+
+              // ClipRRect(
+              //   borderRadius: BorderRadius.circular(10000.0),
+              //   child: CachedNetworkImage(
+              //       imageUrl: widget.imageURL.toString(),
+              //       // maxWidthDiskCache: 500,
+              //       // maxHeightDiskCache: 500,
+              //       height: 80,
+              //       width: 80,
+              //       fit: BoxFit.cover,
+              //       placeholder: (context, url) => Container(
+              //         height: 200,
+              //         width: 200,
+              //         color: AppColor.white,
+              //       ),
+              //       errorWidget: (context, url, error) => Container(
+              //         height: 80,
+              //         width: 80,
+              //         decoration: BoxDecoration(
+              //           color: AppColor.orange,
+              //           shape: BoxShape.circle,
+              //           border: Border.all(width: 2, color: Colors.white),
+              //         ),
+              //         child: Align(
+              //           alignment: Alignment.center,
+              //           child: Image.asset(
+              //             'logos/user.png',
+              //             width: 50,
+              //             color: AppColor.white,
+              //           ),
+              //         ),
+              //       )),
+              // ),
               //Pick a image from gallery
               Positioned.fill(
                 left: 95.0,
@@ -175,12 +213,13 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                   child: Align(
                     alignment: Alignment.topCenter,
                     child: CircleAvatar(
-                        radius: 18,
-                        backgroundColor: Colors.black,
-                        child: Icon(
-                          Icons.edit,
-                          color: Colors.white,
-                        )),
+                      radius: 18,
+                      backgroundColor: Colors.black,
+                      child: Icon(
+                        Icons.edit,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -190,10 +229,13 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                     SizedBox(
                       height: 85,
                     ),
-                    Text(
-                      widget.userName,
-                      style: GoogleFonts.righteous(
-                          fontSize: 20, color: Colors.white),
+                    Center(
+                      child: Text(
+                        widget.userName,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.righteous(
+                            fontSize: 20, color: Colors.white),
+                      ),
                     ),
                   ],
                 ),
@@ -238,18 +280,21 @@ class _ProfileHeaderState extends State<ProfileHeader> {
           Card(
             child: Padding(
               padding:
-                  const EdgeInsets.symmetric(vertical: 20.0, horizontal: 22),
+                  const EdgeInsets.symmetric(vertical: 20.0, horizontal: 20),
               child: Column(
                 children: [
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => ProfileSectionDetail()));
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              ProfileSectionDetail(name: widget.userName),
+                        ),
+                      );
                     },
                     child: ListTile(
-                      title: Text('Account'),
+                      title: Text('Account Detail'),
                       leading: Icon(
                         Icons.person,
                         size: 30,
@@ -281,32 +326,32 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                       ),
                     ),
                   ),
-                  Divider(
-                    thickness: 2,
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      FirebaseAuth.instance.signOut();
-                      Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => SignInScreen()),
-                          (route) => false);
-                    },
-                    child: ListTile(
-                      title: Text("Log Out"),
-                      leading: Icon(
-                        Icons.logout,
-                        size: 30,
-                        color: Colors.black,
-                      ),
-                      trailing: Icon(
-                        Icons.arrow_forward_ios,
-                        size: 15,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
+                  // Divider(
+                  //   thickness: 2,
+                  // ),
+                  // GestureDetector(
+                  //   onTap: () {
+                  //     FirebaseAuth.instance.signOut();
+                  //     Navigator.pushAndRemoveUntil(
+                  //         context,
+                  //         MaterialPageRoute(
+                  //             builder: (context) => SignInScreen()),
+                  //         (route) => false);
+                  //   },
+                  //   child: ListTile(
+                  //     title: Text("Log Out"),
+                  //     leading: Icon(
+                  //       Icons.logout,
+                  //       size: 30,
+                  //       color: Colors.black,
+                  //     ),
+                  //     trailing: Icon(
+                  //       Icons.arrow_forward_ios,
+                  //       size: 15,
+                  //       color: Colors.black,
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
             ),
@@ -322,4 +367,87 @@ class _ProfileHeaderState extends State<ProfileHeader> {
       ),
     );
   }
+
+  // logoutConfirmationDialog() {
+  //   showDialog(
+  //     context: context,
+  //     builder: (_) => AlertDialog(
+  //       shape: const RoundedRectangleBorder(
+  //         borderRadius: BorderRadius.all(
+  //           Radius.circular(10.0),
+  //         ),
+  //       ),
+  //       alignment: Alignment.center,
+  //       backgroundColor: AppColor.lightOrange,
+  //       title: Center(
+  //         child: CircleAvatar(
+  //           radius: 50,
+  //           backgroundColor: AppColor.white,
+  //           child: Image.asset('assets/logout.png', width: 50),
+  //         ),
+  //       ),
+  //       content: Column(
+  //         mainAxisSize: MainAxisSize.min,
+  //         children: [
+  //           Text(
+  //             'Want to logout?',
+  //             style: GoogleFonts.kanit(
+  //               fontWeight: FontWeight.w500,
+  //               fontSize: 18,
+  //             ),
+  //           ),
+  //           Text(
+  //             'Click on the logout button if you really want to logout?',
+  //             textAlign: TextAlign.center,
+  //             style: GoogleFonts.titilliumWeb(),
+  //           ),
+  //           const SizedBox(height: 12.0),
+  //           Material(
+  //             color: AppColor.orange,
+  //             borderRadius: BorderRadius.circular(10.0),
+  //             clipBehavior: Clip.antiAlias,
+  //             child: MaterialButton(
+  //               onPressed: () {
+  //                 signInWith == 'GOOGLE' ? googleSignOut() : signOut();
+  //                 log('SignOut called');
+  //                 Get.snackbar(
+  //                   "Logout",
+  //                   "You logout successfully",
+  //                   colorText: Colors.white,
+  //                   icon: const Icon(Icons.person, color: Colors.white),
+  //                   snackPosition: SnackPosition.BOTTOM,
+  //                   backgroundColor: Colors.green,
+  //                 );
+  //                 // await Fluttertoast.showToast(
+  //                 //   msg: 'User Logout Successfully', // message
+  //                 //   toastLength: Toast.LENGTH_SHORT, // length
+  //                 //   gravity: ToastGravity.BOTTOM, // location
+  //                 //   backgroundColor: Colors.green,
+  //                 // );
+  //                 setUserStatus(status: 'Offline');
+  //                 if (mounted) {
+  //                   Navigator.pushAndRemoveUntil(
+  //                       context,
+  //                       MaterialPageRoute(
+  //                         builder: (context) => const SignInScreen2(),
+  //                       ),
+  //                           (route) => false);
+  //                 }
+  //               },
+  //               height: 40,
+  //               minWidth: double.infinity,
+  //               color: AppColor.orange,
+  //               elevation: 0.0,
+  //               child: Text(
+  //                 'Logout',
+  //                 style: TextStyle(color: AppColor.white),
+  //               ),
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
+
 }

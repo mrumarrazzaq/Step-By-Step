@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -5,56 +6,34 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:stepbystep/apis/app_functions.dart';
-
+import 'package:numberpicker/numberpicker.dart';
 import 'package:stepbystep/apis/firebase_api.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
-import 'package:stepbystep/screens/workspace_manager/workspace_roles_handler/role_selector.dart';
-import 'package:stepbystep/screens/workspace_manager/workspace_roles_handler/workspace_role_card.dart';
-
+import 'package:stepbystep/dataset/roles_dataset.dart';
 import 'package:stepbystep/widgets/app_elevated_button.dart';
-import 'package:numberpicker/numberpicker.dart';
 import 'package:stepbystep/widgets/app_progress_indicator.dart';
+import 'package:velocity_x/velocity_x.dart';
 
-class WorkspaceRolesHandler extends StatefulWidget {
-  WorkspaceRolesHandler({
-    Key? key,
-    required this.workspaceCode,
-    required this.docId,
-    required this.workspaceName,
-    required this.controlForUser,
-    required this.controlForOwner,
-    required this.createRole,
-    required this.editRole,
-    required this.deleteRole,
-    required this.fromTaskAssignment,
-    required this.fromTaskHolder,
-  }) : super(key: key);
+class RoleSelector extends StatefulWidget {
   String workspaceCode;
-  String docId;
-  String workspaceName;
-  bool controlForUser;
-  bool controlForOwner;
-  bool createRole;
-  bool editRole;
-  bool deleteRole;
-  bool fromTaskAssignment;
-  bool fromTaskHolder;
+  String workspaceType;
+  RoleSelector(
+      {Key? key, required this.workspaceCode, required this.workspaceType})
+      : super(key: key);
+
   @override
-  State<WorkspaceRolesHandler> createState() => _WorkspaceRolesHandlerState();
+  State<RoleSelector> createState() => _RoleSelectorState();
 }
 
-class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
+class _RoleSelectorState extends State<RoleSelector> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   int roleLevel = 1;
+  Color roleColor = Colors.white;
+  bool createRoleLoading = false;
   final roleController = TextEditingController();
   final descriptionController = TextEditingController();
-  late final Stream<QuerySnapshot> rolesRecords;
-  bool createRoleLoading = false;
-  bool createRoleForDecision = false;
-  Color roleColor = Colors.white;
   List<Color> colorList = [
     Colors.white,
     Colors.grey,
@@ -75,207 +54,168 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
     Colors.lightGreen,
   ];
   late String hexColorCode;
-  Future<void> getSpecificRoleData() async {
-    try {
-      String assignedRole = await AppFunctions.getRoleByEmail(
-          email: currentUserEmail.toString(),
-          workspaceCode: widget.workspaceCode);
-      await FirebaseFirestore.instance
-          .collection('${widget.workspaceCode} Roles')
-          .doc(assignedRole)
-          .get()
-          .then((ds) {
-        createRoleForDecision = ds['Create Role'];
-      });
-      setState(() {});
-    } catch (e) {
-      log('Failed to get edit role and delete role.');
-    }
-  }
+
+  List<String> workspaceTypes = <String>[
+    'School', //D
+    'University', //D
+    'Software House', //D
+    'Government Organization', //D
+    'Private Organization', //
+    'Multinational Organization', //D
+    'Local Organization', //D
+    'Other' //
+  ];
+  String dropdownValue = '';
+
+  late dynamic roles;
+
+  // late Map<String, String> jsonMap;
 
   @override
   void initState() {
-    hexColorCode = '0x${roleColor.value.toRadixString(16)}';
-    log('fromTaskHolder ${widget.fromTaskHolder}');
-    log('fromTaskAssignment ${widget.fromTaskAssignment}');
-    rolesRecords = FirebaseFirestore.instance
-        .collection('${widget.workspaceCode} Roles')
-        .orderBy('Role Level', descending: false)
-        .snapshots();
-    // if (!widget.controlForOwner) {
-    //   getSpecificRoleData();
-    // }
     super.initState();
+    roles = json.decode(jsonRoles)[widget.workspaceType];
+    dropdownValue = widget.workspaceType;
+    hexColorCode = '0x${roleColor.value.toRadixString(16)}';
   }
+
+  String search = '';
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Visibility(
-          visible: widget.createRole && !widget.fromTaskAssignment,
-          child: MaterialButton(
-            onPressed: () async {
-              String workspaceType = await AppFunctions.getWorkspaceType(
-                  workspaceCode: widget.workspaceCode);
-              if (mounted) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => RoleSelector(
-                      workspaceCode: widget.workspaceCode,
-                      workspaceType: workspaceType,
+    roles = json.decode(jsonRoles)[widget.workspaceType];
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          '${widget.workspaceType} Roles',
+          style: GoogleFonts.kanit(
+            fontWeight: FontWeight.w500,
+            fontSize: 18,
+          ),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size(200, 100),
+          child: Padding(
+            padding: const EdgeInsets.only(
+                left: 25.0, right: 25.0, bottom: 10.0, top: 0.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Workspace Type',
+                  style: GoogleFonts.robotoMono(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                DropdownButtonFormField(
+                  items: workspaceTypes
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  value: dropdownValue,
+                  isDense: true,
+                  onChanged: (String? value) {
+                    setState(() {
+                      dropdownValue = value!;
+                      widget.workspaceType = dropdownValue;
+                    });
+                  },
+                  decoration: InputDecoration(
+                    isDense: true,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      borderSide: BorderSide(color: AppColor.black, width: 1.0),
                     ),
                   ),
-                );
-              }
-            },
-            height: 40,
-            minWidth: double.infinity,
-            color: AppColor.orange,
-            textColor: AppColor.white,
-            elevation: 0.0,
-            child: Text(
-              'Get role from template',
-              style: GoogleFonts.titilliumWeb(fontSize: 15),
+                ),
+              ],
             ),
           ),
         ),
-        StreamBuilder<QuerySnapshot>(
-          stream: rolesRecords,
-          builder:
-              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-            if (snapshot.hasError) {
-              log('Something went wrong');
-            }
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
-                  child: CircularProgressIndicator(
-                color: AppColor.orange,
-                strokeWidth: 2.0,
-              ));
-            }
-            if (snapshot.hasData) {
-              List storedRolesData = [];
+      ),
+      body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(
+                left: 25.0,
+                right: 25.0,
+                bottom: 20.0,
+                top: 10.0,
+              ),
+              child: TextFormField(
+                onChanged: (v) {
+                  setState(() {
+                    search = v;
+                  });
+                },
+                keyboardType: TextInputType.text,
+                cursorColor: AppColor.black,
+                style: TextStyle(color: AppColor.black),
+                decoration: InputDecoration(
+                  isDense: true,
+                  // fillColor: tealColor,
+                  // filled: true,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                    borderSide: BorderSide(color: AppColor.black, width: 1.5),
+                  ),
 
-              snapshot.data!.docs.map((DocumentSnapshot document) {
-                Map id = document.data() as Map<String, dynamic>;
-                storedRolesData.add(id);
-                id['id'] = document.id;
-              }).toList();
-              return Column(
-                children: [
-                  for (int i = 0; i < storedRolesData.length; i++) ...[
-                    /**/
-                    if (widget.controlForOwner &&
-                        widget.fromTaskAssignment) ...[
-                      if (storedRolesData[i]['Assigned By'] !=
-                          currentUserEmail) ...[
-                        WorkspaceRoleCard(
-                          id: storedRolesData[i]['id'],
-                          workspaceCode: widget.workspaceCode,
-                          roleName: storedRolesData[i]['Role'],
-                          roleDescription: storedRolesData[i]
-                              ['Role Description'],
-                          roleLevel:
-                              storedRolesData[i]['Role Level'].toString(),
-                          roleColor: storedRolesData[i]['Role Color'],
-                          teamControl: storedRolesData[i]['Team Control'],
-                          memberControl: storedRolesData[i]['Member Control'],
-                          controlForOwner: widget.controlForOwner,
-                          control: storedRolesData[i]['Control'],
-                          roleControl: storedRolesData[i]['Role Control'],
-                          taskControl: storedRolesData[i]['Task Control'],
-                          viewControl: storedRolesData[i]['View Control'],
-                          reportControl: storedRolesData[i]['Report Control'],
-                          addMember: storedRolesData[i]['Add Member'],
-                          removeMember: storedRolesData[i]['Remove Member'],
-                          assignRole: storedRolesData[i]['Assign Role'],
-                          deAssignRole: storedRolesData[i]['DeAssign Role'],
-                          createRole: storedRolesData[i]['Create Role'],
-                          editRole: storedRolesData[i]['Edit Role'],
-                          deleteRole: storedRolesData[i]['Delete Role'],
+                  hintText: 'Search Role',
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: AppColor.black,
+                  ),
+                  prefixText: '  ',
+                ),
+              ),
+            ),
+            ListView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemCount: roles.length,
+              itemBuilder: (BuildContext context, int index) {
+                final role = roles[index];
+
+                return role['title'].toLowerCase().contains(search)
+                    ? ListTile(
+                        title: Text(
+                          role['title'],
+                          style: GoogleFonts.kanit(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 17,
+                          ),
                         ),
-                      ],
-                    ] else if (widget.controlForOwner &&
-                        widget.fromTaskAssignment) ...[
-                      WorkspaceRoleCard(
-                        id: storedRolesData[i]['id'],
-                        workspaceCode: widget.workspaceCode,
-                        roleName: storedRolesData[i]['Role'],
-                        roleDescription: storedRolesData[i]['Role Description'],
-                        roleLevel: storedRolesData[i]['Role Level'].toString(),
-                        roleColor: storedRolesData[i]['Role Color'],
-                        teamControl: storedRolesData[i]['Team Control'],
-                        memberControl: storedRolesData[i]['Member Control'],
-                        controlForOwner: widget.controlForOwner,
-                        control: storedRolesData[i]['Control'],
-                        roleControl: storedRolesData[i]['Role Control'],
-                        taskControl: storedRolesData[i]['Task Control'],
-                        viewControl: storedRolesData[i]['View Control'],
-                        reportControl: storedRolesData[i]['Report Control'],
-                        addMember: storedRolesData[i]['Add Member'],
-                        removeMember: storedRolesData[i]['Remove Member'],
-                        assignRole: storedRolesData[i]['Assign Role'],
-                        deAssignRole: storedRolesData[i]['DeAssign Role'],
-                        createRole: storedRolesData[i]['Create Role'],
-                        editRole: storedRolesData[i]['Edit Role'],
-                        deleteRole: storedRolesData[i]['Delete Role'],
-                      ),
-                    ] else ...[
-                      WorkspaceRoleCard(
-                        id: storedRolesData[i]['id'],
-                        workspaceCode: widget.workspaceCode,
-                        roleName: storedRolesData[i]['Role'],
-                        roleDescription: storedRolesData[i]['Role Description'],
-                        roleLevel: storedRolesData[i]['Role Level'].toString(),
-                        roleColor: storedRolesData[i]['Role Color'],
-                        teamControl: storedRolesData[i]['Team Control'],
-                        memberControl: storedRolesData[i]['Member Control'],
-                        controlForOwner: widget.controlForOwner,
-                        control: storedRolesData[i]['Control'],
-                        roleControl: storedRolesData[i]['Role Control'],
-                        taskControl: storedRolesData[i]['Task Control'],
-                        viewControl: storedRolesData[i]['View Control'],
-                        reportControl: storedRolesData[i]['Report Control'],
-                        addMember: storedRolesData[i]['Add Member'],
-                        removeMember: storedRolesData[i]['Remove Member'],
-                        assignRole: storedRolesData[i]['Assign Role'],
-                        deAssignRole: storedRolesData[i]['DeAssign Role'],
-                        createRole: storedRolesData[i]['Create Role'],
-                        editRole: storedRolesData[i]['Edit Role'],
-                        deleteRole: storedRolesData[i]['Delete Role'],
-                      ),
-                    ],
-                  ],
-                ],
-              );
-            }
-            return Center(
-                child: CircularProgressIndicator(
-              color: AppColor.orange,
-              strokeWidth: 2.0,
-            ));
-          },
-        ),
-        Visibility(
-          // createRoleForDecision || !widget.fromTaskAssignment
-          visible: widget.createRole && !widget.fromTaskAssignment,
-          child: Align(
-            alignment: FractionalOffset.bottomCenter,
-            child: AppElevatedButton(
-              text: 'Create Role',
-              fontSize: 12,
-              backgroundColor: AppColor.orange,
-              foregroundColor: AppColor.orange,
-              textColor: AppColor.white,
-              function: () {
-                createRoleDialog();
+                        subtitle: Text(
+                          role['description'],
+                          style: GoogleFonts.titilliumWeb(fontSize: 15),
+                        ),
+                        trailing: const Icon(Icons.arrow_forward_ios, size: 18),
+                        onTap: () {
+                          roleController.text = role['title'];
+                          descriptionController.text = role['description'];
+                          createRoleDialog();
+                        },
+                      )
+                    : Container();
               },
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 

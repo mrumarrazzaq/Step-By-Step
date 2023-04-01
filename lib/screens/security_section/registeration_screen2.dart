@@ -406,6 +406,7 @@ class _RegistrationScreen2State extends State<RegistrationScreen2> {
 
         final json = {
           'Verify Account': false,
+          'Paid Account': false,
           'MAC': mac,
           'User Name': personName,
           'User Email': emailController.text.trim(),

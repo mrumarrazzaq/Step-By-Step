@@ -8,8 +8,11 @@ import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_swipe_action_cell/flutter_swipe_action_cell.dart';
 import 'package:get/get.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
+import 'package:stepbystep/ads/ad_mob_service.dart';
+import 'package:stepbystep/apis/get_apis.dart';
 import 'package:stepbystep/calc.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/providers/taskCollection.dart';
@@ -25,6 +28,8 @@ class SelfSpaceHome extends StatefulWidget {
 }
 
 class _SelfSpaceHomeState extends State<SelfSpaceHome> {
+  InterstitialAd? _interstitialAd;
+
   bool _isLoading = false;
   bool isTrue = false;
   IconData taskStatusIcon = Icons.check_box_outline_blank_rounded;
@@ -32,8 +37,46 @@ class _SelfSpaceHomeState extends State<SelfSpaceHome> {
   DateTime initialSelectedDate = DateTime.now();
   @override
   void initState() {
-    context.read<TaskCollection>().refreshData();
     super.initState();
+    _loadInterstitialAd();
+    context.read<TaskCollection>().refreshData();
+  }
+
+  void _loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: AdMobService.interstitialAdUnitId!,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        // Called when an ad is successfully received.
+        onAdLoaded: (ad) {
+          debugPrint('$ad loaded.');
+          // Keep a reference to the ad so you can show it later.
+          _interstitialAd = ad;
+        },
+        // Called when an ad request failed.
+        onAdFailedToLoad: (LoadAdError error) {
+          debugPrint('InterstitialAd failed to load: $error');
+          _interstitialAd = null;
+        },
+      ),
+    );
+  }
+
+  void _showInterstitialAd() {
+    if (_interstitialAd != null) {
+      _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+        onAdDismissedFullScreenContent: (ad) {
+          ad.dispose();
+          _loadInterstitialAd();
+        },
+        onAdFailedToShowFullScreenContent: (ad, err) {
+          ad.dispose();
+          _loadInterstitialAd();
+        },
+      );
+      _interstitialAd!.show();
+      _interstitialAd = null;
+    }
   }
 
   void _deleteTask(int id) async {
@@ -170,7 +213,11 @@ class _SelfSpaceHomeState extends State<SelfSpaceHome> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
+        onPressed: () async {
+          bool isTrue = await GetApi.isPaidAccount();
+          if (!isTrue) {
+            _showInterstitialAd();
+          }
           Navigator.push(
             context,
             MaterialPageRoute(

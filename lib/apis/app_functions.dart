@@ -26,8 +26,23 @@ class AppFunctions {
   }
 
   static String getStringOnly({required String text}) {
-    List<String> temp = text.split(' ');
-    return temp[0];
+    String temp = text.replaceAll(RegExp(r'\d+$'), '');
+    return temp.trimRight();
+    // List<String> temp = text.split(' ');
+    //
+    // if (temp.length == 1) {
+    //   return temp[0];
+    // } else if (temp.length == 2) {
+    //   return '${temp[0]} ${temp[1]}';
+    // } else if (temp.length == 3) {
+    //   return '${temp[0]} ${temp[1]} ${temp[2]}';
+    // } else if (temp.length == 4) {
+    //   return '${temp[0]} ${temp[1]} ${temp[2]} ${temp[3]}';
+    // } else if (temp.length == 5) {
+    //   return '${temp[0]} ${temp[1]} ${temp[2]} ${temp[3]} ${temp[4]}';
+    // } else {
+    //   return temp[0];
+    // }
   }
 
   static Future<String> getTokenByEmail({required String email}) async {
@@ -104,6 +119,24 @@ class AppFunctions {
     } catch (e) {
       log('Failed to get role by email');
       return colorCode;
+    }
+  }
+
+  static Future<String> getWorkspaceType(
+      {required String workspaceCode}) async {
+    String workspaceType = '';
+    try {
+      await FirebaseFirestore.instance
+          .collection('Workspaces')
+          .doc(workspaceCode)
+          .get()
+          .then((ds) {
+        workspaceType = ds['Workspace Type'];
+      });
+      return workspaceType;
+    } catch (e) {
+      log('Failed to get workspace type');
+      return workspaceType;
     }
   }
 }

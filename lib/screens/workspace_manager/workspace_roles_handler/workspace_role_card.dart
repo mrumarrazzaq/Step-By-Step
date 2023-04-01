@@ -275,6 +275,14 @@ class _WorkspaceRoleCardState extends State<WorkspaceRoleCard> {
                 ),
               ),
             ),
+            Container(
+              height: 8,
+              width: 8,
+              decoration: BoxDecoration(
+                color: roleColor,
+                borderRadius: BorderRadius.circular(30.0),
+              ),
+            ),
             Visibility(
               visible: widget.controlForOwner ||
                   (assignedRole != '${widget.roleName} ${widget.roleLevel}' &&

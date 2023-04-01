@@ -109,7 +109,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 borderRadius: BorderRadius.circular(10.0),
                 clipBehavior: Clip.antiAlias,
                 child: MaterialButton(
-                  minWidth: _isLoading ? 50.0 : double.infinity,
+                  minWidth: double.infinity,
                   elevation: 3.0,
                   height: 40.0,
                   padding: const EdgeInsets.symmetric(vertical: 10.0),
@@ -244,11 +244,13 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               textAlign: TextAlign.center,
               style: GoogleFonts.titilliumWeb(),
             ),
+            const SizedBox(height: 12.0),
             MaterialButton(
               onPressed: () {
                 Navigator.pop(context);
               },
               height: 40,
+              minWidth: 100,
               color: AppColor.orange,
               child: Text(
                 'Dismiss',

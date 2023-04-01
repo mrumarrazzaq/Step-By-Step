@@ -60,6 +60,13 @@ class _WorkspaceViewHomeState extends State<WorkspaceViewHome> {
   }
 
   @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -146,16 +153,16 @@ class _WorkspaceViewHomeState extends State<WorkspaceViewHome> {
 }
 
 class ViewCard extends StatelessWidget {
-  ViewCard(
-      {Key? key,
-      required this.workspaceName,
-      required this.workspaceCode,
-      required this.role,
-      required this.widget,
-      required this.level,
-      required this.height,
-      required this.totals})
-      : super(key: key);
+  ViewCard({
+    Key? key,
+    required this.workspaceName,
+    required this.workspaceCode,
+    required this.role,
+    required this.widget,
+    required this.level,
+    required this.height,
+    required this.totals,
+  }) : super(key: key);
   String workspaceName;
   String workspaceCode;
   String role;
@@ -191,7 +198,7 @@ class ViewCard extends StatelessWidget {
           ),
         ),
         subtitle: widget,
-        trailing: Text(''),
+        trailing: const Text(''),
       ),
     );
   }

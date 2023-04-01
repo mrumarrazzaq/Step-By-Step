@@ -1634,17 +1634,20 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
         document: member,
         jsonData: assignRoleJson,
       );
+      List<String> temp = selectedRoleValue.split(' ');
 
       await FirebaseFirestore.instance
           .collection('User Data')
           .doc(member)
           .collection('Workspace Roles')
           .doc(widget.workspaceCode)
-          .set({
-        'Role': AppFunctions.getStringOnly(text: selectedRoleValue),
-        'Level': AppFunctions.getNumberFromString(text: selectedRoleValue),
-        'Created At': DateTime.now(),
-      });
+          .set(
+        {
+          'Role': AppFunctions.getStringOnly(text: selectedRoleValue),
+          'Level': AppFunctions.getNumberFromString(text: selectedRoleValue),
+          'Created At': DateTime.now(),
+        },
+      );
 
       log('Role Assign Successfully');
       String name =
