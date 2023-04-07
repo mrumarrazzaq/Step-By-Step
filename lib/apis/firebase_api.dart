@@ -13,9 +13,10 @@ class FireBaseApi {
     await FirebaseFirestore.instance.collection(collection).doc().set(jsonData);
 
     await CollectionDocHistory.saveCollectionHistory(
-        workspaceCode: workspaceCode,
-        collectionName: collection,
-        docName: 'AUTO');
+      workspaceCode: workspaceCode,
+      collectionName: collection,
+      docName: 'AUTO',
+    );
   }
 
   static Future<void> saveDataIntoFireStore(
@@ -29,9 +30,10 @@ class FireBaseApi {
         .set(jsonData);
 
     await CollectionDocHistory.saveCollectionHistory(
-        workspaceCode: workspaceCode,
-        collectionName: collection,
-        docName: document);
+      workspaceCode: workspaceCode,
+      collectionName: collection,
+      docName: document,
+    );
   }
 
   static Future<void> saveDataIntoWorSpaceFireStore(
@@ -67,9 +69,10 @@ class FireBaseApi {
         .set(jsonData);
 
     await CollectionDocHistory.saveCollectionHistory(
-        workspaceCode: workspaceCode,
-        collectionName: mainCollection,
-        docName: mainDocument);
+      workspaceCode: workspaceCode,
+      collectionName: mainCollection,
+      docName: mainDocument,
+    );
   }
 
   static Future<String> getDocIdByField(
@@ -86,10 +89,10 @@ class FireBaseApi {
 
     if (querySnapshot.docs.isNotEmpty) {
       documentID = querySnapshot.docs.first.id;
-      print('Document ID: $documentID');
+      log('Document ID: $documentID');
       return documentID;
     } else {
-      print('No matching documents found');
+      log('No matching documents found');
       return documentID;
     }
   }

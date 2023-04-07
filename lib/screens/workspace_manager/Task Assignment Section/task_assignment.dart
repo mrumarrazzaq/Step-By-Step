@@ -17,10 +17,8 @@ import 'package:stepbystep/config.dart';
 import 'package:stepbystep/screens/workspace_manager/task_view.dart';
 import 'package:stepbystep/screens/workspace_manager/workspace_members/workspace_members_handler.dart';
 import 'package:stepbystep/screens/workspace_manager/workspace_roles_handler/workspace_roles_handler.dart';
-import 'package:stepbystep/screens/workspace_manager/workspace_task_tile.dart';
 import 'package:stepbystep/screens/workspace_manager/workspace_view/workspace_view_home.dart';
 import 'package:stepbystep/widgets/app_elevated_button.dart';
-import 'package:velocity_x/velocity_x.dart';
 
 class TaskTeamAssignment extends StatefulWidget {
   String name;
@@ -91,7 +89,8 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
   bool fileGetting = false;
   String filePath = '';
   String fileName = '';
-
+  String myRole = '';
+  int myLevel = 0;
   List<String> url = ['', '', ''];
 
   @override
@@ -109,6 +108,7 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
           yyyy
         ])} ${formatDate(dateTime, [hh, ':', nn, ' ', am])}';
     fetchData();
+    getLevelRole();
     getRolesData();
     try {
       Future.delayed(const Duration(milliseconds: 3000), () {
@@ -178,6 +178,24 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
     }
   }
 
+  getLevelRole() async {
+    log('Role Level Data is fetching');
+    try {
+      await FirebaseFirestore.instance
+          .collection('User Data')
+          .doc(widget.email)
+          .collection('Workspace Roles')
+          .doc(widget.workspaceCode)
+          .get()
+          .then((ds) {
+        myRole = ds['Role'];
+        myLevel = ds['Level'];
+      });
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -197,7 +215,14 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
                       icon: const Icon(Icons.arrow_back),
                     ),
                     GestureDetector(
-                      onTap: () {},
+                      onTap: () {
+                        profileViewDialog(
+                          imageURL: imageURL,
+                          name: widget.name,
+                          role: myRole,
+                          level: myLevel,
+                        );
+                      },
                       child: CircleAvatar(
                         backgroundColor: AppColor.orange,
                         radius: _radius,
@@ -220,20 +245,30 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
               ),
               title: Visibility(
                 visible: !isVisible,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.name,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.w800, fontSize: 18),
-                    ),
-                    Text(
-                      widget.email,
-                      style: TextStyle(color: AppColor.grey, fontSize: 16),
-                    ),
-                  ],
+                child: GestureDetector(
+                  onTap: () {
+                    profileViewDialog(
+                      imageURL: imageURL,
+                      name: widget.name,
+                      role: myRole,
+                      level: myLevel,
+                    );
+                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.name,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w800, fontSize: 18),
+                      ),
+                      Text(
+                        widget.email,
+                        style: TextStyle(color: AppColor.grey, fontSize: 16),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               // bottom: PreferredSize(
@@ -901,7 +936,7 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
                                         });
                                       },
                                       child: Text(
-                                        'Roles',
+                                        'Roles  ',
                                         style: TextStyle(
                                           color: teamTabsColor[1],
                                         ),
@@ -919,7 +954,7 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
                                         });
                                       },
                                       child: Text(
-                                        'View',
+                                        'View   ',
                                         style: TextStyle(
                                           color: teamTabsColor[2],
                                         ),
@@ -994,6 +1029,7 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
                       workspaceCode: widget.workspaceCode,
                       workspaceName: widget.workspaceName,
                       docId: widget.docId,
+                      control: true,
                       createRole: true,
                       editRole: true,
                       deleteRole: true,
@@ -1486,8 +1522,9 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
               color: AppColor.white,
             ),
             errorWidget: (context, url, error) => Container(
-              height: 80,
-              width: 80,
+              height: 10,
+              width: 10,
+              padding: const EdgeInsets.only(top: 10),
               decoration: BoxDecoration(
                 color: AppColor.orange,
                 shape: BoxShape.circle,
@@ -1515,7 +1552,7 @@ class _TaskTeamAssignmentState extends State<TaskTeamAssignment> {
               ),
             ),
             Text(
-              'Workspace $role',
+              role,
               textAlign: TextAlign.center,
               style: GoogleFonts.titilliumWeb(),
             ),

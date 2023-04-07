@@ -172,6 +172,7 @@ class _WorkspaceScreenCombinerState extends State<WorkspaceScreenCombiner> {
                 workspaceName: widget.workspaceName,
                 fromTaskAssignment: false,
                 fromTaskHolder: false,
+                control: true,
                 createRole: true,
                 editRole: true,
                 deleteRole: true,

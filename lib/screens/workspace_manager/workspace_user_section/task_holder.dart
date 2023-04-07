@@ -1128,6 +1128,7 @@ class _WorkspaceTaskHolderState extends State<WorkspaceTaskHolder> {
                         workspaceCode: widget.workspaceCode,
                         workspaceName: widget.workspaceName,
                         docId: widget.docId,
+                        control: control,
                         createRole: createRole,
                         editRole: editRole,
                         deleteRole: deleteRole,

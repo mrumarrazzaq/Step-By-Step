@@ -18,7 +18,10 @@ import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/providers/taskCollection.dart';
 import 'package:stepbystep/screens/self_task_manager/add_task.dart';
 import 'package:stepbystep/screens/self_task_manager/update_task.dart';
+import 'package:stepbystep/screens/table_calendar/calendar_utils.dart';
 import 'package:stepbystep/sql_database/sql_helper.dart';
+
+import '../table_calendar/table_calendar.dart';
 
 class SelfSpaceHome extends StatefulWidget {
   const SelfSpaceHome({Key? key}) : super(key: key);
@@ -38,7 +41,7 @@ class _SelfSpaceHomeState extends State<SelfSpaceHome> {
   @override
   void initState() {
     super.initState();
-    _loadInterstitialAd();
+    // _loadInterstitialAd();
     context.read<TaskCollection>().refreshData();
   }
 
@@ -102,17 +105,44 @@ class _SelfSpaceHomeState extends State<SelfSpaceHome> {
         child: Center(
           child: Column(
             children: [
-              // TextButton(
-              //   onPressed: () {
-              //     Navigator.push(
-              //       context,
-              //       MaterialPageRoute(
-              //         builder: (context) => Calc(),
-              //       ),
-              //     );
-              //   },
-              //   child: Text('Press'),
-              // ),
+              TextButton(
+                onPressed: () async {
+                  // Future<List<Map<String, dynamic>>> myFuture =
+                  //     SQLHelper.getTasks();
+                  // List<Map<String, dynamic>> myList = await myFuture;
+                  //
+                  // myList.forEach((item) {
+                  //   // Do something with each item
+                  //   print(item); //['taskTitle'] //['createdAt']
+                  //   // print(item['dateFilter']);
+                  // });
+                  // final _kEventSource = Map.fromIterable(
+                  //   List.generate(50, (index) => index),
+                  //   key: (item) => DateTime.utc(
+                  //       kFirstDay.year, kFirstDay.month, item * 5),
+                  //   value: (item) => List.generate(
+                  //     item % 4 + 1,
+                  //     (index) => Event('Event $item | ${index + 1}'),
+                  //   ),
+                  // )..addAll({
+                  //     kToday: [],
+                  //   });
+                  // print(_kEventSource);
+                },
+                child: Text('PRESS'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TableComplexExample(
+                            // tasks: SQLHelper.getTasks(),
+                            ),
+                      ));
+                },
+                child: Text('Press'),
+              ),
               ListTile(
                 title: const Text('See Previous Date Task'),
                 textColor: AppColor.black,

@@ -258,6 +258,24 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
                           onTap: () async {
                             if (widget.leftButton) {
                               log('LB Task Status Value : ${widget.taskStatusValue - 1}');
+                              if (widget.taskStatusValue - 1 == 0) {
+                                log('Todo');
+                                String userName =
+                                    await AppFunctions.getNameByEmail(
+                                        email: currentUserEmail.toString());
+                                String workspaceName = await AppFunctions
+                                    .getWorkspaceNameByWorkspaceCode(
+                                        workspaceCode: widget.workspaceCode);
+                                String token =
+                                    await AppFunctions.getTokenByEmail(
+                                        email: widget.userEmail);
+                                MessageNotificationApi.send(
+                                    token: token,
+                                    title: '📝 Task Move TODO',
+                                    body:
+                                        '$userName move task in TODO in $workspaceName workspace.');
+                                log('$userName move task in TODO in $workspaceName workspace.');
+                              }
                               if (widget.taskStatusValue - 1 == 1) {
                                 log('Review');
                                 if (widget.isOwner) {
@@ -275,6 +293,7 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
                                       title: '📝 Task Do Again',
                                       body:
                                           '$userName remove your task from review in $workspaceName workspace.');
+                                  log('$userName remove your task from review in $workspaceName workspace.');
                                 } else {
                                   String userName =
                                       await AppFunctions.getNameByEmail(
@@ -290,6 +309,7 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
                                       title: '📝 Task Remove From Review',
                                       body:
                                           '$userName remove task from review in $workspaceName workspace.');
+                                  log('$userName remove task from review in $workspaceName workspace.');
                                 }
                               }
                               if (widget.taskStatusValue - 1 == 2) {
@@ -355,6 +375,28 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
                                   .update({
                                 'Task Status': widget.taskStatusValue + 1,
                               });
+
+                              // Notification For Doing
+                              if (widget.taskStatusValue + 1 == 1) {
+                                log('Doing');
+                                String userName =
+                                    await AppFunctions.getNameByEmail(
+                                        email: currentUserEmail.toString());
+                                String workspaceName = await AppFunctions
+                                    .getWorkspaceNameByWorkspaceCode(
+                                        workspaceCode: widget.workspaceCode);
+                                log(workspaceName);
+                                String token =
+                                    await AppFunctions.getTokenByEmail(
+                                        email: widget.email);
+                                MessageNotificationApi.send(
+                                    token: token,
+                                    title: '📝 Task In Doing ',
+                                    body:
+                                        '$userName is doing task in $workspaceName workspace.');
+                                log('$userName is doing task in $workspaceName workspace.');
+                              }
+                              // Notification For Review
                               if (widget.taskStatusValue + 1 == 2) {
                                 log('Review');
                                 String userName =
@@ -372,8 +414,9 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
                                     title: '📝 Task In Review ',
                                     body:
                                         'Please review a task of $userName in $workspaceName workspace.');
+                                log('Please review a task of $userName in $workspaceName workspace.');
                               }
-
+                              // Notification For Completed
                               if (widget.taskStatusValue + 1 == 3) {
                                 log('Completed');
                                 String userName =
@@ -390,6 +433,7 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
                                     title: '📝 Task Completed',
                                     body:
                                         'Great your task has been completed after review by $userName in $workspaceName workspace.');
+                                log('Great your task has been completed after review by $userName in $workspaceName workspace.');
                               }
                             }
                           },
@@ -464,11 +508,10 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
               .doc(reportId)
               .delete();
 
-          if(fileURL.isNotEmpty)
-            {
-              await FirebaseStorage.instance.refFromURL(fileURL).delete();
-            }
-          
+          if (fileURL.isNotEmpty) {
+            await FirebaseStorage.instance.refFromURL(fileURL).delete();
+          }
+
           await Fluttertoast.showToast(
             msg: 'Task Deleted Successfully', // message
             toastLength: Toast.LENGTH_SHORT, // length

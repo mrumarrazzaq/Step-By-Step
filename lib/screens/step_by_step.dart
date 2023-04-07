@@ -28,8 +28,8 @@ class StepByStep extends StatefulWidget {
 
 class _StepByStepState extends State<StepByStep> with WidgetsBindingObserver {
   int _currentIndex = 0;
-  BannerAd? _bannerAd;
-  InterstitialAd? _interstitialAd;
+  // BannerAd? _bannerAd;
+  // InterstitialAd? _interstitialAd;
   final List<Widget> screens = [
     const HomeScreen(),
     const MotivationalQuotes(),
@@ -62,58 +62,58 @@ class _StepByStepState extends State<StepByStep> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    _loadBannerAd();
-    _loadInterstitialAd();
-    _showInterstitialAd();
+    // _loadBannerAd();
+    // _loadInterstitialAd();
+    // _showInterstitialAd();
     WidgetsBinding.instance.addObserver(this);
     setUserStatus(status: 'Online');
   }
 
-  void _loadBannerAd() {
-    _bannerAd = BannerAd(
-      adUnitId: AdMobService.bannerAdUnitId!,
-      request: const AdRequest(),
-      size: AdSize.banner,
-      listener: AdMobService.bannerAdListener,
-    )..load();
-  }
-
-  void _loadInterstitialAd() {
-    InterstitialAd.load(
-      adUnitId: AdMobService.interstitialAdUnitId!,
-      request: const AdRequest(),
-      adLoadCallback: InterstitialAdLoadCallback(
-        // Called when an ad is successfully received.
-        onAdLoaded: (ad) {
-          debugPrint('$ad loaded.');
-          // Keep a reference to the ad so you can show it later.
-          _interstitialAd = ad;
-        },
-        // Called when an ad request failed.
-        onAdFailedToLoad: (LoadAdError error) {
-          debugPrint('InterstitialAd failed to load: $error');
-          _interstitialAd = null;
-        },
-      ),
-    );
-  }
-
-  void _showInterstitialAd() {
-    if (_interstitialAd != null) {
-      _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
-        onAdDismissedFullScreenContent: (ad) {
-          ad.dispose();
-          _loadInterstitialAd();
-        },
-        onAdFailedToShowFullScreenContent: (ad, err) {
-          ad.dispose();
-          _loadInterstitialAd();
-        },
-      );
-      _interstitialAd!.show();
-      _interstitialAd = null;
-    }
-  }
+  // void _loadBannerAd() {
+  //   _bannerAd = BannerAd(
+  //     adUnitId: AdMobService.bannerAdUnitId!,
+  //     request: const AdRequest(),
+  //     size: AdSize.banner,
+  //     listener: AdMobService.bannerAdListener,
+  //   )..load();
+  // }
+  //
+  // void _loadInterstitialAd() {
+  //   InterstitialAd.load(
+  //     adUnitId: AdMobService.interstitialAdUnitId!,
+  //     request: const AdRequest(),
+  //     adLoadCallback: InterstitialAdLoadCallback(
+  //       // Called when an ad is successfully received.
+  //       onAdLoaded: (ad) {
+  //         debugPrint('$ad loaded.');
+  //         // Keep a reference to the ad so you can show it later.
+  //         _interstitialAd = ad;
+  //       },
+  //       // Called when an ad request failed.
+  //       onAdFailedToLoad: (LoadAdError error) {
+  //         debugPrint('InterstitialAd failed to load: $error');
+  //         _interstitialAd = null;
+  //       },
+  //     ),
+  //   );
+  // }
+  //
+  // void _showInterstitialAd() {
+  //   if (_interstitialAd != null) {
+  //     _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+  //       onAdDismissedFullScreenContent: (ad) {
+  //         ad.dispose();
+  //         _loadInterstitialAd();
+  //       },
+  //       onAdFailedToShowFullScreenContent: (ad, err) {
+  //         ad.dispose();
+  //         _loadInterstitialAd();
+  //       },
+  //     );
+  //     _interstitialAd!.show();
+  //     _interstitialAd = null;
+  //   }
+  // }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -159,13 +159,13 @@ class _StepByStepState extends State<StepByStep> with WidgetsBindingObserver {
           //   },
           //   child: Text('Press'),
           // ),
-          Visibility(
-            visible: _bannerAd != null,
-            child: SizedBox(
-              height: 52,
-              child: AdWidget(ad: _bannerAd!),
-            ),
-          ),
+          // Visibility(
+          //   visible: _bannerAd != null,
+          //   child: SizedBox(
+          //     height: 52,
+          //     child: AdWidget(ad: _bannerAd!),
+          //   ),
+          // ),
           BottomNavigationBar(
             currentIndex: _currentIndex,
             onTap: (index) => setState(() => _currentIndex = index),

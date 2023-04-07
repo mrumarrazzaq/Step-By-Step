@@ -65,7 +65,6 @@ class _TaskViewState extends State<TaskView> {
                 id['id'] = document.id;
               }).toList();
               for (int i = 0; i < storedData.length; i++) {
-                log('Check for expired Task');
                 checkExpiredTask(storedData[i]['Due Date'],
                     storedData[i]['Raw Date'], storedData[i]['id']);
               }
@@ -139,7 +138,6 @@ class _TaskViewState extends State<TaskView> {
   void checkExpiredTask(String dueDate, var rawDate, String docId) async {
     if (dueDate != 'No Due Date') {
       if (rawDate.toDate().isBefore(DateTime.now())) {
-        log('Task Expired');
         await FirebaseFirestore.instance
             .collection(widget.workspaceTaskCode)
             .doc(docId)

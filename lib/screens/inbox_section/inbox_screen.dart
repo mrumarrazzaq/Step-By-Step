@@ -33,7 +33,9 @@ import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
 import 'package:stepbystep/dialog_boxes/full_screen_dialog.dart';
 import 'package:stepbystep/providers/silence_operations.dart';
+import 'package:stepbystep/screens/inbox_section/audio_call.dart';
 import 'package:stepbystep/screens/inbox_section/image_message.dart';
+import 'package:stepbystep/screens/inbox_section/video_call.dart';
 import 'package:stepbystep/screens/inbox_section/voice_message.dart';
 import 'package:stepbystep/widgets/realtime_user_online_status.dart';
 import 'package:logger/logger.dart';
@@ -320,19 +322,35 @@ class _InboxScreenState extends State<InboxScreen> {
         ),
         actions: [
           IconButton(
-              icon: Icon(
-                Icons.videocam,
-                color: AppColor.white,
-                size: 20,
-              ),
-              onPressed: () {}),
+            icon: Icon(
+              Icons.videocam,
+              color: AppColor.white,
+              size: 20,
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const VideoCall(),
+                ),
+              );
+            },
+          ),
           IconButton(
-              icon: Icon(
-                Icons.call,
-                color: AppColor.white,
-                size: 20,
-              ),
-              onPressed: () {}),
+            icon: Icon(
+              Icons.call,
+              color: AppColor.white,
+              size: 20,
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AudioCall(),
+                ),
+              );
+            },
+          ),
           IconButton(
               icon: Icon(
                 Icons.more_vert,

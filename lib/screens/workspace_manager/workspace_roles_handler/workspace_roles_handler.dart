@@ -25,6 +25,7 @@ class WorkspaceRolesHandler extends StatefulWidget {
     required this.workspaceName,
     required this.controlForUser,
     required this.controlForOwner,
+    required this.control,
     required this.createRole,
     required this.editRole,
     required this.deleteRole,
@@ -36,6 +37,7 @@ class WorkspaceRolesHandler extends StatefulWidget {
   String workspaceName;
   bool controlForUser;
   bool controlForOwner;
+  bool control;
   bool createRole;
   bool editRole;
   bool deleteRole;

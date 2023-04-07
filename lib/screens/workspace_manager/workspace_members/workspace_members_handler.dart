@@ -6,6 +6,7 @@ import 'package:flutter_swipe_action_cell/flutter_swipe_action_cell.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:stepbystep/apis/app_functions.dart';
+import 'package:stepbystep/apis/collection_history.dart';
 
 import 'package:stepbystep/apis/firebase_api.dart';
 import 'package:stepbystep/apis/messege_notification_api.dart';
@@ -69,6 +70,7 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
   List<String> assignedByList = [];
   List<String> assignedRoleList = [];
   List<String> roleColors = [];
+  List<dynamic> specificMembersList = [];
   String assignedRole = 'No Role Assign';
   bool tA = false, tH = false;
   int selected = -1;
@@ -221,12 +223,37 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
     }
   }
 
+  getSpecificTeam(String email) async {
+    try {
+      final value = await FirebaseFirestore.instance
+          .collection('$email ${widget.workspaceCode} Team')
+          .doc(widget.workspaceCode)
+          .get();
+
+      setState(() {
+        specificMembersList = value.data()!['Workspace Members'];
+      });
+      log(specificMembersList.toString());
+    } catch (e) {
+      log(e.toString());
+      log('ERROR IN FETCH SPECIFIC MEMBERS LIST');
+    }
+  }
+
   @override
   void initState() {
     log('WORKSPACE MEMBER HANDLER INIT CALLED');
+    if (widget.fromTaskAssignment && !widget.fromTaskHolder) {
+      log('FROM TASK ASSIGNMENT');
+      getSpecificTeam(widget.extraEmail);
+    } else {
+      log('FROM TASK HOLDER');
+      getSpecificTeam(currentUserEmail.toString());
+    }
     setValues();
     getAddedMembers(tH: tH, tA: tA);
     getAddedRoles();
+
     super.initState();
     _animationController = AnimationController(
       vsync: this,
@@ -567,7 +594,11 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
                     if (storedMembersData[i]['Workspace Member'] !=
                             currentUserEmail &&
                         storedMembersData[i]['Workspace Member'] !=
-                            widget.extraEmail) ...[
+                            widget.extraEmail &&
+                        (specificMembersList.contains(
+                                storedMembersData[i]['Workspace Member']) ||
+                            (!widget.fromTaskAssignment) &&
+                                !widget.fromTaskHolder)) ...[
                       if (storedMembersData[i]['Assigned Role'] ==
                           roleFilterValue) ...[
                         Card(
@@ -1430,8 +1461,12 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
           .update({
         'Workspace Members': FieldValue.arrayUnion([memberEmail]),
       });
-
       log('Member is added in Common Workspaces');
+      await CollectionDocHistory.saveCollectionHistory(
+        workspaceCode: widget.workspaceCode,
+        collectionName: 'Workspaces',
+        docName: widget.docId,
+      );
     } catch (e) {
       log(e.toString());
     }
@@ -1461,6 +1496,11 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
         'Created At': DateTime.now(),
       });
       log('Member is added in Members Workspaces');
+      await CollectionDocHistory.saveCollectionHistory(
+        workspaceCode: widget.workspaceCode,
+        collectionName: '${widget.workspaceCode} Members',
+        docName: memberEmail,
+      );
     } catch (e) {
       log(e.toString());
     }

@@ -173,32 +173,47 @@ class ViewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DetailedView(
-                workspaceName: workspaceName,
-                workspaceCode: workspaceCode,
-                role: role,
-                assignedBy: 'assignedBy',
-                level: level,
-              ),
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DetailedView(
+              workspaceName: workspaceName,
+              workspaceCode: workspaceCode,
+              role: role,
+              assignedBy: 'assignedBy',
+              level: level,
             ),
-          );
-        },
-        dense: true,
-        leading: Text('Level $level'),
-        title: Center(
-          child: Text(
-            role,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
+        );
+      },
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Level $level'),
+              const Divider(),
+              Center(
+                child: Text(
+                  role,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+              const Divider(),
+              widget,
+              // const Text(''),
+            ],
           ),
         ),
-        subtitle: widget,
-        trailing: const Text(''),
       ),
     );
   }

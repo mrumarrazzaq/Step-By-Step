@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:stepbystep/apis/collection_history.dart';
 
 import 'package:stepbystep/apis/firebase_api.dart';
 import 'package:stepbystep/colors.dart';
@@ -264,6 +265,7 @@ class _CreateWorkspaceState extends State<CreateWorkspace> {
                               'Level': 0,
                               'Created At': DateTime.now(),
                             });
+
                             if (mounted) {
                               SystemChannels.textInput
                                   .invokeMethod('TextInput.hide');
