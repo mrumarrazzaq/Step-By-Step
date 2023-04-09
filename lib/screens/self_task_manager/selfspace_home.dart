@@ -8,6 +8,7 @@ import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_swipe_action_cell/flutter_swipe_action_cell.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
@@ -41,7 +42,7 @@ class _SelfSpaceHomeState extends State<SelfSpaceHome> {
   @override
   void initState() {
     super.initState();
-    // _loadInterstitialAd();
+    _loadInterstitialAd();
     context.read<TaskCollection>().refreshData();
   }
 
@@ -105,60 +106,109 @@ class _SelfSpaceHomeState extends State<SelfSpaceHome> {
         child: Center(
           child: Column(
             children: [
-              TextButton(
-                onPressed: () async {
-                  // Future<List<Map<String, dynamic>>> myFuture =
-                  //     SQLHelper.getTasks();
-                  // List<Map<String, dynamic>> myList = await myFuture;
-                  //
-                  // myList.forEach((item) {
-                  //   // Do something with each item
-                  //   print(item); //['taskTitle'] //['createdAt']
-                  //   // print(item['dateFilter']);
-                  // });
-                  // final _kEventSource = Map.fromIterable(
-                  //   List.generate(50, (index) => index),
-                  //   key: (item) => DateTime.utc(
-                  //       kFirstDay.year, kFirstDay.month, item * 5),
-                  //   value: (item) => List.generate(
-                  //     item % 4 + 1,
-                  //     (index) => Event('Event $item | ${index + 1}'),
-                  //   ),
-                  // )..addAll({
-                  //     kToday: [],
-                  //   });
-                  // print(_kEventSource);
-                },
-                child: Text('PRESS'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TableComplexExample(
-                            // tasks: SQLHelper.getTasks(),
-                            ),
-                      ));
-                },
-                child: Text('Press'),
-              ),
-              ListTile(
-                title: const Text('See Previous Date Task'),
-                textColor: AppColor.black,
-                trailing: GestureDetector(
-                  onTap: () {
-                    _pickDate();
-                  },
-                  child: Lottie.asset(
-                      repeat: false, height: 30, 'animations/calendar.json'),
+              // TextButton(
+              //   onPressed: () async {
+              //     Future<List<Map<String, dynamic>>> myFuture =
+              //         SQLHelper.getTasks();
+              //     List<Map<String, dynamic>> myList = await myFuture;
+              //
+              //     // myList.forEach((item) {
+              //     //   // Do something with each item
+              //     //   print(item); //['taskTitle'] //['createdAt']
+              //     //   // print(item['dateFilter']);
+              //     // });
+              //     // final _kEventSource = Map.fromIterable(
+              //     //   List.generate(50, (index) => index),
+              //     //   key: (item) =>
+              //     //       DateTime.utc(kFirstDay.year, kFirstDay.month, item * 5),
+              //     //   value: (item) => List.generate(
+              //     //     item % 4 + 1,
+              //     //     (index) => Event('Event $item | ${index + 1}'),
+              //     //   ),
+              //     // )..addAll({
+              //     //     kToday: [],
+              //     //   });
+              //     // print(_kEventSource);
+              //
+              //     for (var item in myList) {
+              //       print(item['taskTitle']);
+              //       //taskTitle
+              //       //dateFilter
+              //     }
+              //
+              //     // print(myList);
+              //   },
+              //   child: Text('PRESS'),
+              // ),
+              // TextButton(
+              //   onPressed: () async {
+              //     Future<List<Map<String, dynamic>>> myFuture =
+              //         SQLHelper.getTasks();
+              //     List<Map<String, dynamic>> myTaskList = await myFuture;
+              //     if (mounted) {
+              //       Navigator.push(
+              //         context,
+              //         MaterialPageRoute(
+              //           builder: (context) => TableComplexExample(
+              //             tasks: myTaskList,
+              //           ),
+              //         ),
+              //       );
+              //     }
+              //   },
+              //   child: Text('Press'),
+              // ),
+              Card(
+                margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                child: ListTile(
+                  dense: true,
+                  title: InkWell(
+                    onTap: () async {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TableCalendarComplex(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      height: 40,
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Text(
+                        'See Task History',
+                        style: GoogleFonts.aBeeZee(
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                  textColor: AppColor.black,
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        color: Colors.black,
+                        width: 2,
+                        height: 30,
+                        margin: const EdgeInsets.only(right: 10),
+                      ),
+                      InkWell(
+                        onTap: () {
+                          _pickDate();
+                        },
+                        child: Container(
+                          height: 30,
+                          width: 30,
+                          color: Colors.transparent,
+                          child: Lottie.asset(
+                              repeat: false,
+                              height: 30,
+                              'animations/calendar.json'),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                // IconButton(
-                //   onPressed: () {
-                //     _pickDate();
-                //   },
-                //   icon: Icon(Icons.date_range_sharp, color: AppColor.black),
-                // ),
               ),
               Lottie.asset(repeat: false, 'animations/black-divider.json'),
               Visibility(

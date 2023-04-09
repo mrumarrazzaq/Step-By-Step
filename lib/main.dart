@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import 'package:stepbystep/notificationservice/local_notification_service.dart';
 import 'package:stepbystep/providers/date_comparison.dart';
 import 'package:stepbystep/providers/taskCollection.dart';
@@ -30,6 +31,8 @@ void main() async {
   log('APP ROOT MAIN IS IN RUNNING');
   WidgetsFlutterBinding.ensureInitialized();
   MobileAds.instance.initialize();
+
+  // await dotenv.load(fileName: "assets/.env");
 
   await FlutterDownloader.initialize(debug: true, ignoreSsl: true);
   SystemChrome.setSystemUIOverlayStyle(

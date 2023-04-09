@@ -18,25 +18,23 @@ import 'package:provider/provider.dart';
 import 'package:stepbystep/authentication/authentication_with_google.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
-import 'package:stepbystep/screens/admin/admin_login.dart';
 import 'package:stepbystep/screens/home.dart';
+import 'package:stepbystep/screens/security_section/forgot_password.dart';
 import 'package:stepbystep/screens/security_section/registeration_screen2.dart';
 import 'package:stepbystep/screens/step_by_step.dart';
-import 'forgot_password.dart';
-import 'registration_screen.dart';
 
 final user = FirebaseFirestore.instance;
 
-class SignInScreen2 extends StatefulWidget {
+class AdminSignInScreen extends StatefulWidget {
   static const String id = 'SignInScreen';
 
-  const SignInScreen2({Key? key}) : super(key: key);
+  const AdminSignInScreen({Key? key}) : super(key: key);
 
   @override
-  _SignInScreen2State createState() => _SignInScreen2State();
+  _AdminSignInScreenState createState() => _AdminSignInScreenState();
 }
 
-class _SignInScreen2State extends State<SignInScreen2> {
+class _AdminSignInScreenState extends State<AdminSignInScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -52,6 +50,7 @@ class _SignInScreen2State extends State<SignInScreen2> {
   var password = "";
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final adminKeyController = TextEditingController();
   final storage = const FlutterSecureStorage();
   String getUserEmail = '';
   String getUserPassword = '';
@@ -96,23 +95,13 @@ class _SignInScreen2State extends State<SignInScreen2> {
                   child: ListView(
                     // mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const AdminSignInScreen(),
-                            ),
-                          );
-                        },
-                        child: Text(
-                          'Welcome!',
-                          style: GoogleFonts.oswald(
-                            textStyle: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: AppColor.black,
-                              fontSize: 30,
-                            ),
+                      Text(
+                        'Welcome!',
+                        style: GoogleFonts.oswald(
+                          textStyle: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: AppColor.black,
+                            fontSize: 30,
                           ),
                         ),
                       ),
@@ -186,7 +175,7 @@ class _SignInScreen2State extends State<SignInScreen2> {
                       Padding(
                         padding: const EdgeInsets.only(
                           right: 25.0,
-                          bottom: 0.0,
+                          bottom: 20.0,
                           top: 10.0,
                         ),
                         child: TextFormField(
@@ -239,6 +228,68 @@ class _SignInScreen2State extends State<SignInScreen2> {
                           validator: validatePassword,
                         ),
                       ),
+                      //Admin Key
+                      const Text(
+                        'Admin Key',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w500, fontSize: 14.0),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          right: 25.0,
+                          bottom: 0.0,
+                          top: 10.0,
+                        ),
+                        child: TextFormField(
+                          onTap: () {},
+                          obscureText: _obscureText,
+                          cursorColor: AppColor.black,
+                          style: TextStyle(color: AppColor.black),
+                          decoration: InputDecoration(
+                            isDense: true,
+                            enabled: _isLoading ? false : true,
+                            // fillColor: purpleColor,
+                            // filled: true,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            hintText: 'Enter Admin Key',
+                            // hintStyle: TextStyle(color: purpleColor),
+//                        labelText: 'Password',
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                              borderSide:
+                                  BorderSide(color: AppColor.black, width: 1.5),
+                            ),
+
+                            prefixIcon: Icon(
+                              Icons.vpn_key,
+                              color: AppColor.black,
+                            ),
+                            prefixText: '  ',
+                            suffixIcon: GestureDetector(
+                              child: _obscureText
+                                  ? Icon(
+                                      Icons.visibility,
+                                      size: 18.0,
+                                      color: AppColor.black,
+                                    )
+                                  : Icon(
+                                      Icons.visibility_off,
+                                      size: 18.0,
+                                      color: AppColor.black,
+                                    ),
+                              onTap: () {
+                                setState(() {
+                                  _obscureText = !_obscureText;
+                                });
+                              },
+                            ),
+                          ),
+                          controller: adminKeyController,
+                          validator: validatePassword,
+                        ),
+                      ),
                       Padding(
                         padding: const EdgeInsets.only(right: 25.0),
                         child: Row(
@@ -266,7 +317,7 @@ class _SignInScreen2State extends State<SignInScreen2> {
                       Padding(
                         padding: const EdgeInsets.only(right: 25.0),
                         child: Material(
-                          color: AppColor.orange,
+                          color: AppColor.black,
                           borderRadius: BorderRadius.circular(10.0),
                           clipBehavior: Clip.antiAlias,
                           child: MaterialButton(
@@ -300,61 +351,11 @@ class _SignInScreen2State extends State<SignInScreen2> {
                                     ),
                                   )
                                 : Text(
-                                    'Login',
+                                    'Admin Login',
                                     style: TextStyle(
                                       color: AppColor.white,
                                     ),
                                   ),
-                          ),
-                        ),
-                      ),
-
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text("Don't have account? ",
-                              style: TextStyle(color: AppColor.black)),
-                          TextButton(
-                            onPressed: () => {
-                              SystemChannels.textInput
-                                  .invokeMethod('TextInput.hide'),
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const RegistrationScreen2(),
-                                ),
-                              )
-                            },
-                            child: const Text('Register'),
-                          )
-                        ],
-                      ),
-
-                      Padding(
-                        padding: const EdgeInsets.only(right: 25.0),
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            setState(() {
-                              _isGoogleSignIn = true;
-                            });
-                            await signInWithGoogle();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            primary: AppColor.white,
-                            onPrimary: AppColor.black,
-                            minimumSize: const Size(200, 50),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Image.asset('assets/google-logo.png',
-                                  height: 30.0),
-                              const SizedBox(
-                                width: 5.0,
-                              ),
-                              const Text('SignIn with Google'),
-                            ],
                           ),
                         ),
                       ),
@@ -529,12 +530,12 @@ class _SignInScreen2State extends State<SignInScreen2> {
           log('---------------------------------');
         });
 
-        Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const StepByStep(),
-            ),
-            (route) => false);
+        // Navigator.pushAndRemoveUntil(
+        //     context,
+        //     MaterialPageRoute(
+        //       builder: (context) => const StepByStep(),
+        //     ),
+        //     (route) => false);
       }
     } on FirebaseAuthException catch (e) {
       setState(() {
@@ -586,6 +587,18 @@ class _SignInScreen2State extends State<SignInScreen2> {
   String? validatePassword(value) {
     if (value.isEmpty) {
       return 'Please enter password';
+    } else if (value.length < 8) {
+      return 'Should be at least 8 characters';
+    } else if (value.length > 25) {
+      return 'Should not be more than 25 characters';
+    } else {
+      return null;
+    }
+  }
+
+  String? validateAdminKey(value) {
+    if (value.isEmpty) {
+      return 'Please enter admin key';
     } else if (value.length < 8) {
       return 'Should be at least 8 characters';
     } else if (value.length > 25) {

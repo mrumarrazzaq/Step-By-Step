@@ -11,6 +11,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:stepbystep/apis/launch_url_api.dart';
 import 'package:stepbystep/authentication/authentication_with_google.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
@@ -139,6 +140,18 @@ class _AppDrawerState extends State<AppDrawer> {
                     builder: (context) => const PrivacyPolicy(),
                   ),
                 );
+              },
+            ),
+            Divider(color: AppColor.white, indent: 15, endIndent: 15),
+            FlatButton(
+              child: const ListTile(
+                leading: Icon(Icons.help, color: Colors.white),
+                title: Text('Get Help'),
+                textColor: Colors.white,
+                trailing: Icon(Icons.arrow_forward, color: Colors.white),
+              ),
+              onPressed: () {
+                LaunchURLAPI.launchMyUrl(Uri.parse('https://flutter.dev'));
               },
             ),
             Divider(color: AppColor.white, indent: 15, endIndent: 15),

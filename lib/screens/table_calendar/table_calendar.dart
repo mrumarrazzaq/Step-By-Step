@@ -1,23 +1,21 @@
-// Copyright 2019 Aleksander Woźniak
-// SPDX-License-Identifier: Apache-2.0
-
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:stepbystep/colors.dart';
+import 'package:stepbystep/sql_database/sql_helper.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import 'calendar_utils.dart';
 
-class TableComplexExample extends StatefulWidget {
-  // Map<dynamic, List<String>> tasks;
-
-  // TableComplexExample({Key? key, required this.tasks}) : super(key: key);
+class TableCalendarComplex extends StatefulWidget {
+  TableCalendarComplex({Key? key}) : super(key: key);
   @override
-  _TableComplexExampleState createState() => _TableComplexExampleState();
+  _TableCalendarComplexState createState() => _TableCalendarComplexState();
 }
 
-class _TableComplexExampleState extends State<TableComplexExample> {
+class _TableCalendarComplexState extends State<TableCalendarComplex> {
   late final ValueNotifier<List<Event>> _selectedEvents;
   final ValueNotifier<DateTime> _focusedDay = ValueNotifier(DateTime.now());
   final Set<DateTime> _selectedDays = LinkedHashSet<DateTime>(
@@ -31,18 +29,8 @@ class _TableComplexExampleState extends State<TableComplexExample> {
   DateTime? _rangeStart;
   DateTime? _rangeEnd;
 
+  bool isLoadingEvents = true;
   late final kEvents;
-
-  final _kEventSource = Map.fromIterable(
-    List.generate(50, (index) => index),
-    key: (item) => DateTime.utc(kFirstDay.year, kFirstDay.month, item * 5),
-    value: (item) => List.generate(
-      item % 4 + 1,
-      (index) => Event('Event $item | ${index + 1}'),
-    ),
-  )..addAll({
-      kToday: [],
-    });
 
   /// Returns a list of [DateTime] objects from [first] to [last], inclusive.
   List<DateTime> daysInRange(DateTime first, DateTime last) {
@@ -59,9 +47,29 @@ class _TableComplexExampleState extends State<TableComplexExample> {
     kEvents = LinkedHashMap<DateTime, List<Event>>(
       equals: isSameDay,
       hashCode: getHashCode,
-    )..addAll(_kEventSource);
+    );
     _selectedDays.add(_focusedDay.value);
     _selectedEvents = ValueNotifier(_getEventsForDay(_focusedDay.value));
+    loadEventsInCalender();
+  }
+
+  loadEventsInCalender() async {
+    Future<List<Map<String, dynamic>>> myFuture = SQLHelper.getTasks();
+    List<Map<String, dynamic>> myTaskList = await myFuture;
+    for (var item in myTaskList) {
+      addEvent(
+          DateTime.parse(item['dateFilter']),
+          Event(item['taskTitle'] +
+              '\n' +
+              item['taskDescription'] +
+              '\n' +
+              item['taskTime'] +
+              '\n' +
+              item['taskStatus']));
+      //taskTitle
+      //dateFilter
+    }
+    setState(() {});
   }
 
   @override
@@ -136,14 +144,7 @@ class _TableComplexExampleState extends State<TableComplexExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('TableCalendar - Complex'),
-        actions: [
-          IconButton(
-              onPressed: () {
-                addEvent(DateTime.now(), Event('My NEW Event'));
-              },
-              icon: Icon(Icons.add)),
-        ],
+        title: const Text('Task History'),
       ),
       body: Column(
         children: [
@@ -183,7 +184,30 @@ class _TableComplexExampleState extends State<TableComplexExample> {
             firstDay: kFirstDay,
             lastDay: kLastDay,
             focusedDay: _focusedDay.value,
-            headerVisible: false,
+            headerVisible: true,
+            calendarStyle: CalendarStyle(
+              rangeHighlightColor: Colors.orange.shade200,
+              todayDecoration: const BoxDecoration(
+                color: Colors.orangeAccent,
+                shape: BoxShape.circle,
+              ),
+              rangeStartDecoration:
+                  BoxDecoration(color: AppColor.orange, shape: BoxShape.circle),
+              rangeEndDecoration:
+                  BoxDecoration(color: AppColor.orange, shape: BoxShape.circle),
+              holidayTextStyle: TextStyle(color: AppColor.black),
+              selectedDecoration:
+                  BoxDecoration(color: AppColor.orange, shape: BoxShape.circle),
+              holidayDecoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.fromBorderSide(
+                  BorderSide(
+                    color: AppColor.transparent,
+                    width: 1,
+                  ),
+                ),
+              ),
+            ),
             selectedDayPredicate: (day) => _selectedDays.contains(day),
             rangeStartDay: _rangeStart,
             rangeEndDay: _rangeEnd,
@@ -205,6 +229,18 @@ class _TableComplexExampleState extends State<TableComplexExample> {
             },
           ),
           const SizedBox(height: 8.0),
+          Card(
+            color: AppColor.black,
+            child: ListTile(
+              dense: true,
+              textColor: AppColor.white,
+              title: Text(
+                'Your Tasks',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.aBeeZee(fontSize: 20),
+              ),
+            ),
+          ),
           Expanded(
             child: ValueListenableBuilder<List<Event>>(
               valueListenable: _selectedEvents,
@@ -212,18 +248,30 @@ class _TableComplexExampleState extends State<TableComplexExample> {
                 return ListView.builder(
                   itemCount: value.length,
                   itemBuilder: (context, index) {
+                    List<String> task = value[index].toString().split('\n');
                     return Container(
                       margin: const EdgeInsets.symmetric(
                         horizontal: 12.0,
                         vertical: 4.0,
                       ),
                       decoration: BoxDecoration(
-                        border: Border.all(),
+                        // border: Border.all(),
                         borderRadius: BorderRadius.circular(12.0),
                       ),
-                      child: ListTile(
-                        onTap: () => print('${value[index]}'),
-                        title: Text('${value[index]}'),
+                      child: Card(
+                        child: ListTile(
+                          dense: true,
+                          onTap: () => print('${value[index]}'),
+                          title: Text(
+                            task[0],
+                            style: GoogleFonts.aBeeZee(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                          trailing: Text(task[3]),
+                          subtitle: Text(task[2]),
+                        ),
                       ),
                     );
                   },
@@ -268,27 +316,27 @@ class _CalendarHeader extends StatelessWidget {
             width: 120.0,
             child: Text(
               headerText,
-              style: TextStyle(fontSize: 26.0),
+              style: const TextStyle(fontSize: 26.0),
             ),
           ),
           IconButton(
-            icon: Icon(Icons.calendar_today, size: 20.0),
+            icon: const Icon(Icons.calendar_today, size: 20.0),
             visualDensity: VisualDensity.compact,
             onPressed: onTodayButtonTap,
           ),
           if (clearButtonVisible)
             IconButton(
-              icon: Icon(Icons.clear, size: 20.0),
+              icon: const Icon(Icons.clear, size: 20.0),
               visualDensity: VisualDensity.compact,
               onPressed: onClearButtonTap,
             ),
           const Spacer(),
           IconButton(
-            icon: Icon(Icons.chevron_left),
+            icon: const Icon(Icons.chevron_left),
             onPressed: onLeftArrowTap,
           ),
           IconButton(
-            icon: Icon(Icons.chevron_right),
+            icon: const Icon(Icons.chevron_right),
             onPressed: onRightArrowTap,
           ),
         ],

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:lottie/lottie.dart';
 import 'package:stepbystep/ads/ad_mob_service.dart';
+import 'package:stepbystep/apis/get_apis.dart';
 import 'package:stepbystep/config.dart';
 import 'package:stepbystep/listeners/firebase_listener.dart';
 
@@ -28,8 +29,9 @@ class StepByStep extends StatefulWidget {
 
 class _StepByStepState extends State<StepByStep> with WidgetsBindingObserver {
   int _currentIndex = 0;
-  // BannerAd? _bannerAd;
-  // InterstitialAd? _interstitialAd;
+  bool _isPaidAccount = false;
+  BannerAd? _bannerAd;
+  InterstitialAd? _interstitialAd;
   final List<Widget> screens = [
     const HomeScreen(),
     const MotivationalQuotes(),
@@ -59,61 +61,68 @@ class _StepByStepState extends State<StepByStep> with WidgetsBindingObserver {
     }
   }
 
+  isUserPaidAccount() async {
+    log('Checking for user account is paid ?');
+    _isPaidAccount = await GetApi.isPaidAccount();
+    setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
-    // _loadBannerAd();
-    // _loadInterstitialAd();
-    // _showInterstitialAd();
+    isUserPaidAccount();
+    _loadBannerAd();
+    _loadInterstitialAd();
+    _showInterstitialAd();
     WidgetsBinding.instance.addObserver(this);
     setUserStatus(status: 'Online');
   }
 
-  // void _loadBannerAd() {
-  //   _bannerAd = BannerAd(
-  //     adUnitId: AdMobService.bannerAdUnitId!,
-  //     request: const AdRequest(),
-  //     size: AdSize.banner,
-  //     listener: AdMobService.bannerAdListener,
-  //   )..load();
-  // }
-  //
-  // void _loadInterstitialAd() {
-  //   InterstitialAd.load(
-  //     adUnitId: AdMobService.interstitialAdUnitId!,
-  //     request: const AdRequest(),
-  //     adLoadCallback: InterstitialAdLoadCallback(
-  //       // Called when an ad is successfully received.
-  //       onAdLoaded: (ad) {
-  //         debugPrint('$ad loaded.');
-  //         // Keep a reference to the ad so you can show it later.
-  //         _interstitialAd = ad;
-  //       },
-  //       // Called when an ad request failed.
-  //       onAdFailedToLoad: (LoadAdError error) {
-  //         debugPrint('InterstitialAd failed to load: $error');
-  //         _interstitialAd = null;
-  //       },
-  //     ),
-  //   );
-  // }
-  //
-  // void _showInterstitialAd() {
-  //   if (_interstitialAd != null) {
-  //     _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
-  //       onAdDismissedFullScreenContent: (ad) {
-  //         ad.dispose();
-  //         _loadInterstitialAd();
-  //       },
-  //       onAdFailedToShowFullScreenContent: (ad, err) {
-  //         ad.dispose();
-  //         _loadInterstitialAd();
-  //       },
-  //     );
-  //     _interstitialAd!.show();
-  //     _interstitialAd = null;
-  //   }
-  // }
+  void _loadBannerAd() {
+    _bannerAd = BannerAd(
+      adUnitId: AdMobService.bannerAdUnitId!,
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: AdMobService.bannerAdListener,
+    )..load();
+  }
+
+  void _loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: AdMobService.interstitialAdUnitId!,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        // Called when an ad is successfully received.
+        onAdLoaded: (ad) {
+          debugPrint('$ad loaded.');
+          // Keep a reference to the ad so you can show it later.
+          _interstitialAd = ad;
+        },
+        // Called when an ad request failed.
+        onAdFailedToLoad: (LoadAdError error) {
+          debugPrint('InterstitialAd failed to load: $error');
+          _interstitialAd = null;
+        },
+      ),
+    );
+  }
+
+  void _showInterstitialAd() {
+    if (_interstitialAd != null) {
+      _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+        onAdDismissedFullScreenContent: (ad) {
+          ad.dispose();
+          _loadInterstitialAd();
+        },
+        onAdFailedToShowFullScreenContent: (ad, err) {
+          ad.dispose();
+          _loadInterstitialAd();
+        },
+      );
+      _interstitialAd!.show();
+      _interstitialAd = null;
+    }
+  }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -159,13 +168,13 @@ class _StepByStepState extends State<StepByStep> with WidgetsBindingObserver {
           //   },
           //   child: Text('Press'),
           // ),
-          // Visibility(
-          //   visible: _bannerAd != null,
-          //   child: SizedBox(
-          //     height: 52,
-          //     child: AdWidget(ad: _bannerAd!),
-          //   ),
-          // ),
+          Visibility(
+            visible: _bannerAd != null && !_isPaidAccount,
+            child: SizedBox(
+              height: 52,
+              child: AdWidget(ad: _bannerAd!),
+            ),
+          ),
           BottomNavigationBar(
             currentIndex: _currentIndex,
             onTap: (index) => setState(() => _currentIndex = index),

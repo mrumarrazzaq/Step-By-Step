@@ -24,22 +24,22 @@ class DeleteWorkspace {
     List<dynamic> members = await getWorkspaceMembers();
     log(members.toString());
 
-    // await deleteMembers();
-    // await deleteTeams(members);
-    //
-    // await deleteRoles();
-    // await deleteAssignedRoles();
-    //
-    // await deleteTasks(members);
-    // await deleteTaskLogs(members);
-    //
-    // await deleteReports(members);
-    //
-    // await removeMembersFromJoinedWorkspaces(members);
-    // await removeWorkspaceRoleFromUserData(members);
-    // await removeOwnerFromOwnedWorkspaces();
-    //
-    // await deleteWorkspaceHistory();
+    await deleteMembers();
+    await deleteTeams(members);
+
+    await deleteRoles();
+    await deleteAssignedRoles();
+
+    await deleteTasks(members);
+    await deleteTaskLogs(members);
+
+    await deleteReports(members);
+
+    await removeMembersFromJoinedWorkspaces(members);
+    await removeWorkspaceRoleFromUserData(members);
+    await removeOwnerFromOwnedWorkspaces();
+
+    await deleteWorkspaceHistory();
 
     await deleteCollectionHistory();
 
