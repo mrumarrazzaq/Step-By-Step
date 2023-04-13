@@ -17,6 +17,7 @@ import 'package:stepbystep/apis/get_apis.dart';
 import 'package:stepbystep/calc.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/providers/taskCollection.dart';
+import 'package:stepbystep/screens/security_section/authenticate_user_email.dart';
 import 'package:stepbystep/screens/self_task_manager/add_task.dart';
 import 'package:stepbystep/screens/self_task_manager/update_task.dart';
 import 'package:stepbystep/screens/table_calendar/calendar_utils.dart';
@@ -107,56 +108,16 @@ class _SelfSpaceHomeState extends State<SelfSpaceHome> {
           child: Column(
             children: [
               // TextButton(
-              //   onPressed: () async {
-              //     Future<List<Map<String, dynamic>>> myFuture =
-              //         SQLHelper.getTasks();
-              //     List<Map<String, dynamic>> myList = await myFuture;
-              //
-              //     // myList.forEach((item) {
-              //     //   // Do something with each item
-              //     //   print(item); //['taskTitle'] //['createdAt']
-              //     //   // print(item['dateFilter']);
-              //     // });
-              //     // final _kEventSource = Map.fromIterable(
-              //     //   List.generate(50, (index) => index),
-              //     //   key: (item) =>
-              //     //       DateTime.utc(kFirstDay.year, kFirstDay.month, item * 5),
-              //     //   value: (item) => List.generate(
-              //     //     item % 4 + 1,
-              //     //     (index) => Event('Event $item | ${index + 1}'),
-              //     //   ),
-              //     // )..addAll({
-              //     //     kToday: [],
-              //     //   });
-              //     // print(_kEventSource);
-              //
-              //     for (var item in myList) {
-              //       print(item['taskTitle']);
-              //       //taskTitle
-              //       //dateFilter
-              //     }
-              //
-              //     // print(myList);
+              //   onPressed: () {
+              //     Navigator.push(
+              //       context,
+              //       MaterialPageRoute(
+              //         builder: (context) =>
+              //             AuthenticateUserEmail(email: 'umar@gmail.com'),
+              //       ),
+              //     );
               //   },
-              //   child: Text('PRESS'),
-              // ),
-              // TextButton(
-              //   onPressed: () async {
-              //     Future<List<Map<String, dynamic>>> myFuture =
-              //         SQLHelper.getTasks();
-              //     List<Map<String, dynamic>> myTaskList = await myFuture;
-              //     if (mounted) {
-              //       Navigator.push(
-              //         context,
-              //         MaterialPageRoute(
-              //           builder: (context) => TableComplexExample(
-              //             tasks: myTaskList,
-              //           ),
-              //         ),
-              //       );
-              //     }
-              //   },
-              //   child: Text('Press'),
+              //   child: const Text('Press'),
               // ),
               Card(
                 margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),

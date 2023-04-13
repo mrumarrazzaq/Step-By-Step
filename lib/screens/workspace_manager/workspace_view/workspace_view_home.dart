@@ -121,7 +121,7 @@ class _WorkspaceViewHomeState extends State<WorkspaceViewHome> {
                                 return Container();
                               } else {
                                 return Text(
-                                  'Assigned By: ${snapshot.data}',
+                                  'Created By: ${snapshot.data}',
                                   textAlign: TextAlign.left,
                                 );
                               }

@@ -134,8 +134,8 @@ class _DetailedViewState extends State<DetailedView> {
             ListView(
               // crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Root(role: widget.role),
-                isLoading
+                Root(role: widget.role, totalMembers: allowedMembers.length),
+                isLoading && allowedMembers.isNotEmpty
                     ? Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 160.0,
@@ -210,8 +210,10 @@ class _DetailedViewState extends State<DetailedView> {
 }
 
 class Root extends StatelessWidget {
-  Root({Key? key, required this.role}) : super(key: key);
+  Root({Key? key, required this.role, required this.totalMembers})
+      : super(key: key);
   String role;
+  int totalMembers;
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -245,6 +247,13 @@ class Root extends StatelessWidget {
             child: CircleAvatar(
               radius: 45,
               backgroundColor: AppColor.orange,
+              child: Text(
+                totalMembers.toString(),
+                style: GoogleFonts.oswald(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
           ),
         ),

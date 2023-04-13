@@ -1555,6 +1555,8 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
       });
       log('------------------------------------');
     }
+
+    getSpecificTeam(currentUserEmail.toString());
   }
 
   removeMemberFromWorkspaces({required String memberEmail}) async {
@@ -1625,6 +1627,7 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
     } catch (e) {
       log(e.toString());
     }
+    getSpecificTeam(currentUserEmail.toString());
   }
 
   safeDisplay(String text) {

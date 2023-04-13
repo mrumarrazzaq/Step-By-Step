@@ -47,7 +47,7 @@ class _SignInScreen2State extends State<SignInScreen2> {
 
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
   var fcmToken;
-
+  bool isVerified = false;
   var email = "";
   var password = "";
   final emailController = TextEditingController();
@@ -68,6 +68,22 @@ class _SignInScreen2State extends State<SignInScreen2> {
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
+  }
+
+  isEmailVerified(String email) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('User Data')
+          .doc(email)
+          .get()
+          .then((ds) {
+        isVerified = ds['Verify Account'];
+        log(isVerified.toString());
+      });
+      setState(() {});
+    } catch (e) {
+      log(e.toString());
+    }
   }
 
   @override
@@ -274,7 +290,7 @@ class _SignInScreen2State extends State<SignInScreen2> {
                             elevation: 3.0,
                             height: 40.0,
                             padding: const EdgeInsets.symmetric(vertical: 10.0),
-                            onPressed: () {
+                            onPressed: () async {
                               SystemChannels.textInput
                                   .invokeMethod('TextInput.hide');
 
@@ -283,10 +299,25 @@ class _SignInScreen2State extends State<SignInScreen2> {
                                 if (_formKey.currentState!.validate()) {
                                   setState(() {
                                     isValidEmail = true;
-                                    email = emailController.text;
-                                    password = passwordController.text;
+                                    email = emailController.text.trim();
+                                    password = passwordController.text.trim();
                                   });
-                                  signInWithEmailAndPassword();
+                                  await isEmailVerified(email);
+                                  if (mounted) {
+                                    if (isVerified) {
+                                      signInWithEmailAndPassword();
+                                    } else {
+                                      Get.snackbar(
+                                        "Alert",
+                                        "Email is not Verified",
+                                        colorText: Colors.white,
+                                        icon: const Icon(Icons.warning_amber,
+                                            color: Colors.white),
+                                        snackPosition: SnackPosition.BOTTOM,
+                                        backgroundColor: Colors.red,
+                                      );
+                                    }
+                                  }
                                 }
                               }
                             },

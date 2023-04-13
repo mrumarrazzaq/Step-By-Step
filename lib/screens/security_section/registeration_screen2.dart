@@ -17,6 +17,7 @@ import 'package:mac_address/mac_address.dart';
 import 'package:stepbystep/apis/pick_file_api.dart';
 
 import 'package:stepbystep/colors.dart';
+import 'package:stepbystep/screens/security_section/authenticate_user_email.dart';
 import 'package:stepbystep/screens/security_section/signIn_screen.dart';
 import 'package:stepbystep/apis/send_email_api.dart';
 import 'package:stepbystep/screens/security_section/signIn_screen2.dert.dart';
@@ -47,6 +48,7 @@ class _RegistrationScreen2State extends State<RegistrationScreen2> {
   var password = "";
   var confirmPassword = "";
   String imageURL = '';
+  String nameInitial = '';
   final personNameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -55,7 +57,7 @@ class _RegistrationScreen2State extends State<RegistrationScreen2> {
 
   @override
   Widget build(BuildContext context) {
-    log("RegisterScreen Build Run");
+    // log("RegisterScreen Build Run");
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: AppColor.white,
@@ -87,6 +89,17 @@ class _RegistrationScreen2State extends State<RegistrationScreen2> {
             // mainAxisAlignment: MainAxisAlignment.center,
             // crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              InkWell(
+                onTap: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AuthenticateUserEmail(email: email),
+                    ),
+                  );
+                },
+                child: Text('Press'),
+              ),
               Align(
                 alignment: Alignment.topCenter,
                 child: imageURL.isEmpty
@@ -100,11 +113,22 @@ class _RegistrationScreen2State extends State<RegistrationScreen2> {
                         ),
                         child: Align(
                           alignment: Alignment.center,
-                          child: Image.asset(
-                            'logos/user.png',
-                            width: 50,
-                            color: AppColor.white,
-                          ),
+                          child: nameInitial.isEmpty
+                              ? Image.asset(
+                                  'logos/user.png',
+                                  width: 50,
+                                  color: AppColor.white,
+                                )
+                              : Text(
+                                  nameInitial[0],
+                                  style: GoogleFonts.bebasNeue(
+                                    textStyle: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColor.white,
+                                      fontSize: 50,
+                                    ),
+                                  ),
+                                ),
                         ),
                       )
                     : Container(
@@ -132,6 +156,11 @@ class _RegistrationScreen2State extends State<RegistrationScreen2> {
                   keyboardType: TextInputType.text,
                   cursorColor: AppColor.orange,
                   style: TextStyle(color: AppColor.black),
+                  onChanged: (v) {
+                    nameInitial = v;
+                    log(nameInitial);
+                    setState(() {});
+                  },
                   decoration: InputDecoration(
                     isDense: true,
                     enabled: _isLoading ? false : true,
@@ -366,8 +395,10 @@ class _RegistrationScreen2State extends State<RegistrationScreen2> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("Already have an Account? ",
-                      style: TextStyle(color: AppColor.black)),
+                  Text(
+                    "Already have an Account? ",
+                    style: TextStyle(color: AppColor.black),
+                  ),
                   TextButton(
                     onPressed: () => {
                       Navigator.push(
@@ -444,10 +475,11 @@ class _RegistrationScreen2State extends State<RegistrationScreen2> {
         log('Email and Password Save Successfully');
         log('------------------------------------');
         await SendEmailAPI().sendEmail(
-            name: personName,
-            email: emailController.text.trim(),
-            subject: 'Thanks for create a account',
-            message: 'You have successfully become a part of SBS Team');
+          name: personName,
+          email: emailController.text.trim(),
+          subject: 'Thanks for create a account',
+          message: 'You have successfully become a part of SBS Team',
+        );
         Get.snackbar(
           "Registered Successfully",
           "Now Sign in",
@@ -463,13 +495,20 @@ class _RegistrationScreen2State extends State<RegistrationScreen2> {
         //   backgroundColor: Colors.green,
         // );
 
-        // ignore: use_build_context_synchronously
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const SignInScreen2(),
-          ),
-        );
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AuthenticateUserEmail(email: email),
+            ),
+          );
+        }
+        // Navigator.pushReplacement(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (context) => const SignInScreen2(),
+        //   ),
+        // );
       } on FirebaseAuthException catch (e) {
         setState(() {
           _isLoading = false;
