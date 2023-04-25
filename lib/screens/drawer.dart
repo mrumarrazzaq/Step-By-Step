@@ -144,6 +144,20 @@ class _AppDrawerState extends State<AppDrawer> {
             ),
             Divider(color: AppColor.white, indent: 15, endIndent: 15),
             FlatButton(
+              child: ListTile(
+                leading: Image.asset(
+                  'assets/remove-ads-icon.png',
+                  color: Colors.white,
+                  height: 25,
+                ),
+                title: const Text('Remove Ads'),
+                textColor: Colors.white,
+                trailing: const Icon(Icons.arrow_forward, color: Colors.white),
+              ),
+              onPressed: () {},
+            ),
+            Divider(color: AppColor.white, indent: 15, endIndent: 15),
+            FlatButton(
               child: const ListTile(
                 leading: Icon(Icons.help, color: Colors.white),
                 title: Text('Get Help'),

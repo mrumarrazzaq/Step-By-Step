@@ -9,13 +9,14 @@ import 'package:table_calendar/table_calendar.dart';
 
 import 'calendar_utils.dart';
 
-class TableCalendarComplex extends StatefulWidget {
-  TableCalendarComplex({Key? key}) : super(key: key);
+class WorkspaceTableCalendar extends StatefulWidget {
+  WorkspaceTableCalendar({Key? key, required this.tasks}) : super(key: key);
+  List tasks;
   @override
-  _TableCalendarComplexState createState() => _TableCalendarComplexState();
+  _WorkspaceTableCalendarState createState() => _WorkspaceTableCalendarState();
 }
 
-class _TableCalendarComplexState extends State<TableCalendarComplex> {
+class _WorkspaceTableCalendarState extends State<WorkspaceTableCalendar> {
   late final ValueNotifier<List<Event>> _selectedEvents;
   final ValueNotifier<DateTime> _focusedDay = ValueNotifier(DateTime.now());
   final Set<DateTime> _selectedDays = LinkedHashSet<DateTime>(
@@ -54,18 +55,16 @@ class _TableCalendarComplexState extends State<TableCalendarComplex> {
   }
 
   loadEventsInCalender() async {
-    Future<List<Map<String, dynamic>>> myFuture = SQLHelper.getTasks();
-    List<Map<String, dynamic>> myTaskList = await myFuture;
-    for (var item in myTaskList) {
+    for (var task in widget.tasks) {
       addEvent(
-          DateTime.parse(item['dateFilter']),
-          Event(item['taskTitle'] +
+          DateTime.parse(task['Date Filter']),
+          Event(task['Task Title'] +
               '\n' +
-              item['taskDescription'] +
+              task['Task Description'] +
               '\n' +
-              item['taskTime'] +
+              task['Assigned By'] +
               '\n' +
-              item['taskStatus']));
+              task['Due Date']));
       //taskTitle
       //dateFilter
     }

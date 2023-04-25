@@ -69,6 +69,91 @@ class NotificationAPI {
     );
   }
 
+  void setAlarm(
+      {required int id,
+      required String title,
+      required DateTime dateTime}) async {
+    FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+        FlutterLocalNotificationsPlugin();
+
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('logo_foreground');
+    const InitializationSettings initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid);
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
+    // Set the time for the alarm
+    var scheduledNotificationDateTime =
+        dateTime.add(const Duration(seconds: 5));
+
+// Configure the notification details
+    var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
+      'alarm_channel_id',
+      'alarm_channel_name',
+      importance: Importance.max,
+      priority: Priority.high,
+      showWhen: false,
+    );
+    var platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.schedule(
+      id,
+      'Don\'t Forget  to complete task',
+      title,
+      scheduledNotificationDateTime,
+      platformChannelSpecifics,
+    );
+  }
+
+  void scheduleNotification({
+    required String id,
+    required String title,
+    String? body,
+    String? payload,
+    required DateTime scheduledDate,
+  }) async {
+    var scheduledNotificationDateTime =
+        scheduledDate.add(const Duration(seconds: 10));
+    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      id,
+      title,
+      importance: Importance.high,
+      priority: Priority.high,
+      ticker: 'ticker',
+    );
+    var iOSPlatformChannelSpecifics = const IOSNotificationDetails();
+    var platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+      iOS: iOSPlatformChannelSpecifics,
+    );
+    await FlutterLocalNotificationsPlugin().zonedSchedule(
+      0,
+      title,
+      payload,
+      _nextInstanceOfScheduledTime(scheduledNotificationDateTime),
+      platformChannelSpecifics,
+      androidAllowWhileIdle: true,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+    );
+  }
+
+  tz.TZDateTime _nextInstanceOfScheduledTime(DateTime scheduledTime) {
+    final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+    tz.TZDateTime scheduledDate = tz.TZDateTime(
+        tz.local,
+        scheduledTime.year,
+        scheduledTime.month,
+        scheduledTime.day,
+        scheduledTime.hour,
+        scheduledTime.minute,
+        scheduledTime.second);
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+    return scheduledDate;
+  }
+
   static Future dailyScheduledNotification({
     required int id,
     required Time time,

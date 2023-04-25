@@ -4,11 +4,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_swipe_action_cell/flutter_swipe_action_cell.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:lottie/lottie.dart';
+import 'package:stepbystep/ads/ad_mob_service.dart';
 import 'package:stepbystep/apis/app_functions.dart';
 import 'package:stepbystep/apis/collection_history.dart';
 
 import 'package:stepbystep/apis/firebase_api.dart';
+import 'package:stepbystep/apis/get_apis.dart';
 import 'package:stepbystep/apis/messege_notification_api.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
@@ -56,6 +59,8 @@ class WorkspaceMembersHandler extends StatefulWidget {
 class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
     with TickerProviderStateMixin {
   late AnimationController _animationController;
+
+  InterstitialAd? _interstitialAd;
 
   bool memberAddingWait = false;
   bool memberRemovingWait = false;
@@ -240,6 +245,43 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
     }
   }
 
+  void _loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: AdMobService.interstitialAdUnitId!,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        // Called when an ad is successfully received.
+        onAdLoaded: (ad) {
+          debugPrint('$ad loaded.');
+          // Keep a reference to the ad so you can show it later.
+          _interstitialAd = ad;
+        },
+        // Called when an ad request failed.
+        onAdFailedToLoad: (LoadAdError error) {
+          debugPrint('InterstitialAd failed to load: $error');
+          _interstitialAd = null;
+        },
+      ),
+    );
+  }
+
+  void _showInterstitialAd() {
+    if (_interstitialAd != null) {
+      _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+        onAdDismissedFullScreenContent: (ad) {
+          ad.dispose();
+          _loadInterstitialAd();
+        },
+        onAdFailedToShowFullScreenContent: (ad, err) {
+          ad.dispose();
+          _loadInterstitialAd();
+        },
+      );
+      _interstitialAd!.show();
+      _interstitialAd = null;
+    }
+  }
+
   @override
   void initState() {
     log('WORKSPACE MEMBER HANDLER INIT CALLED');
@@ -264,6 +306,8 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
         .collection('${widget.workspaceCode} Members')
         .orderBy('Created At', descending: true)
         .snapshots();
+
+    _loadInterstitialAd();
   }
 
   setValues() {
@@ -701,6 +745,11 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
                                     child: ListTile(
                                       onTap: () async {
                                         print('CARD NO 1');
+                                        bool isTrue =
+                                            await GetApi.isPaidAccount();
+                                        if (!isTrue) {
+                                          _showInterstitialAd();
+                                        }
                                         String userName =
                                             await AppFunctions.getNameByEmail(
                                                 email: storedMembersData[i]
@@ -936,6 +985,11 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
                                     child: ListTile(
                                       onTap: () async {
                                         print('CARD NO 2');
+                                        bool isTrue =
+                                            await GetApi.isPaidAccount();
+                                        if (!isTrue) {
+                                          _showInterstitialAd();
+                                        }
                                         String userName =
                                             await AppFunctions.getNameByEmail(
                                                 email: storedMembersData[i]

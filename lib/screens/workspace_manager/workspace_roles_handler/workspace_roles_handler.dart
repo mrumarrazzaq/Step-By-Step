@@ -5,9 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:stepbystep/ads/ad_mob_service.dart';
 import 'package:stepbystep/apis/app_functions.dart';
 
 import 'package:stepbystep/apis/firebase_api.dart';
+import 'package:stepbystep/apis/get_apis.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
 import 'package:stepbystep/screens/workspace_manager/workspace_roles_handler/role_selector.dart';
@@ -49,6 +52,7 @@ class WorkspaceRolesHandler extends StatefulWidget {
 
 class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  InterstitialAd? _interstitialAd;
 
   int roleLevel = 1;
   final roleController = TextEditingController();
@@ -95,6 +99,43 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
     }
   }
 
+  void _loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: AdMobService.interstitialAdUnitId!,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        // Called when an ad is successfully received.
+        onAdLoaded: (ad) {
+          debugPrint('$ad loaded.');
+          // Keep a reference to the ad so you can show it later.
+          _interstitialAd = ad;
+        },
+        // Called when an ad request failed.
+        onAdFailedToLoad: (LoadAdError error) {
+          debugPrint('InterstitialAd failed to load: $error');
+          _interstitialAd = null;
+        },
+      ),
+    );
+  }
+
+  void _showInterstitialAd() {
+    if (_interstitialAd != null) {
+      _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+        onAdDismissedFullScreenContent: (ad) {
+          ad.dispose();
+          _loadInterstitialAd();
+        },
+        onAdFailedToShowFullScreenContent: (ad, err) {
+          ad.dispose();
+          _loadInterstitialAd();
+        },
+      );
+      _interstitialAd!.show();
+      _interstitialAd = null;
+    }
+  }
+
   @override
   void initState() {
     hexColorCode = '0x${roleColor.value.toRadixString(16)}';
@@ -107,6 +148,7 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
     // if (!widget.controlForOwner) {
     //   getSpecificRoleData();
     // }
+    _loadInterstitialAd();
     super.initState();
   }
 
@@ -118,6 +160,10 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
           visible: widget.createRole && !widget.fromTaskAssignment,
           child: MaterialButton(
             onPressed: () async {
+              bool isTrue = await GetApi.isPaidAccount();
+              if (!isTrue) {
+                _showInterstitialAd();
+              }
               String workspaceType = await AppFunctions.getWorkspaceType(
                   workspaceCode: widget.workspaceCode);
               if (mounted) {

@@ -1,24 +1,27 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:stepbystep/visualization/chart_processor.dart';
 
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/visualization/dataset.dart';
 
+import 'package:stepbystep/black_box.dart';
+
 class LineChart extends StatefulWidget {
-  LineChart(
+  const LineChart(
       {Key? key,
       required this.workspaceCode,
       required this.userEmail,
       required this.mainFilterValue,
       required this.subFilterValue})
       : super(key: key);
-  String workspaceCode;
-  String userEmail;
-  String mainFilterValue;
-  String subFilterValue;
+  final String workspaceCode;
+  final String userEmail;
+  final String mainFilterValue;
+  final String subFilterValue;
 
   @override
   State<LineChart> createState() => _LineChartState();
@@ -33,15 +36,147 @@ class _LineChartState extends State<LineChart> {
   double todo = 0.0;
   double completed = 0.0;
   double expired = 0.0;
+
+  List<double> _dailyAssignedTaskProgressData = [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ];
+  List<double> _dailyCompletedTaskProgressData = [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ];
+  List<double> _dailyExpiredTaskProgressData = [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ];
+  List<double> _weeklyAssignedTaskProgressData = [0.0, 0.0, 0.0, 0.0];
+  List<double> _weeklyCompletedTaskProgressData = [0.0, 0.0, 0.0, 0.0];
+  List<double> _weeklyExpiredTaskProgressData = [0.0, 0.0, 0.0, 0.0];
+
+  List<double> _monthlyAssignedTaskProgressData = [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ];
+  List<double> _monthlyCompletedTaskProgressData = [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ];
+  List<double> _monthlyExpiredTaskProgressData = [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ];
   @override
   void initState() {
-    // print(widget.userEmail);
-    // print(widget.workspaceCode);
-    // getData();
+    dailyLineChartProcess();
+    weeklyLineChartProcess();
+    monthlyLineChartProcess();
+    reportDataListener();
     super.initState();
   }
 
-  getData() async {
+  dailyLineChartProcess() async {
+    for (int i = 0; i < 7; i++) {
+      _dailyAssignedTaskProgressData[i] = 0.0;
+      _dailyCompletedTaskProgressData[i] = 0.0;
+      _dailyExpiredTaskProgressData[i] = 0.0;
+    }
+
+    CollectionReference report = FirebaseFirestore.instance
+        .collection('Report ${widget.userEmail} ${widget.workspaceCode}');
+
+    QuerySnapshot querySnapshot = await report.get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      List<DocumentSnapshot> documentList = querySnapshot.docs;
+      for (DocumentSnapshot documentSnapshot in documentList) {
+        Map<String, dynamic>? data =
+            documentSnapshot.data() as Map<String, dynamic>?;
+        List<String> list = documentSnapshot.id.split(' ');
+        String getYear = list[1];
+        String getMonth = list[3];
+        String getWeek = list[5];
+        String getWeekDay = list[7];
+        String getDay = list[9];
+        if (DateTime.now().year.toString() == getYear &&
+            getWeek == BlackBox.getWeekNumber().toString()) {
+          _dailyAssignedTaskProgressData[7 - int.parse(getWeekDay)] +=
+              data!['TODO'] + data['DOING'] + data['REVIEW'];
+          _dailyCompletedTaskProgressData[7 - int.parse(getWeekDay)] +=
+              data['COMPLETED'];
+          _dailyExpiredTaskProgressData[7 - int.parse(getWeekDay)] +=
+              data['EXPIRED'];
+        }
+        setState(() {});
+        log('-----------------------------------');
+      }
+    } else {
+      log('No documents found');
+    }
+    log('Daily Assigned Task $_dailyAssignedTaskProgressData');
+    log('Daily Completed Task $_dailyCompletedTaskProgressData');
+    log('Daily Expired Task $_dailyExpiredTaskProgressData');
+    _dailyAssignedTaskProgressData =
+        shiftArrayToRight(_dailyAssignedTaskProgressData, weekDay);
+    _dailyCompletedTaskProgressData =
+        shiftArrayToRight(_dailyCompletedTaskProgressData, weekDay);
+    _dailyExpiredTaskProgressData =
+        shiftArrayToRight(_dailyExpiredTaskProgressData, weekDay);
+    log('Daily Assigned Task $_dailyAssignedTaskProgressData');
+    log('Daily Completed Task $_dailyCompletedTaskProgressData');
+    log('Daily Expired Task $_dailyExpiredTaskProgressData');
+  }
+
+  weeklyLineChartProcess() async {
+    for (int i = 0; i < 4; i++) {
+      _weeklyAssignedTaskProgressData[i] = 0.0;
+      _weeklyCompletedTaskProgressData[i] = 0.0;
+      _weeklyExpiredTaskProgressData[i] = 0.0;
+    }
     CollectionReference users = FirebaseFirestore.instance
         .collection('Report ${widget.userEmail} ${widget.workspaceCode}');
 
@@ -52,7 +187,6 @@ class _LineChartState extends State<LineChart> {
       for (DocumentSnapshot documentSnapshot in documentList) {
         Map<String, dynamic>? data =
             documentSnapshot.data() as Map<String, dynamic>?;
-        print('Document ID: ${documentSnapshot.id}');
 
         List<String> list = documentSnapshot.id.split(' ');
         String getYear = list[1];
@@ -60,34 +194,123 @@ class _LineChartState extends State<LineChart> {
         String getWeek = list[5];
         String getWeekDay = list[7];
         String getDay = list[9];
-        print('$getYear $getMonth $getWeek $getWeekDay $getDay');
-        // print(documentSnapshot.id.split(' '));
+
         if (DateTime.now().year.toString() == getYear &&
             DateTime.now().month.toString() == getMonth) {
-          // print('TODO: ${data!['TODO']}');
-          todo += data!['TODO'];
-          // completed += data['COMPLETED'];
-          // expired += data['EXPIRED'];
+          if (int.parse(getWeek) - 1 == 4) {
+            _weeklyAssignedTaskProgressData[3] +=
+                data!['TODO'] + data['DOING'] + data['REVIEW'];
+            _weeklyCompletedTaskProgressData[3] += data['COMPLETED'];
+            _weeklyExpiredTaskProgressData[3] += data['EXPIRED'];
+          } else {
+            _weeklyAssignedTaskProgressData[5 - int.parse(getWeek)] +=
+                data!['TODO'] + data['DOING'] + data['REVIEW'];
+            _weeklyCompletedTaskProgressData[5 - int.parse(getWeek)] +=
+                data['COMPLETED'];
+            _weeklyExpiredTaskProgressData[5 - int.parse(getWeek)] +=
+                data['EXPIRED'];
+          }
         }
-        setState(() {
-          print('---------------');
-          print(weekDay);
-          print(day);
-          calculateDailyTaskProgress('Assigned Task');
-          dailyTaskProgressData[weekDay + int.parse(getWeekDay) - 1] = todo;
-        });
+        setState(() {});
+        log('-----------------------------------');
       }
     } else {
-      print('No documents found');
+      log('No documents found');
     }
 
-    // await FirebaseFirestore.instance
-    //     .collection('Report zain@gmail.com umar@gmail.com Software')
-    //     .doc()
-    //     .get()
-    //     .then((ds) {
-    //   print(ds['TODO']);
-    // });
+    log('Weekly Assigned Task $_weeklyAssignedTaskProgressData');
+    log('Weekly Completed Task $_weeklyCompletedTaskProgressData');
+    log('Weekly Expired Task $_weeklyExpiredTaskProgressData');
+    _weeklyAssignedTaskProgressData =
+        shiftArrayToRight(_weeklyAssignedTaskProgressData, -1);
+    _weeklyCompletedTaskProgressData =
+        shiftArrayToRight(_weeklyCompletedTaskProgressData, -1);
+    _weeklyExpiredTaskProgressData =
+        shiftArrayToRight(_weeklyExpiredTaskProgressData, -1);
+    log('Weekly Assigned Task $_weeklyAssignedTaskProgressData');
+    log('Weekly Completed Task $_weeklyCompletedTaskProgressData');
+    log('Weekly Expired Task $_weeklyExpiredTaskProgressData');
+  }
+
+  monthlyLineChartProcess() async {
+    for (int i = 0; i < 12; i++) {
+      _monthlyAssignedTaskProgressData[i] = 0.0;
+      _monthlyCompletedTaskProgressData[i] = 0.0;
+      _monthlyExpiredTaskProgressData[i] = 0.0;
+    }
+    CollectionReference users = FirebaseFirestore.instance
+        .collection('Report ${widget.userEmail} ${widget.workspaceCode}');
+
+    QuerySnapshot querySnapshot = await users.get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      List<DocumentSnapshot> documentList = querySnapshot.docs;
+      for (DocumentSnapshot documentSnapshot in documentList) {
+        Map<String, dynamic>? data =
+            documentSnapshot.data() as Map<String, dynamic>?;
+
+        List<String> list = documentSnapshot.id.split(' ');
+        String getYear = list[1];
+        String getMonth = list[3];
+        String getWeek = list[5];
+        String getWeekDay = list[7];
+        String getDay = list[9];
+        if (DateTime.now().year.toString() == getYear) {
+          _monthlyAssignedTaskProgressData[12 - int.parse(getMonth)] +=
+              data!['TODO'] + data['DOING'] + data['REVIEW'];
+          _monthlyCompletedTaskProgressData[12 - int.parse(getMonth)] +=
+              data['COMPLETED'];
+          _monthlyExpiredTaskProgressData[12 - int.parse(getMonth)] +=
+              data['EXPIRED'];
+        }
+        setState(() {});
+        log('-----------------------------------');
+      }
+    } else {
+      log('No documents found');
+    }
+
+    log('Monthly Assigned Task $_monthlyAssignedTaskProgressData');
+    log('Monthly Completed Task $_monthlyCompletedTaskProgressData');
+    log('Monthly Expired Task $_monthlyExpiredTaskProgressData');
+    _monthlyAssignedTaskProgressData =
+        shiftArrayToRight(_monthlyAssignedTaskProgressData, month);
+    _monthlyCompletedTaskProgressData =
+        shiftArrayToRight(_monthlyCompletedTaskProgressData, month);
+    _monthlyExpiredTaskProgressData =
+        shiftArrayToRight(_monthlyExpiredTaskProgressData, month);
+    log('Monthly Assigned Task $_monthlyAssignedTaskProgressData');
+    log('Monthly Completed Task $_monthlyCompletedTaskProgressData');
+    log('Monthly Expired Task $_monthlyExpiredTaskProgressData');
+  }
+
+  List<double> shiftArrayToRight(List arr, int numShifts) {
+    // Determine the number of shifts required based on array length
+    int actualShifts = numShifts % arr.length;
+    // Shift the array to the right using sub lists and concatenation
+    List<double> shiftedArr = [
+      ...arr.getRange(arr.length - actualShifts, arr.length),
+      ...arr.getRange(0, arr.length - actualShifts)
+    ];
+
+    return shiftedArr;
+  }
+
+  void reportDataListener() {
+    log('Listen For Line Chart Data..............');
+    try {
+      FirebaseFirestore.instance
+          .collection('Report ${widget.userEmail} ${widget.workspaceCode}')
+          .snapshots()
+          .listen((querySnapshot) {
+        querySnapshot.docChanges.forEach((change) {});
+        dailyLineChartProcess();
+        weeklyLineChartProcess();
+        monthlyLineChartProcess();
+      });
+    } catch (e) {
+      log(e.toString());
+    }
   }
 
   @override
@@ -136,7 +359,7 @@ class _LineChartState extends State<LineChart> {
                 for (int i = 0; i < 7; i++) ...[
                   EmotionData(
                     text: weekDays[weekDay][i],
-                    value: dailyTaskProgressData[i],
+                    value: _dailyAssignedTaskProgressData[i],
                   ),
                 ],
               ] else if (widget.mainFilterValue == 'month' &&
@@ -144,7 +367,7 @@ class _LineChartState extends State<LineChart> {
                 for (int i = 0; i < 4; i++) ...[
                   EmotionData(
                     text: weeksOfMonth[week][i],
-                    value: weeklyTaskProgressData[i],
+                    value: _weeklyAssignedTaskProgressData[i],
                   ),
                 ],
               ] else if (widget.mainFilterValue == 'year' &&
@@ -152,7 +375,7 @@ class _LineChartState extends State<LineChart> {
                 for (int i = 0; i < 12; i++) ...[
                   EmotionData(
                     text: monthsOfYear[month][i],
-                    value: monthlyTaskProgressData[i],
+                    value: _monthlyAssignedTaskProgressData[i],
                   ),
                 ],
               ],
@@ -161,7 +384,7 @@ class _LineChartState extends State<LineChart> {
                 for (int i = 0; i < 7; i++) ...[
                   EmotionData(
                     text: weekDays[weekDay][i],
-                    value: dailyTaskProgressData[i],
+                    value: _dailyCompletedTaskProgressData[i],
                   ),
                 ],
               ] else if (widget.mainFilterValue == 'month' &&
@@ -169,7 +392,7 @@ class _LineChartState extends State<LineChart> {
                 for (int i = 0; i < 4; i++) ...[
                   EmotionData(
                     text: weeksOfMonth[week][i],
-                    value: weeklyTaskProgressData[i],
+                    value: _weeklyCompletedTaskProgressData[i],
                   ),
                 ],
               ] else if (widget.mainFilterValue == 'year' &&
@@ -177,7 +400,7 @@ class _LineChartState extends State<LineChart> {
                 for (int i = 0; i < 12; i++) ...[
                   EmotionData(
                     text: monthsOfYear[month][i],
-                    value: monthlyTaskProgressData[i],
+                    value: _monthlyCompletedTaskProgressData[i],
                   ),
                 ],
               ],
@@ -186,7 +409,7 @@ class _LineChartState extends State<LineChart> {
                 for (int i = 0; i < 7; i++) ...[
                   EmotionData(
                     text: weekDays[weekDay][i],
-                    value: dailyTaskProgressData[i],
+                    value: _dailyExpiredTaskProgressData[i],
                   ),
                 ],
               ] else if (widget.mainFilterValue == 'month' &&
@@ -194,7 +417,7 @@ class _LineChartState extends State<LineChart> {
                 for (int i = 0; i < 4; i++) ...[
                   EmotionData(
                     text: weeksOfMonth[week][i],
-                    value: weeklyTaskProgressData[i],
+                    value: _weeklyExpiredTaskProgressData[i],
                   ),
                 ],
               ] else if (widget.mainFilterValue == 'year' &&
@@ -202,7 +425,7 @@ class _LineChartState extends State<LineChart> {
                 for (int i = 0; i < 12; i++) ...[
                   EmotionData(
                     text: monthsOfYear[month][i],
-                    value: monthlyTaskProgressData[i],
+                    value: _monthlyExpiredTaskProgressData[i],
                   ),
                 ],
               ],

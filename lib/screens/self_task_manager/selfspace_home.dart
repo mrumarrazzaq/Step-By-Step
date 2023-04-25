@@ -14,6 +14,7 @@ import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:stepbystep/ads/ad_mob_service.dart';
 import 'package:stepbystep/apis/get_apis.dart';
+import 'package:stepbystep/apis/notification_api.dart';
 import 'package:stepbystep/calc.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/providers/taskCollection.dart';
@@ -23,7 +24,7 @@ import 'package:stepbystep/screens/self_task_manager/update_task.dart';
 import 'package:stepbystep/screens/table_calendar/calendar_utils.dart';
 import 'package:stepbystep/sql_database/sql_helper.dart';
 
-import '../table_calendar/table_calendar.dart';
+import '../table_calendar/self_table_calendar.dart';
 
 class SelfSpaceHome extends StatefulWidget {
   const SelfSpaceHome({Key? key}) : super(key: key);
@@ -107,28 +108,20 @@ class _SelfSpaceHomeState extends State<SelfSpaceHome> {
         child: Center(
           child: Column(
             children: [
-              // TextButton(
-              //   onPressed: () {
-              //     Navigator.push(
-              //       context,
-              //       MaterialPageRoute(
-              //         builder: (context) =>
-              //             AuthenticateUserEmail(email: 'umar@gmail.com'),
-              //       ),
-              //     );
-              //   },
-              //   child: const Text('Press'),
-              // ),
               Card(
                 margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 child: ListTile(
                   dense: true,
                   title: InkWell(
                     onTap: () async {
+                      bool isTrue = await GetApi.isPaidAccount();
+                      if (!isTrue) {
+                        _showInterstitialAd();
+                      }
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => TableCalendarComplex(),
+                          builder: (context) => SelfTableCalendar(),
                         ),
                       );
                     },
@@ -327,11 +320,14 @@ class _SelfSpaceHomeState extends State<SelfSpaceHome> {
                       child: Column(
                     children: const [
                       Text('Do you want to delete task'),
-                      Text('Deleted task cannot be recovered',
-                          style: TextStyle(
-                              fontStyle: FontStyle.italic,
-                              fontSize: 10,
-                              color: Colors.red)),
+                      Text(
+                        'Deleted task cannot be recovered',
+                        style: TextStyle(
+                          fontStyle: FontStyle.italic,
+                          fontSize: 10,
+                          color: Colors.red,
+                        ),
+                      ),
                     ],
                   )),
                 ),
@@ -351,6 +347,7 @@ class _SelfSpaceHomeState extends State<SelfSpaceHome> {
                 TextButton(
                   onPressed: () async {
                     _deleteTask(id);
+                    await NotificationAPI.cancelNotification(id);
                     Navigator.of(context, rootNavigator: true).pop('dialog');
                   },
                   child: const Text(

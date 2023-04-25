@@ -50,9 +50,11 @@ class _BotUIState extends State<BotUI> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      child: Lottie.network(
-                          height: 200,
-                          'https://assets2.lottiefiles.com/packages/lf20_ofa3xwo7.json'),
+                      child: Lottie.asset(
+                        height: 200,
+                        'animations/robot-bot-3d.json',
+                        //https://assets2.lottiefiles.com/packages/lf20_ofa3xwo7.json
+                      ),
                     ),
                     const Text('Ack Your Queries From Me'),
                     const Text(

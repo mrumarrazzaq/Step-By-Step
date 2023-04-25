@@ -438,6 +438,7 @@ class _SignInScreen2State extends State<SignInScreen2> {
 
         final json = {
           'Verify Account': true,
+          'Paid Account': false,
           'MAC': mac,
           'User Name': currentUser.displayName!,
           'User Email': currentUser.email!,

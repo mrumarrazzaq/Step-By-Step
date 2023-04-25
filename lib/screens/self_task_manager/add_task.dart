@@ -111,7 +111,6 @@ class _TaskState extends State<Task> {
                     taskStatus: 'TODO',
                   );
                   try {
-                    log('Notification Set Successfully');
                     // NotificationAPI.dailyScheduledNotification(
                     //   id: _selectedDateTime.minute + _selectedDateTime.second,
                     //   time: const Time(0, 0, 0),
@@ -123,17 +122,32 @@ class _TaskState extends State<Task> {
                     //   payload: _taskDescriptionController.text,
                     // );
 
-                    NotificationAPI.showScheduledNotification(
+                    NotificationAPI().setAlarm(
                       id: _selectedDateTime.minute + _selectedDateTime.second,
-                      title: 'Don\'t Forget  to complete task',
-                      body: _taskTitleController.text,
-                      payload: _taskDescriptionController.text,
-                      scheduledDate: DateTime.parse(dateTimeString).add(
-                        const Duration(milliseconds: 100),
-                      ),
+                      title: _taskTitleController.text,
+                      dateTime: DateTime.parse(dateTimeString),
                     );
+                    //
+                    // notificationAPIInstance.scheduleNotification(
+                    //   id: '${_selectedDateTime.minute} ${_selectedDateTime.second}',
+                    //   title: 'Don\'t Forget  to complete task',
+                    //   payload: _taskDescriptionController.text,
+                    //   scheduledDate: DateTime.parse(dateTimeString),
+                    // );
+                    //
+                    // NotificationAPI.showScheduledNotification(
+                    //   id: _selectedDateTime.minute + _selectedDateTime.second,
+                    //   title: 'Don\'t Forget  to complete task',
+                    //   body: _taskTitleController.text,
+                    //   payload: _taskDescriptionController.text,
+                    //   scheduledDate: DateTime.parse(dateTimeString).add(
+                    //     const Duration(milliseconds: 100),
+                    //   ),
+                    // );
+                    log('Notification Set Successfully');
                   } catch (e) {
                     log(e.toString());
+                    log('Notification Not Set Successfully');
                   }
                   Fluttertoast.showToast(
                     msg: "Task create successfully",

@@ -21,22 +21,22 @@ import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:dio/dio.dart';
 
 class WorkspaceTaskTile extends StatefulWidget {
-  bool isOwner;
-  String userEmail;
-  String workspaceCode;
-  String workspaceTaskCode;
-  String docId;
-  String title;
-  String description;
-  String email;
-  String date;
-  int taskStatusValue;
-  Color color;
-  String fileURL;
-  String fileName;
-  bool leftButton;
-  bool rightButton;
-  WorkspaceTaskTile({
+  final bool isOwner;
+  final String userEmail;
+  final String workspaceCode;
+  final String workspaceTaskCode;
+  final String docId;
+  final String title;
+  final String description;
+  final String email;
+  final String date;
+  final int taskStatusValue;
+  final Color color;
+  final String fileURL;
+  final String fileName;
+  final bool leftButton;
+  final bool rightButton;
+  const WorkspaceTaskTile({
     Key? key,
     required this.isOwner,
     required this.userEmail,
@@ -66,7 +66,7 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
   @override
   void initState() {
     super.initState();
-
+    log(widget.userEmail);
     IsolateNameServer.registerPortWithName(
         _port.sendPort, 'downloader_send_port');
     _port.listen((dynamic data) {
@@ -123,6 +123,14 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onLongPress: () async {
+        // updateFieldIfMatch(
+        //   collectionPath: 'Report ${widget.userEmail} ${widget.workspaceCode}',
+        //   matchingField: 'Task Id',
+        //   matchingValue: widget.docId,
+        //   fieldToBeUpdated: 'TODO',
+        //   newValue: 30,
+        // );
+
         if (widget.isOwner) {
           showTaskDeletionDialog(
             context: context,
@@ -132,13 +140,13 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
             docId: widget.docId,
           );
         }
-
-        log(widget.docId);
       },
       child: Card(
-        margin: const EdgeInsets.only(left: 10, bottom: 10, top: 10, right: 10),
+        margin: const EdgeInsets.only(left: 10, bottom: 5, top: 5, right: 10),
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+          borderRadius: BorderRadius.all(
+            Radius.circular(10.0),
+          ),
         ),
         child: ClipPath(
           clipper: ShapeBorderClipper(
@@ -258,8 +266,12 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
                           onTap: () async {
                             if (widget.leftButton) {
                               log('LB Task Status Value : ${widget.taskStatusValue - 1}');
+                              //Notification for TODO
                               if (widget.taskStatusValue - 1 == 0) {
-                                log('Todo');
+                                log('<--------Todo');
+                                updateFieldIfMatch(
+                                  fieldToBeUpdated: 'TODO',
+                                );
                                 String userName =
                                     await AppFunctions.getNameByEmail(
                                         email: currentUserEmail.toString());
@@ -276,8 +288,12 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
                                         '$userName move task in TODO in $workspaceName workspace.');
                                 log('$userName move task in TODO in $workspaceName workspace.');
                               }
+                              //Notification for DOING
                               if (widget.taskStatusValue - 1 == 1) {
-                                log('Review');
+                                log('<--------Doing');
+                                updateFieldIfMatch(
+                                  fieldToBeUpdated: 'DOING',
+                                );
                                 if (widget.isOwner) {
                                   String userName =
                                       await AppFunctions.getNameByEmail(
@@ -312,8 +328,12 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
                                   log('$userName remove task from review in $workspaceName workspace.');
                                 }
                               }
+                              //Notification for REVIEW
                               if (widget.taskStatusValue - 1 == 2) {
-                                log('Doing');
+                                log('<--------Review');
+                                updateFieldIfMatch(
+                                  fieldToBeUpdated: 'REVIEW',
+                                );
                                 String userName =
                                     await AppFunctions.getNameByEmail(
                                         email: currentUserEmail.toString());
@@ -338,6 +358,11 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
                                     ? widget.taskStatusValue - 2
                                     : widget.taskStatusValue - 1,
                               });
+                              if (widget.isOwner) {
+                                updateFieldIfMatch(
+                                  fieldToBeUpdated: 'DOING',
+                                );
+                              }
                             }
                           },
                           child: RotatedBox(
@@ -345,23 +370,6 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
                               child: Lottie.asset(
                                   height: 20, 'animations/arrow.json')),
                         ),
-
-                        // IconButton(
-                        //   onPressed: () async {
-                        //     if (leftButton) {
-                        //       log('LB Task Status Value : ${taskStatusValue - 1}');
-                        //       await FirebaseFirestore.instance
-                        //           .collection(workspaceTaskCode)
-                        //           .doc(docId)
-                        //           .update({
-                        //         'Task Status': isOwner
-                        //             ? taskStatusValue - 2
-                        //             : taskStatusValue - 1,
-                        //       });
-                        //     }
-                        //   },
-                        //   icon: const Icon(Icons.arrow_back),
-                        // ),
                       ),
                       Visibility(
                         visible: widget.rightButton,
@@ -369,26 +377,25 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
                           onTap: () async {
                             if (widget.rightButton) {
                               log('RB Task Status Value : ${widget.taskStatusValue + 1}');
-                              await FirebaseFirestore.instance
-                                  .collection(widget.workspaceTaskCode)
-                                  .doc(widget.docId)
-                                  .update({
-                                'Task Status': widget.taskStatusValue + 1,
-                              });
 
                               // Notification For Doing
                               if (widget.taskStatusValue + 1 == 1) {
-                                log('Doing');
+                                log('Doing------->');
+                                updateFieldIfMatch(
+                                  fieldToBeUpdated: 'DOING',
+                                );
                                 String userName =
                                     await AppFunctions.getNameByEmail(
                                         email: currentUserEmail.toString());
                                 String workspaceName = await AppFunctions
                                     .getWorkspaceNameByWorkspaceCode(
-                                        workspaceCode: widget.workspaceCode);
+                                  workspaceCode: widget.workspaceCode,
+                                );
                                 log(workspaceName);
                                 String token =
                                     await AppFunctions.getTokenByEmail(
-                                        email: widget.email);
+                                  email: widget.email,
+                                );
                                 MessageNotificationApi.send(
                                     token: token,
                                     title: '📝 Task In Doing ',
@@ -398,7 +405,10 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
                               }
                               // Notification For Review
                               if (widget.taskStatusValue + 1 == 2) {
-                                log('Review');
+                                log('Review------->');
+                                updateFieldIfMatch(
+                                  fieldToBeUpdated: 'REVIEW',
+                                );
                                 String userName =
                                     await AppFunctions.getNameByEmail(
                                         email: currentUserEmail.toString());
@@ -418,7 +428,10 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
                               }
                               // Notification For Completed
                               if (widget.taskStatusValue + 1 == 3) {
-                                log('Completed');
+                                log('Completed------->');
+                                updateFieldIfMatch(
+                                  fieldToBeUpdated: 'COMPLETED',
+                                );
                                 String userName =
                                     await AppFunctions.getNameByEmail(
                                         email: currentUserEmail.toString());
@@ -435,27 +448,18 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
                                         'Great your task has been completed after review by $userName in $workspaceName workspace.');
                                 log('Great your task has been completed after review by $userName in $workspaceName workspace.');
                               }
+
+                              await FirebaseFirestore.instance
+                                  .collection(widget.workspaceTaskCode)
+                                  .doc(widget.docId)
+                                  .update({
+                                'Task Status': widget.taskStatusValue + 1,
+                              });
                             }
                           },
                           child:
                               Lottie.asset(height: 20, 'animations/arrow.json'),
                         ),
-                        // IconButton(
-                        //   onPressed: () async {
-                        //     if (rightButton) {
-                        //       log('RB Task Status Value : ${taskStatusValue + 1}');
-                        //       await FirebaseFirestore.instance
-                        //           .collection(workspaceTaskCode)
-                        //           .doc(docId)
-                        //           .update({
-                        //         'Task Status': taskStatusValue + 1,
-                        //       });
-                        //     }
-                        //   },
-                        //   icon: const Icon(
-                        //     Icons.arrow_forward,
-                        //   ),
-                        // ),
                       ),
                     ],
                   ),
@@ -466,6 +470,40 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
         ),
       ),
     );
+  }
+
+  Future<void> updateFieldIfMatch({
+    required dynamic fieldToBeUpdated,
+  }) async {
+    try {
+      log('___________________________________________________________');
+      var docId;
+      await FirebaseFirestore.instance
+          .collection('Report ${widget.userEmail} ${widget.workspaceCode}')
+          .where('Task Id', isEqualTo: widget.docId)
+          .get()
+          .then((querySnapshot) {
+        var docSnapshot = querySnapshot.docs[0];
+        docId = docSnapshot.id;
+        log('Document ID: $docId');
+      });
+
+      await FirebaseFirestore.instance
+          .collection('Report ${widget.userEmail} ${widget.workspaceCode}')
+          .doc(docId)
+          .update({
+        'TODO': fieldToBeUpdated == 'TODO' ? 1 : 0,
+        'DOING': fieldToBeUpdated == 'DOING' ? 1 : 0,
+        'REVIEW': fieldToBeUpdated == 'REVIEW' ? 1 : 0,
+        'COMPLETED': fieldToBeUpdated == 'COMPLETED' ? 1 : 0,
+        'EXPIRED': fieldToBeUpdated == 'EXPIRED' ? 1 : 0
+      });
+      log('Updated Successfully');
+      log('___________________________________________________________');
+    } catch (e) {
+      log(e.toString());
+      log('++++++++++++++++++++++++++++++++++++++++++');
+    }
   }
 
   showTaskDeletionDialog(
@@ -511,7 +549,6 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
           if (fileURL.isNotEmpty) {
             await FirebaseStorage.instance.refFromURL(fileURL).delete();
           }
-
           await Fluttertoast.showToast(
             msg: 'Task Deleted Successfully', // message
             toastLength: Toast.LENGTH_SHORT, // length

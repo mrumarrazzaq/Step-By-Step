@@ -67,8 +67,9 @@ class _RecentWorkspacesState extends State<RecentWorkspaces> {
                 decoration: BoxDecoration(
                   color: AppColor.white,
                   borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(20.0),
-                      topRight: Radius.circular(20.0)),
+                    topLeft: Radius.circular(20.0),
+                    topRight: Radius.circular(20.0),
+                  ),
                 ),
                 child: SingleChildScrollView(
                   child: StreamBuilder<QuerySnapshot>(
@@ -166,14 +167,14 @@ class _RecentWorkspacesState extends State<RecentWorkspaces> {
                                         ),
                                       ] else ...[
                                         Container(
-                                          height: 500,
+                                          height: 0,
                                           decoration: const BoxDecoration(
-                                            image: DecorationImage(
-                                              scale: 1.3,
-                                              image: AssetImage(
-                                                  'assets/group_chat.png'),
-                                            ),
-                                          ),
+                                              // image: DecorationImage(
+                                              //   scale: 1.3,
+                                              //   image: AssetImage(
+                                              //       'assets/group_chat.png'),
+                                              // ),
+                                              ),
                                         ),
                                       ]
                                     ],

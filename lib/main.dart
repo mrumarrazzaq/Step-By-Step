@@ -32,8 +32,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MobileAds.instance.initialize();
 
-  // await dotenv.load(fileName: "assets/.env");
-
   await FlutterDownloader.initialize(debug: true, ignoreSsl: true);
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(

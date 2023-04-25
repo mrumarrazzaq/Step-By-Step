@@ -3,6 +3,8 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:stepbystep/colors.dart';
+
+import 'package:stepbystep/dialog_boxes/app_dialog2.dart';
 import 'package:stepbystep/screens/workspace_manager/workspace_members/workspace_members_handler.dart';
 import 'package:stepbystep/screens/workspace_manager/workspace_roles_handler/workspace_roles_handler.dart';
 import 'package:stepbystep/screens/workspace_manager/workspace_view/workspace_view_home.dart';
@@ -40,10 +42,20 @@ class _WorkspaceScreenCombinerState extends State<WorkspaceScreenCombiner> {
         ),
         backgroundColor: AppColor.white,
         actions: [
-          GestureDetector(
-            onTap: () {},
+          InkWell(
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (_) => const AppDialog2(),
+              );
+            },
+            radius: 20,
             child: Lottie.asset(
-                repeat: false, height: 30, width: 30, 'animations/Info.json'),
+              repeat: false,
+              height: 30,
+              width: 30,
+              'animations/Info.json',
+            ),
           ),
         ],
         bottom: PreferredSize(

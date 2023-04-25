@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 const List<List<String>> weekDays = [
   ['So', 'Sa', 'Fr', 'Th', 'We', 'Tu', 'Mo'],
   ['Mo', 'So', 'Sa', 'Fr', 'Th', 'We', 'Tu'],
@@ -15,6 +13,21 @@ const List<List<String>> weeksOfMonth = [
   ['Week 1', 'Week 4', 'Week 3', 'Week 2'],
   ['Week 2', 'Week 1', 'Week 4', 'Week 3'],
   ['Week 3', 'Week 2', 'Week 1', 'Week 4']
+];
+
+const List<String> monthNames = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December'
 ];
 const List<List<String>> monthsOfYear = [
   [

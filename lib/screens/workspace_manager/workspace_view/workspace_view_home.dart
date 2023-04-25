@@ -88,10 +88,11 @@ class _WorkspaceViewHomeState extends State<WorkspaceViewHome> {
             }
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
-                  child: CircularProgressIndicator(
-                color: AppColor.orange,
-                strokeWidth: 2.0,
-              ));
+                child: CircularProgressIndicator(
+                  color: AppColor.orange,
+                  strokeWidth: 2.0,
+                ),
+              );
             }
             if (snapshot.hasData) {
               List storedRolesData = [];

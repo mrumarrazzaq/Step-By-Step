@@ -7,6 +7,7 @@ import 'package:lottie/lottie.dart';
 import 'package:stepbystep/ads/ad_mob_service.dart';
 import 'package:stepbystep/apis/get_apis.dart';
 import 'package:stepbystep/config.dart';
+import 'package:stepbystep/dialog_boxes/app_dialog.dart';
 import 'package:stepbystep/listeners/firebase_listener.dart';
 
 import 'package:stepbystep/screens/drawer.dart';
@@ -151,8 +152,14 @@ class _StepByStepState extends State<StepByStep> with WidgetsBindingObserver {
       appBar: AppBar(
         title: Image.asset('logos/StepByStep(text).png', height: 22),
         actions: [
-          GestureDetector(
-            onTap: () async {},
+          InkWell(
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (_) => const AppDialog(),
+              );
+            },
+            radius: 20,
             child: Lottie.asset(
                 repeat: false, height: 30, width: 30, 'animations/Info.json'),
           ),
