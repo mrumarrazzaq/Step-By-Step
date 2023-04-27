@@ -12,7 +12,7 @@ import 'package:stepbystep/screens/inbox_section/inbox_screen.dart';
 import 'package:stepbystep/screens/inbox_section/recent_inboxes.dart';
 
 class RecentWorkspaces extends StatefulWidget {
-  RecentWorkspaces({Key? key}) : super(key: key);
+  const RecentWorkspaces({Key? key}) : super(key: key);
 
   @override
   _RecentWorkspacesState createState() => _RecentWorkspacesState();
@@ -199,7 +199,7 @@ class _RecentWorkspacesState extends State<RecentWorkspaces> {
 }
 
 class CustomRecentChatsTile extends StatelessWidget {
-  CustomRecentChatsTile({
+  const CustomRecentChatsTile({
     Key? key,
     required this.name,
     required this.email,
@@ -207,10 +207,10 @@ class CustomRecentChatsTile extends StatelessWidget {
     required this.currentStatus,
   }) : super(key: key);
 
-  String name;
-  String email;
-  String imagePath;
-  String currentStatus;
+  final String name;
+  final String email;
+  final String imagePath;
+  final String currentStatus;
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -302,7 +302,7 @@ class CustomRecentChatsTile extends StatelessWidget {
 }
 
 class WorkspaceCard extends StatelessWidget {
-  WorkspaceCard({
+  const WorkspaceCard({
     Key? key,
     required this.isOwned,
     required this.workspaceName,
@@ -310,11 +310,11 @@ class WorkspaceCard extends StatelessWidget {
     required this.height,
     required this.onTap,
   }) : super(key: key);
-  bool isOwned;
-  String workspaceName;
-  String workspaceType;
-  double height;
-  Function() onTap;
+  final bool isOwned;
+  final String workspaceName;
+  final String workspaceType;
+  final double height;
+  final Function() onTap;
 
   @override
   Widget build(BuildContext context) {

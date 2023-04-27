@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+
 import 'package:google_fonts/google_fonts.dart';
-import 'package:get/get.dart';
+
 import 'package:stepbystep/colors.dart';
 
 class AppDialog2 extends StatelessWidget {

@@ -2,27 +2,24 @@
 
 import 'dart:developer';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:date_format/date_format.dart';
-import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_swipe_action_cell/flutter_swipe_action_cell.dart';
-import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
+
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
-import 'package:stepbystep/ads/ad_mob_service.dart';
-import 'package:stepbystep/apis/get_apis.dart';
-import 'package:stepbystep/apis/notification_api.dart';
-import 'package:stepbystep/calc.dart';
+import 'package:date_format/date_format.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:date_picker_timeline/date_picker_timeline.dart';
+import 'package:flutter_swipe_action_cell/flutter_swipe_action_cell.dart';
+
 import 'package:stepbystep/colors.dart';
+import 'package:stepbystep/apis/get_apis.dart';
+import 'package:stepbystep/ads/ad_mob_service.dart';
+import 'package:stepbystep/apis/notification_api.dart';
+import 'package:stepbystep/sql_database/sql_helper.dart';
 import 'package:stepbystep/providers/taskCollection.dart';
-import 'package:stepbystep/screens/security_section/authenticate_user_email.dart';
 import 'package:stepbystep/screens/self_task_manager/add_task.dart';
 import 'package:stepbystep/screens/self_task_manager/update_task.dart';
-import 'package:stepbystep/screens/table_calendar/calendar_utils.dart';
-import 'package:stepbystep/sql_database/sql_helper.dart';
 
 import '../table_calendar/self_table_calendar.dart';
 
@@ -36,7 +33,7 @@ class SelfSpaceHome extends StatefulWidget {
 class _SelfSpaceHomeState extends State<SelfSpaceHome> {
   InterstitialAd? _interstitialAd;
 
-  bool _isLoading = false;
+  final bool _isLoading = false;
   bool isTrue = false;
   IconData taskStatusIcon = Icons.check_box_outline_blank_rounded;
   String dateFilter = formatDate(DateTime.now(), [yyyy, '-', mm, '-', dd]);
@@ -121,7 +118,7 @@ class _SelfSpaceHomeState extends State<SelfSpaceHome> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => SelfTableCalendar(),
+                          builder: (context) => const SelfTableCalendar(),
                         ),
                       );
                     },
@@ -174,11 +171,13 @@ class _SelfSpaceHomeState extends State<SelfSpaceHome> {
                   selectedTextColor: Colors.white,
                   width: 60,
                   onDateChange: (dateTime) {
-                    setState(() {
-                      dateFilter =
-                          formatDate(dateTime, [yyyy, '-', mm, '-', dd]);
-                      log(dateFilter);
-                    });
+                    setState(
+                      () {
+                        dateFilter =
+                            formatDate(dateTime, [yyyy, '-', mm, '-', dd]);
+                        log(dateFilter);
+                      },
+                    );
                   },
                 ),
               ),
@@ -364,8 +363,9 @@ class _SelfSpaceHomeState extends State<SelfSpaceHome> {
 
 class TaskTile extends StatelessWidget {
   final task;
-  String dateFilter;
-  TaskTile({Key? key, this.task, required this.dateFilter}) : super(key: key);
+  final String dateFilter;
+  const TaskTile({Key? key, this.task, required this.dateFilter})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {

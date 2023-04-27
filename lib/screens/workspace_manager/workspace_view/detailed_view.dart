@@ -1,14 +1,18 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:lottie/lottie.dart';
-import 'package:stepbystep/colors.dart';
 import 'package:dotted_line/dotted_line.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+
+import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/visualization/visualization.dart';
 
 class DetailedView extends StatefulWidget {
-  DetailedView({
+  const DetailedView({
     Key? key,
     required this.workspaceName,
     required this.workspaceCode,
@@ -16,11 +20,11 @@ class DetailedView extends StatefulWidget {
     required this.assignedBy,
     required this.level,
   }) : super(key: key);
-  String workspaceCode;
-  String workspaceName;
-  String role;
-  String assignedBy;
-  int level;
+  final String workspaceCode;
+  final String workspaceName;
+  final String role;
+  final String assignedBy;
+  final int level;
   @override
   State<DetailedView> createState() => _DetailedViewState();
 }
@@ -45,7 +49,7 @@ class _DetailedViewState extends State<DetailedView> {
     setState(() {
       membersList = value.data()!['Workspace Members'];
       isLoading = true;
-      print(membersList.toString());
+      log(membersList.toString());
     });
     for (var member in membersList) {
       getUserRole(member);
@@ -62,7 +66,7 @@ class _DetailedViewState extends State<DetailedView> {
         .then((ds) {
       assignedRole = ds['Role'];
       assignedRole = '$assignedRole ${ds['Level']}';
-      print(assignedRole);
+      log(assignedRole.toString());
       if (assignedRole == '${widget.role} ${widget.level}') {
         allowedMembers.add(email);
       }
@@ -70,8 +74,8 @@ class _DetailedViewState extends State<DetailedView> {
     setState(() {
       isLoading = false;
     });
-    print('Allowed Members');
-    print(allowedMembers);
+    log('Allowed Members');
+    log(allowedMembers.toString());
   }
 
   @override
@@ -132,7 +136,6 @@ class _DetailedViewState extends State<DetailedView> {
               ),
             ),
             ListView(
-              // crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Root(role: widget.role, totalMembers: allowedMembers.length),
                 isLoading && allowedMembers.isNotEmpty
@@ -152,7 +155,7 @@ class _DetailedViewState extends State<DetailedView> {
                         builder: (BuildContext context,
                             AsyncSnapshot<QuerySnapshot> snapshot) {
                           if (snapshot.hasError) {
-                            print('Something went wrong');
+                            log('Something went wrong');
                           }
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
@@ -210,10 +213,10 @@ class _DetailedViewState extends State<DetailedView> {
 }
 
 class Root extends StatelessWidget {
-  Root({Key? key, required this.role, required this.totalMembers})
+  const Root({Key? key, required this.role, required this.totalMembers})
       : super(key: key);
-  String role;
-  int totalMembers;
+  final String role;
+  final int totalMembers;
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -277,7 +280,7 @@ class Root extends StatelessWidget {
 }
 
 class Connector extends StatelessWidget {
-  Connector({
+  const Connector({
     Key? key,
     required this.workspaceCode,
     required this.workspaceName,
@@ -286,12 +289,12 @@ class Connector extends StatelessWidget {
     required this.imageUrl,
     required this.width,
   }) : super(key: key);
-  String workspaceCode;
-  String workspaceName;
-  String name;
-  String email;
-  String imageUrl;
-  double width;
+  final String workspaceCode;
+  final String workspaceName;
+  final String name;
+  final String email;
+  final String imageUrl;
+  final double width;
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(

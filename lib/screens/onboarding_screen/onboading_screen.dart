@@ -6,7 +6,6 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/screens/security_section/registeration_screen2.dart';
-import 'package:stepbystep/screens/security_section/registration_screen.dart';
 
 class OnBoardingScreen extends StatefulWidget {
   static const String id = 'OnBoardingScreen';

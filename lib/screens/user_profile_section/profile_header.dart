@@ -1,23 +1,24 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, must_be_immutable
 
+import 'dart:io';
 import 'dart:developer';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
-import 'package:stepbystep/screens/security_section/signIn_screen.dart';
 import 'package:stepbystep/screens/user_profile_section/profile_section_detail.dart';
 
 String image = '';
 
 class ProfileHeader extends StatefulWidget {
-  String userName;
+  final String userName;
   String imageURL;
 
   ProfileHeader({required this.userName, required this.imageURL, Key? key})

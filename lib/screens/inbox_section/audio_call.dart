@@ -8,17 +8,15 @@ import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 const String appId = "<--Insert app ID here-->";
 
 class AudioCall extends StatefulWidget {
-  const AudioCall({Key? key}) : super(key: key);
-
+  const AudioCall({Key? key, required this.token}) : super(key: key);
+  final String token;
   @override
   State<AudioCall> createState() => _AudioCallState();
 }
 
 class _AudioCallState extends State<AudioCall> {
   String appId = "f6a59f6c0f794394af3604bb174cb945";
-  String token =
-      "007eJxTYPjnofcmhvn4i5ncqoYvLBv6tyS5LDz45r1JToTXR8F13R8VGNLMEk0t08ySDdLMLU2MLU0S04zNDEySkgzNTZKTLE1MDy7QS2kIZGTYMPMJMyMDBIL4fAzBTsG6YZkpqfm6zok5OQwMAAASJAs=";
-  final channel = "SBS-Video-Call";
+  final channel = "sbs";
 
   int uid = 0; // uid of the local user
 
@@ -97,7 +95,7 @@ class _AudioCallState extends State<AudioCall> {
             // Status text
             Align(
               alignment: Alignment.center,
-              child: Container(
+              child: SizedBox(
                 height: 40,
                 child: Center(
                   child: _status(),
@@ -184,7 +182,7 @@ class _AudioCallState extends State<AudioCall> {
     );
 
     await agoraEngine.joinChannel(
-      token: token,
+      token: widget.token,
       channelId: channel,
       options: options,
       uid: uid,

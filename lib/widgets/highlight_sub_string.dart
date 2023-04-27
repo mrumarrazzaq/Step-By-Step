@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:meta/meta.dart';
 
 class SubstringHighlight extends StatelessWidget {
   final String text;
@@ -7,7 +6,8 @@ class SubstringHighlight extends StatelessWidget {
   final TextStyle textStyle;
   final TextStyle textStyleHighlight;
 
-  SubstringHighlight({
+  const SubstringHighlight({
+    Key? key,
     required this.text,
     required this.terms,
     this.textStyle = const TextStyle(

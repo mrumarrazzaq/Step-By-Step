@@ -1,12 +1,11 @@
 import 'dart:developer';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
@@ -16,12 +15,12 @@ import 'package:stepbystep/screens/workspace_manager/workspace_roles_handler/wor
 import 'package:stepbystep/screens/workspace_manager/workspace_view/workspace_view_home.dart';
 
 class WorkspaceTaskHolder extends StatefulWidget {
-  String docId;
-  String workspaceCode;
-  String workspaceName;
-  String workspaceOwnerName;
-  String workspaceOwnerEmail;
-  WorkspaceTaskHolder({
+  final String docId;
+  final String workspaceCode;
+  final String workspaceName;
+  final String workspaceOwnerName;
+  final String workspaceOwnerEmail;
+  const WorkspaceTaskHolder({
     Key? key,
     required this.workspaceCode,
     required this.docId,
@@ -120,16 +119,6 @@ class _WorkspaceTaskHolderState extends State<WorkspaceTaskHolder> {
       log(e.toString());
     }
     listenForRolesData();
-    // FirebaseFirestore.instance
-    //     .collection('${widget.workspaceCode} Roles')
-    //     .snapshots()
-    //     .listen((querySnapshot) {
-    //   querySnapshot.docChanges.forEach((change) {
-    //     print('@@CHANGE@@');
-    //     print(change.doc.get('Member Control'));
-    //     // await getAssignRoleData();
-    //   });
-    // });
   }
 
   fetchData() async {
@@ -240,30 +229,14 @@ class _WorkspaceTaskHolderState extends State<WorkspaceTaskHolder> {
   }
 
   void listenForRolesData() {
-    print('listenForData..............');
+    log('listenForData..............');
     try {
       FirebaseFirestore.instance
           .collection('${widget.workspaceCode} Roles')
           .snapshots()
           .listen((querySnapshot) {
         querySnapshot.docChanges.forEach((change) {
-          print('@@CHANGE@@');
           getAssignRoleData();
-          // control = change.doc.get('Control');
-          // teamControl = change.doc.get('Team Control');
-          // memberControl = change.doc.get('Member Control');
-          // taskControl = change.doc.get('Task Control');
-          // roleControl = change.doc.get('Role Control');
-          // viewControl = change.doc.get('View Control');
-          // reportControl = change.doc.get('Report Control');
-          // addMember = change.doc.get('Add Member');
-          // removeMember = change.doc.get('Remove Member');
-          // assignRole = change.doc.get('Assign Role');
-          // deAssignRole = change.doc.get('DeAssign Role');
-          // roleControl = change.doc.get('Role Control');
-          // createRole = change.doc.get('Create Role');
-          // editRole = change.doc.get('Edit Role');
-          // deleteRole = change.doc.get('Delete Role');
         });
       });
     } catch (e) {
@@ -360,356 +333,6 @@ class _WorkspaceTaskHolderState extends State<WorkspaceTaskHolder> {
                   ),
                 ),
               ),
-              // bottom: PreferredSize(
-              //   preferredSize: Size(30, _height),
-              //   child: Column(
-              //     children: [
-              //       Visibility(
-              //         visible: isVisible,
-              //         child: AnimatedContainer(
-              //           duration: const Duration(milliseconds: 3000),
-              //           child: Column(
-              //             crossAxisAlignment: CrossAxisAlignment.center,
-              //             children: [
-              //               AnimatedContainer(
-              //                 duration: const Duration(milliseconds: 3000),
-              //                 child: CircleAvatar(
-              //                   backgroundColor: AppColor.orange,
-              //                   radius: _radius,
-              //                   foregroundImage: imageURL.isEmpty
-              //                       ? null
-              //                       : NetworkImage(imageURL),
-              //                   child: Center(
-              //                     child: Text(
-              //                       widget.workspaceOwnerName[0],
-              //                       style: TextStyle(
-              //                           fontWeight: FontWeight.w800,
-              //                           fontSize: 40,
-              //                           color: AppColor.white),
-              //                     ),
-              //                   ),
-              //                 ),
-              //               ),
-              //               AnimatedContainer(
-              //                 duration: const Duration(milliseconds: 3000),
-              //                 // height: _height,
-              //                 child: Padding(
-              //                   padding:
-              //                       const EdgeInsets.symmetric(vertical: 3.0),
-              //                   child: Text(
-              //                     widget.workspaceOwnerName,
-              //                     style: TextStyle(
-              //                         fontWeight: FontWeight.w800,
-              //                         fontSize: _text),
-              //                   ),
-              //                 ),
-              //               ),
-              //               AnimatedContainer(
-              //                 duration: const Duration(milliseconds: 3000),
-              //                 // height: _height,
-              //                 child: Text(
-              //                   widget.workspaceOwnerEmail,
-              //                   style: TextStyle(
-              //                       color: AppColor.grey, fontSize: _text - 2),
-              //                 ),
-              //               ),
-              //             ],
-              //           ),
-              //         ),
-              //       ),
-              //       Column(
-              //         children: [
-              //           Visibility(
-              //             visible: teamControl,
-              //             child: Container(
-              //               margin: const EdgeInsets.only(top: 20),
-              //               color: AppColor.orange,
-              //               child: Row(
-              //                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              //                 children: [
-              //                   Column(
-              //                     mainAxisSize: MainAxisSize.min,
-              //                     children: [
-              //                       MaterialButton(
-              //                         onPressed: () {
-              //                           setState(() {
-              //                             selectedTab = 'Task';
-              //                             mainTabsColor[0] = AppColor.white;
-              //                             mainTabsColor[1] = AppColor.orange;
-              //                           });
-              //                         },
-              //                         minWidth: 160,
-              //                         child: Text(
-              //                           'Task',
-              //                           style: TextStyle(
-              //                             color: AppColor.white,
-              //                             fontSize: 18,
-              //                             fontWeight:
-              //                                 mainTabsColor[0] == AppColor.white
-              //                                     ? FontWeight.bold
-              //                                     : FontWeight.normal,
-              //                           ),
-              //                         ),
-              //                       ),
-              //                       Container(
-              //                         height: 3,
-              //                         width: 160,
-              //                         color: mainTabsColor[0],
-              //                       ),
-              //                     ],
-              //                   ),
-              //                   Column(
-              //                     mainAxisSize: MainAxisSize.min,
-              //                     children: [
-              //                       MaterialButton(
-              //                         onPressed: () {
-              //                           setState(() {
-              //                             selectedTab = 'Team';
-              //                             mainTabsColor[0] = AppColor.orange;
-              //                             mainTabsColor[1] = AppColor.white;
-              //                           });
-              //                         },
-              //                         minWidth: 160,
-              //                         child: Text(
-              //                           'Team',
-              //                           style: TextStyle(
-              //                             color: AppColor.white,
-              //                             fontSize: 18,
-              //                             fontWeight:
-              //                                 mainTabsColor[1] == AppColor.white
-              //                                     ? FontWeight.bold
-              //                                     : FontWeight.normal,
-              //                           ),
-              //                         ),
-              //                       ),
-              //                       Container(
-              //                         height: 3,
-              //                         width: 160,
-              //                         color: mainTabsColor[1],
-              //                       ),
-              //                     ],
-              //                   ),
-              //                 ],
-              //               ),
-              //               // TabBar(
-              //               //   controller: tabController,
-              //               //   onTap: (index) {
-              //               //     setState(() {
-              //               //       currentIndex = index;
-              //               //     });
-              //               //   },
-              //               //   indicatorColor: Colors.transparent,
-              //               //   unselectedLabelColor: AppColor.white,
-              //               //   labelColor: AppColor.orange,
-              //               //   tabs: taskTabs,
-              //               // ),
-              //             ),
-              //           ),
-              //           //Task Sub Tabs
-              //           Visibility(
-              //             visible: selectedTab == 'Task',
-              //             child: Container(
-              //               margin: EdgeInsets.only(top: teamControl ? 0 : 20),
-              //               color: AppColor.black,
-              //               child: Row(
-              //                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              //                 children: [
-              //                   TextButton(
-              //                     onPressed: () {
-              //                       setState(() {
-              //                         taskStatusValue = 0;
-              //                         tileColor = AppChartColor.blue;
-              //                         leftButton = false;
-              //                         rightButton = true;
-              //                         taskTabsColor[0] = AppColor.orange;
-              //                         taskTabsColor[1] = AppColor.white;
-              //                         taskTabsColor[2] = AppColor.white;
-              //                         taskTabsColor[3] = AppColor.white;
-              //                         taskTabsColor[4] = AppColor.white;
-              //                       });
-              //                     },
-              //                     child: Text(
-              //                       'TODO',
-              //                       style: TextStyle(
-              //                         color: taskTabsColor[0],
-              //                       ),
-              //                     ),
-              //                   ),
-              //                   TextButton(
-              //                     onPressed: () {
-              //                       setState(() {
-              //                         taskStatusValue = 1;
-              //                         tileColor = AppChartColor.yellow;
-              //                         leftButton = true;
-              //                         rightButton = true;
-              //                         taskTabsColor[0] = AppColor.white;
-              //                         taskTabsColor[1] = AppColor.orange;
-              //                         taskTabsColor[2] = AppColor.white;
-              //                         taskTabsColor[3] = AppColor.white;
-              //                         taskTabsColor[4] = AppColor.white;
-              //                       });
-              //                     },
-              //                     child: Text(
-              //                       'Doing',
-              //                       style: TextStyle(
-              //                         color: taskTabsColor[1],
-              //                       ),
-              //                     ),
-              //                   ),
-              //                   TextButton(
-              //                     onPressed: () {
-              //                       setState(() {
-              //                         taskStatusValue = 2;
-              //                         tileColor = AppChartColor.grey;
-              //                         leftButton = true;
-              //                         rightButton = false;
-              //                         taskTabsColor[0] = AppColor.white;
-              //                         taskTabsColor[1] = AppColor.white;
-              //                         taskTabsColor[2] = AppColor.orange;
-              //                         taskTabsColor[3] = AppColor.white;
-              //                         taskTabsColor[4] = AppColor.white;
-              //                       });
-              //                     },
-              //                     child: Text(
-              //                       'Review',
-              //                       style: TextStyle(
-              //                         color: taskTabsColor[2],
-              //                       ),
-              //                     ),
-              //                   ),
-              //                   TextButton(
-              //                     onPressed: () {
-              //                       setState(() {
-              //                         taskStatusValue = 3;
-              //                         tileColor = AppChartColor.green;
-              //                         leftButton = false;
-              //                         rightButton = false;
-              //                         taskTabsColor[0] = AppColor.white;
-              //                         taskTabsColor[1] = AppColor.white;
-              //                         taskTabsColor[2] = AppColor.white;
-              //                         taskTabsColor[3] = AppColor.orange;
-              //                         taskTabsColor[4] = AppColor.white;
-              //                       });
-              //                     },
-              //                     child: Text(
-              //                       'Completed',
-              //                       style: TextStyle(
-              //                         color: taskTabsColor[3],
-              //                       ),
-              //                     ),
-              //                   ),
-              //                   TextButton(
-              //                     onPressed: () {
-              //                       setState(() {});
-              //                       taskStatusValue = 4;
-              //                       tileColor = AppChartColor.red;
-              //                       leftButton = false;
-              //                       rightButton = false;
-              //                       taskTabsColor[0] = AppColor.white;
-              //                       taskTabsColor[1] = AppColor.white;
-              //                       taskTabsColor[2] = AppColor.white;
-              //                       taskTabsColor[3] = AppColor.white;
-              //                       taskTabsColor[4] = AppColor.orange;
-              //                     },
-              //                     child: Text(
-              //                       'Expired',
-              //                       style: TextStyle(
-              //                         color: taskTabsColor[4],
-              //                       ),
-              //                     ),
-              //                   ),
-              //                 ],
-              //               ),
-              //             ),
-              //           ),
-              //           //Team Sub Tabs
-              //           Visibility(
-              //             visible: selectedTab == 'Team',
-              //             child: Container(
-              //               margin: const EdgeInsets.only(top: 0),
-              //               color: AppColor.black,
-              //               child: Row(
-              //                 mainAxisAlignment: spaceEvenly
-              //                     ? MainAxisAlignment.spaceEvenly
-              //                     : MainAxisAlignment.center,
-              //                 children: [
-              //                   Visibility(
-              //                     visible: teamControl,
-              //                     child: TextButton(
-              //                       onPressed: () {
-              //                         setState(() {
-              //                           teamTabsColor[0] = AppColor.orange;
-              //                           teamTabsColor[1] = AppColor.white;
-              //                           teamTabsColor[2] = AppColor.white;
-              //                         });
-              //                       },
-              //                       child: Text(
-              //                         'Members',
-              //                         style: TextStyle(
-              //                           color: teamTabsColor[0],
-              //                         ),
-              //                       ),
-              //                     ),
-              //                   ),
-              //                   Visibility(
-              //                     visible: roleControl,
-              //                     child: TextButton(
-              //                       onPressed: () {
-              //                         log('role');
-              //                         setState(() {
-              //                           teamTabsColor[0] = AppColor.white;
-              //                           teamTabsColor[1] = AppColor.orange;
-              //                           teamTabsColor[2] = AppColor.white;
-              //                         });
-              //                       },
-              //                       child: Text(
-              //                         'Roles',
-              //                         style: TextStyle(
-              //                           color: teamTabsColor[1],
-              //                         ),
-              //                       ),
-              //                     ),
-              //                   ),
-              //                   Visibility(
-              //                     visible: viewControl,
-              //                     child: TextButton(
-              //                       onPressed: () {
-              //                         log('view');
-              //                         setState(() {
-              //                           teamTabsColor[0] = AppColor.white;
-              //                           teamTabsColor[1] = AppColor.white;
-              //                           teamTabsColor[2] = AppColor.orange;
-              //                         });
-              //                       },
-              //                       child: Text(
-              //                         'View',
-              //                         style: TextStyle(
-              //                           color: teamTabsColor[2],
-              //                         ),
-              //                       ),
-              //                     ),
-              //                   ),
-              //                 ],
-              //               ),
-              //               // TabBar(
-              //               //   controller: tabController,
-              //               //   onTap: (index) {
-              //               //     setState(() {
-              //               //       currentIndex = index;
-              //               //     });
-              //               //   },
-              //               //   indicatorColor: Colors.transparent,
-              //               //   unselectedLabelColor: AppColor.white,
-              //               //   labelColor: AppColor.orange,
-              //               //   tabs: taskTabs,
-              //               // ),
-              //             ),
-              //           ),
-              //         ],
-              //       ),
-              //     ],
-              //   ),
-              // ),
             ),
       body: loading
           ? Center(

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -7,13 +9,15 @@ import 'package:stepbystep/services/speech_to_text_service.dart';
 import 'package:stepbystep/app_utils/utils.dart';
 import 'package:stepbystep/services/text_to_speech_service.dart';
 import 'package:stepbystep/widgets/highlight_sub_string.dart';
-//import 'package:alan_voice/alan_voice.dart';
 
+//import 'package:alan_voice/alan_voice.dart';
 // intent('hello world', p => {
 // p.play('(hello|hi there)');
 // });
 
 class BotUI extends StatefulWidget {
+  const BotUI({Key? key}) : super(key: key);
+
   @override
   _BotUIState createState() => _BotUIState();
 }
@@ -53,7 +57,6 @@ class _BotUIState extends State<BotUI> {
                       child: Lottie.asset(
                         height: 200,
                         'animations/robot-bot-3d.json',
-                        //https://assets2.lottiefiles.com/packages/lf20_ofa3xwo7.json
                       ),
                     ),
                     const Text('Ack Your Queries From Me'),
@@ -121,7 +124,7 @@ class _BotUIState extends State<BotUI> {
 
           if (!isListening) {
             reply = text;
-            print(reply);
+            log(reply.toString());
             Future.delayed(const Duration(seconds: 1), () {
               setState(() {
                 text = '';

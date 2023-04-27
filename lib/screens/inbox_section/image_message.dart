@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:stepbystep/colors.dart';
 
 class ImageMessage extends StatelessWidget {
-  ImageMessage({
+  const ImageMessage({
     Key? key,
     required this.imageUrl,
     required this.time,
@@ -13,13 +13,13 @@ class ImageMessage extends StatelessWidget {
     required this.onTap,
     required this.color,
   }) : super(key: key);
-  Function() onTap;
-  String imageUrl;
-  String time;
-  int messageStatus;
-  Color? color;
-  double left;
-  double right;
+  final Function() onTap;
+  final String imageUrl;
+  final String time;
+  final int messageStatus;
+  final Color? color;
+  final double left;
+  final double right;
   @override
   Widget build(BuildContext context) {
     return GestureDetector(

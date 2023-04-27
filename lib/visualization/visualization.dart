@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -148,9 +147,7 @@ class _VisualizationState extends State<Visualization> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 InkWell(
-                  onTap: () {
-                    log('OK');
-                  },
+                  onTap: () {},
                   child: Container(
                     height: 50,
                     width: double.infinity,

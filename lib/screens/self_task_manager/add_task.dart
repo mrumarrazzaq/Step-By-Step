@@ -2,13 +2,12 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 
-import 'package:date_format/date_format.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
-import 'package:stepbystep/apis/notification_api.dart';
+import 'package:date_format/date_format.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:stepbystep/colors.dart';
+import 'package:stepbystep/apis/notification_api.dart';
 import 'package:stepbystep/providers/taskCollection.dart';
 import 'package:stepbystep/sql_database/sql_helper.dart';
 import 'package:stepbystep/widgets/app_input_field.dart';
@@ -41,7 +40,7 @@ class _TaskState extends State<Task> {
     _date = formatDate(_selectedDateTime, [yyyy, '-', mm, '-', dd]);
     _time = '${_selectedDateTime.hour}:${_selectedDateTime.minute}';
     dateTimeString = '$_date $_time';
-    print('init : $dateTimeString');
+    log('init : $dateTimeString');
     super.initState();
   }
 
@@ -111,29 +110,11 @@ class _TaskState extends State<Task> {
                     taskStatus: 'TODO',
                   );
                   try {
-                    // NotificationAPI.dailyScheduledNotification(
-                    //   id: _selectedDateTime.minute + _selectedDateTime.second,
-                    //   time: const Time(0, 0, 0),
-                    //   scheduledDate: DateTime.parse(dateTimeString).add(
-                    //     const Duration(microseconds: 10),
-                    //   ),
-                    //   title: 'Don\'t Forget  to complete task',
-                    //   body: _taskTitleController.text,
-                    //   payload: _taskDescriptionController.text,
-                    // );
-
                     NotificationAPI().setAlarm(
                       id: _selectedDateTime.minute + _selectedDateTime.second,
                       title: _taskTitleController.text,
                       dateTime: DateTime.parse(dateTimeString),
                     );
-                    //
-                    // notificationAPIInstance.scheduleNotification(
-                    //   id: '${_selectedDateTime.minute} ${_selectedDateTime.second}',
-                    //   title: 'Don\'t Forget  to complete task',
-                    //   payload: _taskDescriptionController.text,
-                    //   scheduledDate: DateTime.parse(dateTimeString),
-                    // );
                     //
                     // NotificationAPI.showScheduledNotification(
                     //   id: _selectedDateTime.minute + _selectedDateTime.second,
@@ -155,8 +136,10 @@ class _TaskState extends State<Task> {
                     gravity: ToastGravity.BOTTOM,
                     backgroundColor: AppColor.orange,
                   );
-                  context.read<TaskCollection>().refreshData();
-                  Navigator.pop(context);
+                  if (mounted) {
+                    context.read<TaskCollection>().refreshData();
+                    Navigator.pop(context);
+                  }
                 }
               },
               child: const Text('Create'),

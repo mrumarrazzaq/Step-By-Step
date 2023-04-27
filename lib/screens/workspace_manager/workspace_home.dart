@@ -1,18 +1,17 @@
 import 'dart:developer';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
+
 import 'package:lottie/lottie.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:readmore/readmore.dart';
 import 'package:stepbystep/ads/ad_mob_service.dart';
-import 'package:stepbystep/apis/get_apis.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
+import 'package:stepbystep/apis/get_apis.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:stepbystep/dialog_boxes/rounded_dialog.dart';
 
 import 'package:stepbystep/screens/workspace_manager/create_workspace.dart';
 import 'package:stepbystep/screens/workspace_manager/delete_workspace.dart';
@@ -209,22 +208,25 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
                                     if (!isTrue) {
                                       _showInterstitialAd();
                                     }
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            WorkspaceScreenCombiner(
-                                          workspaceCode:
-                                              "${storedWorkspaces[i]['Workspace Code']}",
-                                          docId: "${storedWorkspaces[i]['id']}",
-                                          workspaceName: storedWorkspaces[i]
-                                              ['Workspace Name'],
-                                          workspaceOwnerEmail:
-                                              storedWorkspaces[i]
-                                                  ['Workspace Owner Email'],
+                                    if (mounted) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              WorkspaceScreenCombiner(
+                                            workspaceCode:
+                                                "${storedWorkspaces[i]['Workspace Code']}",
+                                            docId:
+                                                "${storedWorkspaces[i]['id']}",
+                                            workspaceName: storedWorkspaces[i]
+                                                ['Workspace Name'],
+                                            workspaceOwnerEmail:
+                                                storedWorkspaces[i]
+                                                    ['Workspace Owner Email'],
+                                          ),
                                         ),
-                                      ),
-                                    );
+                                      );
+                                    }
                                   },
                                   onLongPress: () {
                                     showWorkspaceDeletionDialog(
@@ -240,11 +242,7 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
                                 ),
                               ] else if (storedWorkspaces[i]
                                       ['Workspace Members']
-                                  .contains(currentUserEmail)
-                              // joinedWorkspaces.contains(
-                              //     storedWorkspaces[i]['Workspace Code'])
-
-                              ) ...[
+                                  .contains(currentUserEmail)) ...[
                                 WorkspaceCard(
                                     isOwned: false,
                                     workspaceName: storedWorkspaces[i]
@@ -259,25 +257,27 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
                                         _showInterstitialAd();
                                       }
 
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              WorkspaceTaskHolder(
-                                            workspaceCode: storedWorkspaces[i]
-                                                ['Workspace Code'],
-                                            workspaceName: storedWorkspaces[i]
-                                                ['Workspace Name'],
-                                            docId: storedWorkspaces[i]['id'],
-                                            workspaceOwnerName:
-                                                storedWorkspaces[i]
-                                                    ['Workspace Owner Name'],
-                                            workspaceOwnerEmail:
-                                                storedWorkspaces[i]
-                                                    ['Workspace Owner Email'],
+                                      if (mounted) {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                WorkspaceTaskHolder(
+                                              workspaceCode: storedWorkspaces[i]
+                                                  ['Workspace Code'],
+                                              workspaceName: storedWorkspaces[i]
+                                                  ['Workspace Name'],
+                                              docId: storedWorkspaces[i]['id'],
+                                              workspaceOwnerName:
+                                                  storedWorkspaces[i]
+                                                      ['Workspace Owner Name'],
+                                              workspaceOwnerEmail:
+                                                  storedWorkspaces[i]
+                                                      ['Workspace Owner Email'],
+                                            ),
                                           ),
-                                        ),
-                                      );
+                                        );
+                                      }
                                     },
                                     onLongPress: () {}),
                               ] else if (storedWorkspaces.length < 2) ...[
@@ -447,7 +447,7 @@ class _WorkspaceHomeState extends State<WorkspaceHome> {
 }
 
 class WorkspaceCard extends StatelessWidget {
-  WorkspaceCard(
+  const WorkspaceCard(
       {Key? key,
       required this.isOwned,
       required this.workspaceName,
@@ -456,12 +456,12 @@ class WorkspaceCard extends StatelessWidget {
       required this.onTap,
       required this.onLongPress})
       : super(key: key);
-  bool isOwned;
-  String workspaceName;
-  String workspaceType;
-  double height;
-  Function() onTap;
-  Function() onLongPress;
+  final bool isOwned;
+  final String workspaceName;
+  final String workspaceType;
+  final double height;
+  final Function() onTap;
+  final Function() onLongPress;
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -532,13 +532,3 @@ class WorkspaceCard extends StatelessWidget {
     );
   }
 }
-
-// Container(
-// height: 500,
-// decoration: const BoxDecoration(
-// image: DecorationImage(
-// scale: 1.3,
-// image: AssetImage('assets/workspace_bg.png'),
-// ),
-// ),
-// ),

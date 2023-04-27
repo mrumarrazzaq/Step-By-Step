@@ -21,14 +21,14 @@ import 'package:stepbystep/screens/workspace_manager/workspace_view/workspace_vi
 import 'package:stepbystep/widgets/app_elevated_button.dart';
 
 class TaskTeamAssignment extends StatefulWidget {
-  String name;
-  String email;
-  String docId;
-  String workspaceCode;
-  String workspaceName;
-  String workspaceOwnerEmail;
-  String assignedRole;
-  TaskTeamAssignment({
+  final String name;
+  final String email;
+  final String docId;
+  final String workspaceCode;
+  final String workspaceName;
+  final String workspaceOwnerEmail;
+  final String assignedRole;
+  const TaskTeamAssignment({
     Key? key,
     required this.name,
     required this.email,

@@ -3,14 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:form_field_validator/form_field_validator.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:stepbystep/screens/security_section/registeration_screen2.dart';
-import 'package:stepbystep/screens/security_section/signIn_screen2.dert.dart';
 
-import 'signIn_screen.dart';
-import 'registration_screen.dart';
 import 'package:stepbystep/colors.dart';
 
 class ForgotPassword extends StatefulWidget {
@@ -139,48 +135,6 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                         ),
                 ),
               ),
-              // Column(
-              //   children: [
-              //     Row(
-              //       mainAxisAlignment: MainAxisAlignment.center,
-              //       children: [
-              //         const Text("Don't have Account? "),
-              //         TextButton(
-              //           onPressed: () => {
-              //             Navigator.pushAndRemoveUntil(
-              //                 context,
-              //                 PageRouteBuilder(
-              //                   pageBuilder: (context, a, b) =>
-              //                       const RegistrationScreen2(),
-              //                   transitionDuration: const Duration(seconds: 1),
-              //                 ),
-              //                 (route) => false)
-              //           },
-              //           child: const Text('Register'),
-              //         )
-              //       ],
-              //     ),
-              //     Row(
-              //       mainAxisAlignment: MainAxisAlignment.center,
-              //       children: [
-              //         const Text("Already have an account? "),
-              //         TextButton(
-              //           onPressed: () => {
-              //             Navigator.pushAndRemoveUntil(
-              //                 context,
-              //                 PageRouteBuilder(
-              //                   pageBuilder: (context, a, b) =>
-              //                       const SignInScreen2(),
-              //                   transitionDuration: const Duration(seconds: 1),
-              //                 ),
-              //                 (route) => false)
-              //           },
-              //           child: const Text('Sign in'),
-              //         )
-              //       ],
-              //     ),
-              //   ],
-              // ),
             ],
           ),
         ),

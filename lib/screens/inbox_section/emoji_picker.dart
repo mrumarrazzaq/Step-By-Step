@@ -3,8 +3,9 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/foundation.dart' as foundation;
 
 class EmojiPickerWidget extends StatelessWidget {
-  EmojiPickerWidget({Key? key, required this.selectEmoji}) : super(key: key);
-  Function(Category?, Emoji?) selectEmoji;
+  const EmojiPickerWidget({Key? key, required this.selectEmoji})
+      : super(key: key);
+  final Function(Category?, Emoji?) selectEmoji;
   @override
   Widget build(BuildContext context) {
     return EmojiPicker(

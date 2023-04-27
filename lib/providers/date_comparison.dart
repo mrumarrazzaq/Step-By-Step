@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stepbystep/sql_database/sql_helper.dart';
 
 class DateCompare extends ChangeNotifier {
   String dateFilter = '';

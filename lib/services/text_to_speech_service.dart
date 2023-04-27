@@ -5,17 +5,17 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:stepbystep/screens/ai_bot.dart';
+
+enum TtsState { playing, stopped, paused, continued }
 
 class TextToSpeechService extends StatefulWidget {
-  String voiceText;
+  final String voiceText;
 
-  TextToSpeechService({Key? key, required this.voiceText}) : super(key: key);
+  const TextToSpeechService({Key? key, required this.voiceText})
+      : super(key: key);
   @override
   _TextToSpeechServiceState createState() => _TextToSpeechServiceState();
 }
-
-enum TtsState { playing, stopped, paused, continued }
 
 class _TextToSpeechServiceState extends State<TextToSpeechService> {
   late FlutterTts flutterTts;
@@ -107,8 +107,8 @@ class _TextToSpeechServiceState extends State<TextToSpeechService> {
   Future _getDefaultEngine() async {
     var engine = await flutterTts.getDefaultEngine;
     if (engine != null) {
-      print('Getting getDefaultEngine');
-      print(engine);
+      log('Getting getDefaultEngine');
+      log(engine.toString());
     }
   }
 
@@ -155,8 +155,12 @@ class _TextToSpeechServiceState extends State<TextToSpeechService> {
       dynamic languages) {
     var items = <DropdownMenuItem<String>>[];
     for (dynamic type in languages) {
-      items.add(DropdownMenuItem(
-          value: type as String?, child: Text(type as String)));
+      items.add(
+        DropdownMenuItem(
+          value: type as String?,
+          child: Text(type as String),
+        ),
+      );
     }
     return items;
   }
@@ -209,11 +213,14 @@ class _TextToSpeechServiceState extends State<TextToSpeechService> {
             setState(
               () {
                 language = selectedType!;
-                log(language.toString());
+                log(
+                  language.toString(),
+                );
                 flutterTts.setLanguage(language);
                 if (isAndroid) {
                   flutterTts.isLanguageInstalled(language).then(
-                      (value) => isCurrentLanguageInstalled = (value as bool));
+                        (value) => isCurrentLanguageInstalled = (value as bool),
+                      );
                 }
               },
             );
@@ -224,21 +231,24 @@ class _TextToSpeechServiceState extends State<TextToSpeechService> {
   Column _buildButtonColumn(Color color, Color splashColor, IconData icon,
       String label, Function func) {
     return Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          IconButton(
-              icon: Icon(icon),
-              color: color,
-              splashColor: splashColor,
-              onPressed: () => func()),
-          Container(
-              margin: const EdgeInsets.only(top: 8.0),
-              child: Text(label,
-                  style: TextStyle(
-                      fontSize: 12.0,
-                      fontWeight: FontWeight.w400,
-                      color: color)))
-        ]);
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        IconButton(
+          icon: Icon(icon),
+          color: color,
+          splashColor: splashColor,
+          onPressed: () => func(),
+        ),
+        Container(
+          margin: const EdgeInsets.only(top: 8.0),
+          child: Text(
+            label,
+            style: TextStyle(
+                fontSize: 12.0, fontWeight: FontWeight.w400, color: color),
+          ),
+        )
+      ],
+    );
   }
 }

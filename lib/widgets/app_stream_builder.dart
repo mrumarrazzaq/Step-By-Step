@@ -1,21 +1,22 @@
 import 'dart:developer';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:stepbystep/colors.dart';
 
 class AppSteamBuilder extends StatelessWidget {
-  AppSteamBuilder(
-      {Key? key,
-      required this.snapshots,
-      required this.emptyDataWidget,
-      required this.widget,
-      required this.condition})
-      : super(key: key);
-  Stream<QuerySnapshot> snapshots;
-  Widget emptyDataWidget;
-  Widget widget;
-  bool condition;
+  const AppSteamBuilder({
+    Key? key,
+    required this.snapshots,
+    required this.emptyDataWidget,
+    required this.widget,
+    required this.condition,
+  }) : super(key: key);
+  final Stream<QuerySnapshot> snapshots;
+  final Widget emptyDataWidget;
+  final Widget widget;
+  final bool condition;
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(

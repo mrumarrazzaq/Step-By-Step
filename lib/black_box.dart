@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:stepbystep/apis/collection_history.dart';
@@ -56,29 +58,17 @@ class BlackBox {
   }
 
   static int getWeekNumber() {
-    String date = DateTime.now().toString();
+    DateTime date = DateTime.now();
+    int month = date.month;
+    int year = date.year;
+    DateTime firstDayOfMonth = DateTime(year, month, 1);
+    int daysOffset = (DateTime.monday - firstDayOfMonth.weekday) % 7;
+    DateTime firstMondayOfMonth =
+        firstDayOfMonth.add(Duration(days: daysOffset));
+    int weekNumber =
+        ((date.difference(firstMondayOfMonth).inDays) / 7).floor() + 1;
+    log('Week number: $weekNumber');
 
-    // This will generate the time and date for first day of month
-    String firstDay = '${date.substring(0, 8)}01${date.substring(10)}';
-
-    // week day for the first day of the month
-    int weekDay = DateTime.parse(firstDay).weekday;
-
-    DateTime testDate = DateTime.now();
-
-    int weekOfMonth;
-
-//  If your calender starts from Monday
-    weekDay--;
-    weekOfMonth = ((testDate.day + weekDay) / 7).ceil();
-    print('Week of the month: $weekOfMonth');
-    weekDay++;
-
-    // If your calender starts from sunday
-    if (weekDay == 7) {
-      weekDay = 0;
-    }
-    weekOfMonth = ((testDate.day + weekDay) / 7).ceil();
-    return weekOfMonth;
+    return weekNumber;
   }
 }

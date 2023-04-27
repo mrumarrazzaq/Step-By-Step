@@ -2,7 +2,6 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_swipe_action_cell/flutter_swipe_action_cell.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:lottie/lottie.dart';
@@ -18,23 +17,22 @@ import 'package:stepbystep/config.dart';
 import 'package:stepbystep/screens/workspace_manager/Task%20Assignment%20Section/task_assignment.dart';
 import 'package:stepbystep/visualization/visualization.dart';
 import 'package:stepbystep/widgets/app_divider.dart';
-import 'package:velocity_x/velocity_x.dart';
 
 class WorkspaceMembersHandler extends StatefulWidget {
-  String docId;
-  String workspaceCode;
-  String workspaceName;
-  String workspaceOwnerEmail;
-  bool assignTaskControl;
-  bool reportControl;
-  bool addMember;
-  bool removeMember;
-  bool assignRole;
-  bool deAssignRole;
-  bool fromTaskAssignment;
-  bool fromTaskHolder;
-  String extraEmail;
-  WorkspaceMembersHandler({
+  final String docId;
+  final String workspaceCode;
+  final String workspaceName;
+  final String workspaceOwnerEmail;
+  final bool assignTaskControl;
+  final bool reportControl;
+  final bool addMember;
+  final bool removeMember;
+  final bool assignRole;
+  final bool deAssignRole;
+  final bool fromTaskAssignment;
+  final bool fromTaskHolder;
+  final String extraEmail;
+  const WorkspaceMembersHandler({
     Key? key,
     required this.workspaceCode,
     required this.docId,
@@ -419,11 +417,6 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
             }
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Container();
-              //   Center(
-              //     child: CircularProgressIndicator(
-              //   color: AppColor.orange,
-              //   strokeWidth: 2.0,
-              // ),);
             }
             if (snapshot.hasData) {
               List storedUserData = [];
@@ -439,7 +432,8 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
                     if (searchValue == storedUserData[i]['User Email'] &&
                         storedUserData[i]['User Email'] != currentUserEmail &&
                         storedUserData[i]['User Email'] !=
-                            widget.workspaceOwnerEmail) ...[
+                            widget.workspaceOwnerEmail &&
+                        storedUserData[i]['Verify Account'] == true) ...[
                       Card(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.0),
@@ -744,7 +738,7 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
                                     visible: widget.reportControl,
                                     child: ListTile(
                                       onTap: () async {
-                                        print('CARD NO 1');
+                                        log('CARD NO 1');
                                         bool isTrue =
                                             await GetApi.isPaidAccount();
                                         if (!isTrue) {
@@ -984,7 +978,7 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
                                     visible: widget.reportControl,
                                     child: ListTile(
                                       onTap: () async {
-                                        print('CARD NO 2');
+                                        log('CARD NO 2');
                                         bool isTrue =
                                             await GetApi.isPaidAccount();
                                         if (!isTrue) {
@@ -1731,7 +1725,7 @@ class _WorkspaceMembersHandlerState extends State<WorkspaceMembersHandler>
         document: member,
         jsonData: assignRoleJson,
       );
-      List<String> temp = selectedRoleValue.split(' ');
+      // List<String> temp = selectedRoleValue.split(' ');
 
       await FirebaseFirestore.instance
           .collection('User Data')

@@ -1,24 +1,23 @@
-import 'dart:developer';
+import 'dart:ui';
 import 'dart:io';
 import 'dart:isolate';
-import 'dart:ui';
+import 'dart:developer';
 
+import 'package:dio/dio.dart';
+import 'package:lottie/lottie.dart';
+import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:image_downloader/image_downloader.dart';
-import 'package:lottie/lottie.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:stepbystep/apis/app_functions.dart';
-import 'package:stepbystep/apis/firebase_api.dart';
-import 'package:stepbystep/apis/messege_notification_api.dart';
+
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
+import 'package:stepbystep/apis/firebase_api.dart';
+import 'package:stepbystep/apis/app_functions.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
-import 'package:dio/dio.dart';
+import 'package:stepbystep/apis/messege_notification_api.dart';
 
 class WorkspaceTaskTile extends StatefulWidget {
   final bool isOwner;
@@ -110,9 +109,9 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
           showNotification: true,
           openFileFromNotification: true,
         );
-        // if (taskId == null) {
-        //   return;
-        // }
+        if (taskId == null) {
+          return;
+        }
       }
     } catch (e) {
       log(e.toString());
@@ -123,14 +122,6 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onLongPress: () async {
-        // updateFieldIfMatch(
-        //   collectionPath: 'Report ${widget.userEmail} ${widget.workspaceCode}',
-        //   matchingField: 'Task Id',
-        //   matchingValue: widget.docId,
-        //   fieldToBeUpdated: 'TODO',
-        //   newValue: 30,
-        // );
-
         if (widget.isOwner) {
           showTaskDeletionDialog(
             context: context,
@@ -162,12 +153,9 @@ class _WorkspaceTaskTileState extends State<WorkspaceTaskTile> {
               border: Border(
                 right: BorderSide(color: widget.color, width: 10),
               ),
-              //borderRadius: BorderRadius.circular(10),
             ),
             child: Container(
               width: double.infinity,
-              // margin:
-              // const EdgeInsets.symmetric(horizontal: 2.5, vertical: 2.5),
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               decoration: BoxDecoration(
                 color: AppColor.white,

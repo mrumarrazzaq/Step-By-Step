@@ -5,22 +5,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+import 'package:mac_address/mac_address.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:mac_address/mac_address.dart';
-import 'package:stepbystep/apis/pick_file_api.dart';
 
 import 'package:stepbystep/colors.dart';
-import 'package:stepbystep/screens/security_section/authenticate_user_email.dart';
-import 'package:stepbystep/screens/security_section/signIn_screen.dart';
 import 'package:stepbystep/apis/send_email_api.dart';
-import 'package:stepbystep/screens/security_section/signIn_screen2.dert.dart';
+import 'package:stepbystep/screens/security_section/signIn_screen2.dart';
+import 'package:stepbystep/screens/security_section/authenticate_user_email.dart';
 
 final user = FirebaseFirestore.instance;
 
@@ -86,20 +82,7 @@ class _RegistrationScreen2State extends State<RegistrationScreen2> {
             left: 20.0,
           ),
           child: ListView(
-            // mainAxisAlignment: MainAxisAlignment.center,
-            // crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              InkWell(
-                onTap: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AuthenticateUserEmail(email: email),
-                    ),
-                  );
-                },
-                child: Text('Press'),
-              ),
               Align(
                 alignment: Alignment.topCenter,
                 child: imageURL.isEmpty
@@ -488,12 +471,6 @@ class _RegistrationScreen2State extends State<RegistrationScreen2> {
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.green,
         );
-        // Fluttertoast.showToast(
-        //   msg: 'Registered Successfully.. Now Sign in', // message
-        //   toastLength: Toast.LENGTH_SHORT, // length
-        //   gravity: ToastGravity.BOTTOM, // location
-        //   backgroundColor: Colors.green,
-        // );
 
         if (mounted) {
           Navigator.pushReplacement(
@@ -538,19 +515,6 @@ class _RegistrationScreen2State extends State<RegistrationScreen2> {
             snackPosition: SnackPosition.BOTTOM,
             backgroundColor: Colors.red,
           );
-          // _scaffoldKey.currentState!.showSnackBar(
-          //   const SnackBar(
-          //     backgroundColor: Colors.red,
-          //     content: Text(
-          //       'Sorry! Account Already Exist !',
-          //       style: TextStyle(
-          //         fontSize: 15,
-          //         color: Colors.white,
-          //       ),
-          //     ),
-          //     duration: Duration(seconds: 1),
-          //   ),
-          // );
         }
       }
     } else {
@@ -566,16 +530,6 @@ class _RegistrationScreen2State extends State<RegistrationScreen2> {
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
       );
-
-      // _scaffoldKey.currentState!.showSnackBar(
-      //   const SnackBar(
-      //     backgroundColor: Colors.red,
-      //     content: Text(
-      //       'Password and Confirm Password doesn\'t match !',
-      //       style: TextStyle(fontSize: 15, color: Colors.white),
-      //     ),
-      //   ),
-      // );
     }
   }
 

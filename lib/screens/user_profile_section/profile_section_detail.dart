@@ -1,6 +1,5 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, must_be_immutable
 
-//import 'package:authentication/pages/user/Profile/user_profile_section.dart';
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,7 +10,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
-//import 'package:velocity_x/velocity_x.dart';
 
 class ProfileSectionDetail extends StatefulWidget {
   ProfileSectionDetail({Key? key, required this.name}) : super(key: key);
@@ -29,8 +27,8 @@ class _ProfileSectionDetailState extends State<ProfileSectionDetail> {
   final TextEditingController newPasswordController = TextEditingController();
 
   bool _isLoading = false;
-  bool _obscureText1 = true;
-  bool _obscureText2 = true;
+  final bool _obscureText1 = true;
+  final bool _obscureText2 = true;
 
   String _currentPassword = '';
 
@@ -39,7 +37,7 @@ class _ProfileSectionDetailState extends State<ProfileSectionDetail> {
 
   fetchData() async {
     final user = FirebaseAuth.instance.currentUser;
-    print(user!.email);
+    log(user!.email.toString());
 
     try {
       await FirebaseFirestore.instance
@@ -50,13 +48,13 @@ class _ProfileSectionDetailState extends State<ProfileSectionDetail> {
         // personName = ds['User Name'];
         _currentPassword = ds['User Password'];
       });
-      print('---------------');
-      print(_currentPassword);
+      log('---------------');
+      log(_currentPassword.toString());
       setState(() {
         _currentPassword = _currentPassword;
       });
     } catch (e) {
-      print(e.toString());
+      log(e.toString());
     }
   }
 
@@ -130,9 +128,9 @@ class _ProfileSectionDetailState extends State<ProfileSectionDetail> {
   }
 
   String? validateCurrentPassword(value) {
-    print('======================');
-    print('_currentPassword : $_currentPassword');
-    print('currentPasswordController.text : ${currentPasswordController.text}');
+    log('======================');
+    log('_currentPassword : $_currentPassword');
+    log('currentPasswordController.text : ${currentPasswordController.text}');
 
     if (value.isEmpty) {
       return 'Please enter current password';
@@ -182,96 +180,92 @@ class _ProfileSectionDetailState extends State<ProfileSectionDetail> {
                   builder: (BuildContext context) {
                     return Padding(
                       padding: MediaQuery.of(context).viewInsets,
-                      child: Container(
-                        child: Wrap(
-                          children: <Widget>[
-                            Padding(
-                              padding: EdgeInsets.fromLTRB(30, 20, 30, 10),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  IconButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        _isLoading = false;
-                                      });
-                                      Navigator.pop(context);
-                                    },
-                                    icon: Icon(
-                                      Icons.arrow_back_ios,
-                                      size: 15,
-                                    ),
+                      child: Wrap(
+                        children: <Widget>[
+                          Padding(
+                            padding: EdgeInsets.fromLTRB(30, 20, 30, 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _isLoading = false;
+                                    });
+                                    Navigator.pop(context);
+                                  },
+                                  icon: Icon(
+                                    Icons.arrow_back_ios,
+                                    size: 15,
                                   ),
-                                  Text(
-                                    'Name',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18.0),
-                                  ),
-                                  GestureDetector(
-                                    onTap: () async {
-                                      if (_formKey.currentState!.validate()) {
-                                        SystemChannels.textInput
-                                            .invokeMethod('TextInput.hide');
-                                        updateData(title: 'personName');
-                                      }
-                                    },
-                                    child: _isLoading
-                                        ? SizedBox(
-                                            height: 10.0,
-                                            width: 10.0,
-                                            child: CircularProgressIndicator(
-                                              color: AppColor.orange,
-                                              strokeWidth: 1.0,
-                                            ),
-                                          )
-                                        : Text(
-                                            "Done",
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 18.0),
-                                          ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
-                              child: Form(
-                                key: _formKey,
-                                child: TextFormField(
-                                  controller: personNameController,
-                                  validator: (value) {
-                                    if (value!.isEmpty) {
-                                      return "Please enter name";
+                                ),
+                                Text(
+                                  'Name',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18.0),
+                                ),
+                                GestureDetector(
+                                  onTap: () async {
+                                    if (_formKey.currentState!.validate()) {
+                                      SystemChannels.textInput
+                                          .invokeMethod('TextInput.hide');
+                                      updateData(title: 'personName');
                                     }
                                   },
-                                  obscureText: false,
-                                  decoration: InputDecoration(
-                                      hintText: widget.name,
-                                      labelStyle:
-                                          TextStyle(color: Colors.black),
-                                      contentPadding:
-                                          EdgeInsets.symmetric(horizontal: 16),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(10)),
-                                        borderSide: BorderSide(
-                                            color: Colors.black, width: 0.5),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(10)),
-                                        borderSide: BorderSide(
-                                            color: Colors.black, width: 2.0),
-                                      )),
+                                  child: _isLoading
+                                      ? SizedBox(
+                                          height: 10.0,
+                                          width: 10.0,
+                                          child: CircularProgressIndicator(
+                                            color: AppColor.orange,
+                                            strokeWidth: 1.0,
+                                          ),
+                                        )
+                                      : Text(
+                                          "Done",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 18.0),
+                                        ),
                                 ),
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
+                            child: Form(
+                              key: _formKey,
+                              child: TextFormField(
+                                controller: personNameController,
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return "Please enter name";
+                                  }
+                                },
+                                obscureText: false,
+                                decoration: InputDecoration(
+                                    hintText: widget.name,
+                                    labelStyle: TextStyle(color: Colors.black),
+                                    contentPadding:
+                                        EdgeInsets.symmetric(horizontal: 16),
+                                    border: OutlineInputBorder(
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(10)),
+                                      borderSide: BorderSide(
+                                          color: Colors.black, width: 0.5),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(10)),
+                                      borderSide: BorderSide(
+                                          color: Colors.black, width: 2.0),
+                                    )),
                               ),
                             ),
-                            Text(' '),
-                          ],
-                        ),
+                          ),
+                          Text(' '),
+                        ],
                       ),
                     );
                   },
@@ -315,124 +309,74 @@ class _ProfileSectionDetailState extends State<ProfileSectionDetail> {
                   builder: (BuildContext context) {
                     return Padding(
                       padding: MediaQuery.of(context).viewInsets,
-                      child: Container(
-                        child: Wrap(
-                          children: <Widget>[
-                            Padding(
-                              padding:
-                                  const EdgeInsets.fromLTRB(30, 20, 30, 10),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  IconButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        _isLoading = false;
-                                      });
-                                      newPasswordController.clear();
-                                      currentPasswordController.clear();
-                                      Navigator.of(context).pop();
-                                    },
-                                    icon: Icon(
-                                      Icons.arrow_back_ios,
-                                      size: 15,
-                                    ),
+                      child: Wrap(
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(30, 20, 30, 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _isLoading = false;
+                                    });
+                                    newPasswordController.clear();
+                                    currentPasswordController.clear();
+                                    Navigator.of(context).pop();
+                                  },
+                                  icon: Icon(
+                                    Icons.arrow_back_ios,
+                                    size: 15,
                                   ),
-                                  Text(
-                                    'Password',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18.0),
-                                  ),
-                                  GestureDetector(
-                                    onTap: () async {
-                                      if (_formKey.currentState!.validate()) {
-                                        updateData(title: 'password');
-                                        SystemChannels.textInput
-                                            .invokeMethod('TextInput.hide');
-                                      }
-                                    },
-                                    child: _isLoading
-                                        ? SizedBox(
-                                            height: 10.0,
-                                            width: 10.0,
-                                            child: CircularProgressIndicator(
-                                              color: AppColor.orange,
-                                              strokeWidth: 1.0,
-                                            ),
-                                          )
-                                        : Text(
-                                            'Done',
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 18.0),
+                                ),
+                                Text(
+                                  'Password',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18.0),
+                                ),
+                                GestureDetector(
+                                  onTap: () async {
+                                    if (_formKey.currentState!.validate()) {
+                                      updateData(title: 'password');
+                                      SystemChannels.textInput
+                                          .invokeMethod('TextInput.hide');
+                                    }
+                                  },
+                                  child: _isLoading
+                                      ? SizedBox(
+                                          height: 10.0,
+                                          width: 10.0,
+                                          child: CircularProgressIndicator(
+                                            color: AppColor.orange,
+                                            strokeWidth: 1.0,
                                           ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
-                              child: Form(
-                                key: _formKey,
-                                child: Column(
-                                  children: [
-                                    Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 8.0),
-                                      child: TextFormField(
-                                        obscureText: _obscureText1,
-                                        controller: currentPasswordController,
-                                        validator: validateCurrentPassword,
-                                        decoration: InputDecoration(
-                                          hintText: 'Current Password',
-                                          labelStyle:
-                                              TextStyle(color: Colors.black),
-                                          contentPadding: EdgeInsets.symmetric(
-                                              horizontal: 16),
-                                          border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(10)),
-                                            borderSide: BorderSide(
-                                                color: Colors.black,
-                                                width: 0.5),
-                                          ),
-                                          focusedBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(10)),
-                                            borderSide: BorderSide(
-                                                color: Colors.black,
-                                                width: 2.0),
-                                          ),
-                                          // suffixIcon: GestureDetector(
-                                          //   child: _obscureText1
-                                          //       ? Icon(
-                                          //           Icons.visibility,
-                                          //           size: 20.0,
-                                          //           color: blackColor,
-                                          //         )
-                                          //       : Icon(
-                                          //           Icons.visibility_off,
-                                          //           size: 20.0,
-                                          //           color: blackColor,
-                                          //         ),
-                                          //   onTap: () {
-                                          //     setState(() {
-                                          //       _obscureText1 =
-                                          //           !_obscureText1;
-                                          //     });
-                                          //   },
-                                          // ),
+                                        )
+                                      : Text(
+                                          'Done',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 18.0),
                                         ),
-                                      ),
-                                    ),
-                                    TextFormField(
-                                      obscureText: _obscureText2,
-                                      controller: newPasswordController,
-                                      validator: validatePassword,
+                                ),
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
+                            child: Form(
+                              key: _formKey,
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 8.0),
+                                    child: TextFormField(
+                                      obscureText: _obscureText1,
+                                      controller: currentPasswordController,
+                                      validator: validateCurrentPassword,
                                       decoration: InputDecoration(
-                                        hintText: 'New Password',
+                                        hintText: 'Current Password',
                                         labelStyle:
                                             TextStyle(color: Colors.black),
                                         contentPadding: EdgeInsets.symmetric(
@@ -449,33 +393,57 @@ class _ProfileSectionDetailState extends State<ProfileSectionDetail> {
                                           borderSide: BorderSide(
                                               color: Colors.black, width: 2.0),
                                         ),
-                                        // suffixIcon: GestureDetector(
-                                        //   child: _obscureText2
-                                        //       ? Icon(
-                                        //           Icons.visibility,
-                                        //           size: 18.0,
-                                        //           color: blackColor,
-                                        //         )
-                                        //       : Icon(
-                                        //           Icons.visibility_off,
-                                        //           size: 18.0,
-                                        //           color: blackColor,
-                                        //         ),
-                                        //   onTap: () {
-                                        //     setState(() {
-                                        //       _obscureText2 = !_obscureText2;
-                                        //     });
-                                        //   },
-                                        // ),
                                       ),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                  TextFormField(
+                                    obscureText: _obscureText2,
+                                    controller: newPasswordController,
+                                    validator: validatePassword,
+                                    decoration: InputDecoration(
+                                      hintText: 'New Password',
+                                      labelStyle:
+                                          TextStyle(color: Colors.black),
+                                      contentPadding:
+                                          EdgeInsets.symmetric(horizontal: 16),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(10)),
+                                        borderSide: BorderSide(
+                                            color: Colors.black, width: 0.5),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(10)),
+                                        borderSide: BorderSide(
+                                            color: Colors.black, width: 2.0),
+                                      ),
+                                      // suffixIcon: GestureDetector(
+                                      //   child: _obscureText2
+                                      //       ? Icon(
+                                      //           Icons.visibility,
+                                      //           size: 18.0,
+                                      //           color: blackColor,
+                                      //         )
+                                      //       : Icon(
+                                      //           Icons.visibility_off,
+                                      //           size: 18.0,
+                                      //           color: blackColor,
+                                      //         ),
+                                      //   onTap: () {
+                                      //     setState(() {
+                                      //       _obscureText2 = !_obscureText2;
+                                      //     });
+                                      //   },
+                                      // ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            Text(' '),
-                          ],
-                        ),
+                          ),
+                          Text(' '),
+                        ],
                       ),
                     );
                   },
@@ -656,13 +624,13 @@ class _ProfileSectionDetailState extends State<ProfileSectionDetail> {
         .update({
           'User Password': newPasswordController.text,
         })
-        .then((value) => print('Password Update by email : $currentUserEmail'))
-        .catchError((error) => print('Failed to Update Password $error'));
+        .then((value) => log('Password Update by email : $currentUserEmail'))
+        .catchError((error) => log('Failed to Update Password $error'));
   }
 
   updateData({required String title}) async {
     final user = FirebaseAuth.instance.currentUser;
-    print(user!.email);
+    log(user!.email.toString());
     _isLoading = true;
     if (title == 'personName') {
       try {
@@ -681,7 +649,7 @@ class _ProfileSectionDetailState extends State<ProfileSectionDetail> {
           _isLoading = false;
         });
       } catch (e) {
-        print("Name changes Fail");
+        log("Name changes Fail");
       }
     } else if (title == 'password') {
       try {
@@ -695,7 +663,6 @@ class _ProfileSectionDetailState extends State<ProfileSectionDetail> {
           backgroundColor: Colors.green,
         );
 
-        if (ref == null) {}
         setState(() {
           _isLoading = false;
         });
@@ -708,7 +675,7 @@ class _ProfileSectionDetailState extends State<ProfileSectionDetail> {
           gravity: ToastGravity.BOTTOM, // location
           backgroundColor: Colors.black,
         );
-        print("Password changes Fail");
+        log("Password changes Fail");
       }
     }
     Navigator.pop(context);
@@ -716,12 +683,12 @@ class _ProfileSectionDetailState extends State<ProfileSectionDetail> {
 }
 
 class CustomTile extends StatelessWidget {
-  CustomTile(
+  const CustomTile(
       {Key? key, required this.title, required this.role, required this.level})
       : super(key: key);
-  String title;
-  String role;
-  int level;
+  final String title;
+  final String role;
+  final int level;
   @override
   Widget build(BuildContext context) {
     return Column(

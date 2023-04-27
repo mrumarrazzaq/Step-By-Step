@@ -1,3 +1,5 @@
+// ignore_for_file: must_be_immutable
+
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -7,7 +9,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
 import 'package:stepbystep/screens/inbox_section/inbox_screen.dart';
-import 'package:stepbystep/widgets/app_stream_builder.dart';
 
 class RecentInboxes extends StatefulWidget {
   RecentInboxes({Key? key, required this.workspaceCode}) : super(key: key);
@@ -169,7 +170,7 @@ class _RecentInboxesState extends State<RecentInboxes> {
 }
 
 class CustomRecentChatsTile extends StatelessWidget {
-  CustomRecentChatsTile({
+  const CustomRecentChatsTile({
     Key? key,
     required this.name,
     required this.email,
@@ -177,10 +178,10 @@ class CustomRecentChatsTile extends StatelessWidget {
     required this.currentStatus,
   }) : super(key: key);
 
-  String name;
-  String email;
-  String imagePath;
-  String currentStatus;
+  final String name;
+  final String email;
+  final String imagePath;
+  final String currentStatus;
   @override
   Widget build(BuildContext context) {
     return GestureDetector(

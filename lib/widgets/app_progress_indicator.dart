@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stepbystep/colors.dart';
 
 class AppProgressIndicator extends StatelessWidget {
-  AppProgressIndicator({
+  const AppProgressIndicator({
     Key? key,
     this.size = 10,
     this.radius = 25,
@@ -11,12 +11,12 @@ class AppProgressIndicator extends StatelessWidget {
     this.circleBgColor = const Color(0xFFFF4C00),
     this.circleColor = Colors.white,
   }) : super(key: key);
-  double size;
-  double radius;
-  double strokeWidth;
-  Color bgColor;
-  Color circleColor;
-  Color circleBgColor;
+  final double size;
+  final double radius;
+  final double strokeWidth;
+  final Color bgColor;
+  final Color circleColor;
+  final Color circleBgColor;
 
   @override
   Widget build(BuildContext context) {

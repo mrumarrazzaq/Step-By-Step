@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:stepbystep/colors.dart';
 
 class AppToast extends StatelessWidget {
-  AppToast(
+  const AppToast(
       {Key? key,
       required this.widget,
       required this.color,
@@ -11,11 +9,11 @@ class AppToast extends StatelessWidget {
       this.width = 200,
       this.radius = 10})
       : super(key: key);
-  double width;
-  double height;
-  double radius;
-  Color color;
-  List<Widget> widget;
+  final double width;
+  final double height;
+  final double radius;
+  final Color color;
+  final List<Widget> widget;
   @override
   Widget build(BuildContext context) {
     return Container(

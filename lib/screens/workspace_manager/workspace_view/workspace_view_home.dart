@@ -1,25 +1,26 @@
 import 'dart:developer';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+
 import 'package:lottie/lottie.dart';
-import 'package:stepbystep/apis/app_functions.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:stepbystep/colors.dart';
+import 'package:stepbystep/apis/app_functions.dart';
 import 'package:stepbystep/screens/workspace_manager/workspace_view/detailed_view.dart';
-import 'package:stepbystep/widgets/app_future_builder.dart';
 
 class WorkspaceViewHome extends StatefulWidget {
-  String workspaceCode;
-  String docId;
-  String workspaceName;
-  bool fromTaskAssignment;
-  bool fromTaskHolder;
-  bool createRole;
-  bool editRole;
-  bool deleteRole;
-  bool controlForUser;
-  bool controlForOwner;
-  WorkspaceViewHome(
+  final String workspaceCode;
+  final String docId;
+  final String workspaceName;
+  final bool fromTaskAssignment;
+  final bool fromTaskHolder;
+  final bool createRole;
+  final bool editRole;
+  final bool deleteRole;
+  final bool controlForUser;
+  final bool controlForOwner;
+  const WorkspaceViewHome(
       {Key? key,
       required this.workspaceName,
       required this.workspaceCode,
@@ -154,7 +155,7 @@ class _WorkspaceViewHomeState extends State<WorkspaceViewHome> {
 }
 
 class ViewCard extends StatelessWidget {
-  ViewCard({
+  const ViewCard({
     Key? key,
     required this.workspaceName,
     required this.workspaceCode,
@@ -164,13 +165,13 @@ class ViewCard extends StatelessWidget {
     required this.height,
     required this.totals,
   }) : super(key: key);
-  String workspaceName;
-  String workspaceCode;
-  String role;
-  Widget widget;
-  int level;
-  double height;
-  int totals;
+  final String workspaceName;
+  final String workspaceCode;
+  final String role;
+  final Widget widget;
+  final int level;
+  final double height;
+  final int totals;
 
   @override
   Widget build(BuildContext context) {

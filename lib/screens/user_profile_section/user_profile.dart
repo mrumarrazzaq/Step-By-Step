@@ -1,14 +1,13 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:stepbystep/config.dart';
 import 'package:stepbystep/screens/user_profile_section/profile_header.dart';
 
 class UserProfile extends StatefulWidget {
   static const String id = 'UserProfile';
-  UserProfile({
+  const UserProfile({
     Key? key,
   }) : super(key: key);
 

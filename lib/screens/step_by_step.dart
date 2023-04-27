@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +7,6 @@ import 'package:stepbystep/ads/ad_mob_service.dart';
 import 'package:stepbystep/apis/get_apis.dart';
 import 'package:stepbystep/config.dart';
 import 'package:stepbystep/dialog_boxes/app_dialog.dart';
-import 'package:stepbystep/listeners/firebase_listener.dart';
 
 import 'package:stepbystep/screens/drawer.dart';
 import 'package:stepbystep/screens/home.dart';
@@ -36,10 +34,9 @@ class _StepByStepState extends State<StepByStep> with WidgetsBindingObserver {
   final List<Widget> screens = [
     const HomeScreen(),
     const MotivationalQuotes(),
-    // RecentInboxes(),
-    RecentWorkspaces(),
-    BotUI(),
-    UserProfile()
+    const RecentWorkspaces(),
+    const BotUI(),
+    const UserProfile()
   ];
 
   getData() async {
@@ -165,16 +162,11 @@ class _StepByStepState extends State<StepByStep> with WidgetsBindingObserver {
           ),
         ],
       ),
-      drawer: AppDrawer(),
+      drawer: const AppDrawer(),
       body: screens[_currentIndex],
       bottomNavigationBar: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // ElevatedButton(
-          //   onPressed: () {
-          //   },
-          //   child: Text('Press'),
-          // ),
           Visibility(
             visible: _bannerAd != null && !_isPaidAccount,
             child: SizedBox(

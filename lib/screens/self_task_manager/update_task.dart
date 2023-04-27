@@ -13,11 +13,11 @@ import 'package:stepbystep/sql_database/sql_helper.dart';
 import 'package:stepbystep/widgets/app_input_field.dart';
 
 class UpdateTask extends StatefulWidget {
-  int id;
-  String title;
-  String description;
-  String taskStatus;
-  UpdateTask(
+  final int id;
+  final String title;
+  final String description;
+  final String taskStatus;
+  const UpdateTask(
       {Key? key,
       required this.id,
       required this.title,
@@ -53,8 +53,8 @@ class _UpdateTaskState extends State<UpdateTask> {
     _date = formatDate(_selectedDateTime, [yyyy, '-', mm, '-', dd]);
     _time = '${_selectedDateTime.hour}:${_selectedDateTime.minute}';
     dateTimeString = '$_date $_time';
-    print('init : $dateTimeString');
-    print('----------');
+    log('init : $dateTimeString');
+    log('----------');
 
     super.initState();
   }
@@ -144,8 +144,10 @@ class _UpdateTaskState extends State<UpdateTask> {
                     backgroundColor: AppColor.orange,
                   );
 
-                  context.read<TaskCollection>().refreshData();
-                  Navigator.pop(context);
+                  if (mounted) {
+                    context.read<TaskCollection>().refreshData();
+                    Navigator.pop(context);
+                  }
                 }
               },
               child: const Text('Update'),

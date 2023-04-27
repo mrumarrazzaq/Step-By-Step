@@ -1,27 +1,28 @@
 import 'dart:developer';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:numberpicker/numberpicker.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:stepbystep/ads/ad_mob_service.dart';
-import 'package:stepbystep/apis/app_functions.dart';
 
-import 'package:stepbystep/apis/firebase_api.dart';
-import 'package:stepbystep/apis/get_apis.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:stepbystep/ads/ad_mob_service.dart';
+
+import 'package:stepbystep/apis/app_functions.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
+import 'package:stepbystep/apis/get_apis.dart';
+import 'package:stepbystep/apis/firebase_api.dart';
+import 'package:stepbystep/widgets/app_elevated_button.dart';
+import 'package:stepbystep/widgets/app_progress_indicator.dart';
 import 'package:stepbystep/screens/workspace_manager/workspace_roles_handler/role_selector.dart';
 import 'package:stepbystep/screens/workspace_manager/workspace_roles_handler/workspace_role_card.dart';
 
-import 'package:stepbystep/widgets/app_elevated_button.dart';
-import 'package:numberpicker/numberpicker.dart';
-import 'package:stepbystep/widgets/app_progress_indicator.dart';
-
 class WorkspaceRolesHandler extends StatefulWidget {
-  WorkspaceRolesHandler({
+  const WorkspaceRolesHandler({
     Key? key,
     required this.workspaceCode,
     required this.docId,
@@ -35,17 +36,17 @@ class WorkspaceRolesHandler extends StatefulWidget {
     required this.fromTaskAssignment,
     required this.fromTaskHolder,
   }) : super(key: key);
-  String workspaceCode;
-  String docId;
-  String workspaceName;
-  bool controlForUser;
-  bool controlForOwner;
-  bool control;
-  bool createRole;
-  bool editRole;
-  bool deleteRole;
-  bool fromTaskAssignment;
-  bool fromTaskHolder;
+  final String workspaceCode;
+  final String docId;
+  final String workspaceName;
+  final bool controlForUser;
+  final bool controlForOwner;
+  final bool control;
+  final bool createRole;
+  final bool editRole;
+  final bool deleteRole;
+  final bool fromTaskAssignment;
+  final bool fromTaskHolder;
   @override
   State<WorkspaceRolesHandler> createState() => _WorkspaceRolesHandlerState();
 }
@@ -481,7 +482,7 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
                               onColorChanged: (color) {
                                 hexColorCode =
                                     '0x${color.value.toRadixString(16)}';
-                                print(hexColorCode);
+                                log(hexColorCode.toString());
                               },
                               availableColors: colorList,
                               useInShowDialog: true,
@@ -491,7 +492,7 @@ class _WorkspaceRolesHandlerState extends State<WorkspaceRolesHandler> {
                       ),
                       const SizedBox(height: 25),
                       createRoleLoading
-                          ? AppProgressIndicator(
+                          ? const AppProgressIndicator(
                               radius: 25,
                               size: 30,
                             )

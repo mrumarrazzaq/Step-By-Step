@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirebaseListener {
@@ -9,13 +11,13 @@ class FirebaseListener {
       snapshot.docChanges.forEach((change) {
         if (change.type == DocumentChangeType.added) {
           // Document added
-          print('New document added: ${change.doc.id}');
+          log('New document added: ${change.doc.id}');
         } else if (change.type == DocumentChangeType.modified) {
           // Document modified
-          print('Document modified: ${change.doc.id}');
+          log('Document modified: ${change.doc.id}');
         } else if (change.type == DocumentChangeType.removed) {
           // Document removed
-          print('Document removed: ${change.doc.id}');
+          log('Document removed: ${change.doc.id}');
         }
       });
     });
@@ -30,10 +32,10 @@ class FirebaseListener {
         .listen((DocumentSnapshot snapshot) {
       if (snapshot.exists) {
         myFieldValue = snapshot.get('Paid Account');
-        print('my_field value has been updated: $myFieldValue');
+        log('my_field value has been updated: $myFieldValue');
       } else {
         myFieldValue = false;
-        print('Document does not exist');
+        log('Document does not exist');
       }
     });
     return myFieldValue;

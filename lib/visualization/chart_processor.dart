@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import 'dataset.dart';
 
 void calculateDailyTaskProgress(String subFilterValue) {

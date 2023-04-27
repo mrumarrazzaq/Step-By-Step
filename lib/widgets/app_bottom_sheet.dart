@@ -21,7 +21,7 @@ class MyBottomSheet extends StatelessWidget {
                 topRight: Radius.circular(20),
               ),
             ),
-            child: Text('Umar'),
+            child: const Text('Umar'),
           ),
         );
       },

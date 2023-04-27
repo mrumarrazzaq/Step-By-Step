@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -10,7 +11,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'calendar_utils.dart';
 
 class SelfTableCalendar extends StatefulWidget {
-  SelfTableCalendar({Key? key}) : super(key: key);
+  const SelfTableCalendar({Key? key}) : super(key: key);
   @override
   _SelfTableCalendarState createState() => _SelfTableCalendarState();
 }
@@ -167,13 +168,13 @@ class _SelfTableCalendarState extends State<SelfTableCalendar> {
                 },
                 onLeftArrowTap: () {
                   _pageController.previousPage(
-                    duration: Duration(milliseconds: 300),
+                    duration: const Duration(milliseconds: 300),
                     curve: Curves.easeOut,
                   );
                 },
                 onRightArrowTap: () {
                   _pageController.nextPage(
-                    duration: Duration(milliseconds: 300),
+                    duration: const Duration(milliseconds: 300),
                     curve: Curves.easeOut,
                   );
                 },
@@ -261,7 +262,7 @@ class _SelfTableCalendarState extends State<SelfTableCalendar> {
                       child: Card(
                         child: ListTile(
                           dense: true,
-                          onTap: () => print('${value[index]}'),
+                          onTap: () => log('${value[index]}'),
                           title: Text(
                             task[0],
                             style: GoogleFonts.aBeeZee(

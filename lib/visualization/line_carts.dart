@@ -29,7 +29,7 @@ class LineChart extends StatefulWidget {
 
 class _LineChartState extends State<LineChart> {
   int day = DateTime.now().day - 1;
-  int week = 0;
+  int week = BlackBox.getWeekNumber() - 1;
   int weekDay = DateTime.now().weekday - 1;
   int month = DateTime.now().month - 1;
 
@@ -64,9 +64,9 @@ class _LineChartState extends State<LineChart> {
     0.0,
     0.0
   ];
-  List<double> _weeklyAssignedTaskProgressData = [0.0, 0.0, 0.0, 0.0];
-  List<double> _weeklyCompletedTaskProgressData = [0.0, 0.0, 0.0, 0.0];
-  List<double> _weeklyExpiredTaskProgressData = [0.0, 0.0, 0.0, 0.0];
+  final List<double> _weeklyAssignedTaskProgressData = [0.0, 0.0, 0.0, 0.0];
+  final List<double> _weeklyCompletedTaskProgressData = [0.0, 0.0, 0.0, 0.0];
+  final List<double> _weeklyExpiredTaskProgressData = [0.0, 0.0, 0.0, 0.0];
 
   List<double> _monthlyAssignedTaskProgressData = [
     0.0,
@@ -151,7 +151,9 @@ class _LineChartState extends State<LineChart> {
           _dailyExpiredTaskProgressData[7 - int.parse(getWeekDay)] +=
               data['EXPIRED'];
         }
-        setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
         log('-----------------------------------');
       }
     } else {
@@ -197,21 +199,23 @@ class _LineChartState extends State<LineChart> {
 
         if (DateTime.now().year.toString() == getYear &&
             DateTime.now().month.toString() == getMonth) {
-          if (int.parse(getWeek) - 1 == 4) {
+          if (int.parse(getWeek) == 4) {
             _weeklyAssignedTaskProgressData[3] +=
                 data!['TODO'] + data['DOING'] + data['REVIEW'];
             _weeklyCompletedTaskProgressData[3] += data['COMPLETED'];
             _weeklyExpiredTaskProgressData[3] += data['EXPIRED'];
           } else {
-            _weeklyAssignedTaskProgressData[5 - int.parse(getWeek)] +=
+            _weeklyAssignedTaskProgressData[4 - int.parse(getWeek)] +=
                 data!['TODO'] + data['DOING'] + data['REVIEW'];
-            _weeklyCompletedTaskProgressData[5 - int.parse(getWeek)] +=
+            _weeklyCompletedTaskProgressData[4 - int.parse(getWeek)] +=
                 data['COMPLETED'];
-            _weeklyExpiredTaskProgressData[5 - int.parse(getWeek)] +=
+            _weeklyExpiredTaskProgressData[4 - int.parse(getWeek)] +=
                 data['EXPIRED'];
           }
         }
-        setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
         log('-----------------------------------');
       }
     } else {
@@ -221,15 +225,15 @@ class _LineChartState extends State<LineChart> {
     log('Weekly Assigned Task $_weeklyAssignedTaskProgressData');
     log('Weekly Completed Task $_weeklyCompletedTaskProgressData');
     log('Weekly Expired Task $_weeklyExpiredTaskProgressData');
-    _weeklyAssignedTaskProgressData =
-        shiftArrayToRight(_weeklyAssignedTaskProgressData, -1);
-    _weeklyCompletedTaskProgressData =
-        shiftArrayToRight(_weeklyCompletedTaskProgressData, -1);
-    _weeklyExpiredTaskProgressData =
-        shiftArrayToRight(_weeklyExpiredTaskProgressData, -1);
-    log('Weekly Assigned Task $_weeklyAssignedTaskProgressData');
-    log('Weekly Completed Task $_weeklyCompletedTaskProgressData');
-    log('Weekly Expired Task $_weeklyExpiredTaskProgressData');
+    // _weeklyAssignedTaskProgressData =
+    //     shiftArrayToRight(_weeklyAssignedTaskProgressData, -1);
+    // _weeklyCompletedTaskProgressData =
+    //     shiftArrayToRight(_weeklyCompletedTaskProgressData, -1);
+    // _weeklyExpiredTaskProgressData =
+    //     shiftArrayToRight(_weeklyExpiredTaskProgressData, -1);
+    // log('Weekly Assigned Task $_weeklyAssignedTaskProgressData');
+    // log('Weekly Completed Task $_weeklyCompletedTaskProgressData');
+    // log('Weekly Expired Task $_weeklyExpiredTaskProgressData');
   }
 
   monthlyLineChartProcess() async {
@@ -263,7 +267,9 @@ class _LineChartState extends State<LineChart> {
           _monthlyExpiredTaskProgressData[12 - int.parse(getMonth)] +=
               data['EXPIRED'];
         }
-        setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
         log('-----------------------------------');
       }
     } else {

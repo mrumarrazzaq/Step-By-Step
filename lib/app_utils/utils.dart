@@ -1,7 +1,5 @@
 import 'dart:developer';
 
-import 'package:flutter/material.dart';
-import 'package:stepbystep/bot_data/questions.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Command {
@@ -27,18 +25,12 @@ class Utils {
       'You need to create workspace to handle members and task in the organization',
       'i am your assistant you can clear your queries by asking questions from me',
     ];
-    // for (var key in botData.keys) {
-    //   log('$text                      $key');
-    //   if (text.toString() == key.toString()) {
-    //     print('botData[key]');
-    //   }
-    // }
 
     for (int i = 0; i < questions.length; i++) {
       List<String> words = questions[i].split(' ');
       for (var word in words) {
         if (text.contains(word)) {
-          print(answers[i]);
+          log(answers[i].toString());
           break;
         }
       }

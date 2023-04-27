@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 class AppDivider extends StatelessWidget {
-  AppDivider({Key? key, required this.text, required this.color})
+  const AppDivider({Key? key, required this.text, required this.color})
       : super(key: key);
-  String text;
-  Color color;
+  final String text;
+  final Color color;
   @override
   Widget build(BuildContext context) {
     return Row(children: [

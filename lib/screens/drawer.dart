@@ -7,7 +7,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -16,12 +15,11 @@ import 'package:stepbystep/authentication/authentication_with_google.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
 import 'package:stepbystep/screens/privacy_policy.dart';
-import 'package:stepbystep/screens/security_section/signIn_screen.dart';
-import 'package:stepbystep/screens/security_section/signIn_screen2.dert.dart';
+import 'package:stepbystep/screens/security_section/signIn_screen2.dart';
 import 'package:stepbystep/screens/user_profile_section/user_profile.dart';
 
 class AppDrawer extends StatefulWidget {
-  AppDrawer({
+  const AppDrawer({
     Key? key,
   }) : super(key: key);
   @override
@@ -120,7 +118,7 @@ class _AppDrawerState extends State<AppDrawer> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => UserProfile(),
+                    builder: (context) => const UserProfile(),
                   ),
                 );
               },

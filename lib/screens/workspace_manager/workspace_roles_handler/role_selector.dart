@@ -1,3 +1,5 @@
+// ignore_for_file: must_be_immutable
+
 import 'dart:convert';
 import 'dart:developer';
 
@@ -13,10 +15,9 @@ import 'package:stepbystep/config.dart';
 import 'package:stepbystep/dataset/roles_dataset.dart';
 import 'package:stepbystep/widgets/app_elevated_button.dart';
 import 'package:stepbystep/widgets/app_progress_indicator.dart';
-import 'package:velocity_x/velocity_x.dart';
 
 class RoleSelector extends StatefulWidget {
-  String workspaceCode;
+  final String workspaceCode;
   String workspaceType;
   RoleSelector(
       {Key? key, required this.workspaceCode, required this.workspaceType})
@@ -68,8 +69,6 @@ class _RoleSelectorState extends State<RoleSelector> {
   String dropdownValue = '';
 
   late dynamic roles;
-
-  // late Map<String, String> jsonMap;
 
   @override
   void initState() {
@@ -373,7 +372,7 @@ class _RoleSelectorState extends State<RoleSelector> {
                               onColorChanged: (color) {
                                 hexColorCode =
                                     '0x${color.value.toRadixString(16)}';
-                                print(hexColorCode);
+                                log(hexColorCode);
                               },
                               availableColors: colorList,
                               useInShowDialog: true,
@@ -383,7 +382,7 @@ class _RoleSelectorState extends State<RoleSelector> {
                       ),
                       const SizedBox(height: 25),
                       createRoleLoading
-                          ? AppProgressIndicator(
+                          ? const AppProgressIndicator(
                               radius: 25,
                               size: 30,
                             )

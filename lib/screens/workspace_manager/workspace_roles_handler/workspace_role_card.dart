@@ -1,24 +1,26 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:developer';
 import 'package:flutter/material.dart';
 
+import 'package:lottie/lottie.dart';
+import 'package:readmore/readmore.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:numberpicker/numberpicker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:lottie/lottie.dart';
-import 'package:numberpicker/numberpicker.dart';
-import 'package:readmore/readmore.dart';
-import 'package:stepbystep/apis/app_functions.dart';
-
 import 'package:stepbystep/apis/firebase_api.dart';
+
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
-import 'package:stepbystep/screens/workspace_manager/workspace_roles_handler/controls_list.dart';
+import 'package:stepbystep/apis/app_functions.dart';
 import 'package:stepbystep/widgets/app_divider.dart';
 import 'package:stepbystep/widgets/app_elevated_button.dart';
 import 'package:stepbystep/widgets/app_progress_indicator.dart';
+import 'package:stepbystep/screens/workspace_manager/workspace_roles_handler/controls_list.dart';
 
 class WorkspaceRoleCard extends StatefulWidget {
-  WorkspaceRoleCard({
+  const WorkspaceRoleCard({
     Key? key,
     required this.id,
     required this.workspaceCode,
@@ -42,28 +44,28 @@ class WorkspaceRoleCard extends StatefulWidget {
     required this.deleteRole,
     required this.reportControl,
   }) : super(key: key);
-  String id;
-  String workspaceCode;
-  String roleName;
-  String roleDescription;
-  String roleLevel;
-  String roleColor;
-  bool controlForOwner;
-  bool teamControl;
-  bool memberControl;
-  bool control;
-  bool roleControl;
-  bool taskControl;
-  bool viewControl;
-  bool reportControl;
+  final String id;
+  final String workspaceCode;
+  final String roleName;
+  final String roleDescription;
+  final String roleLevel;
+  final String roleColor;
+  final bool controlForOwner;
+  final bool teamControl;
+  final bool memberControl;
+  final bool control;
+  final bool roleControl;
+  final bool taskControl;
+  final bool viewControl;
+  final bool reportControl;
 
-  bool addMember;
-  bool removeMember;
-  bool assignRole;
-  bool deAssignRole;
-  bool createRole;
-  bool editRole;
-  bool deleteRole;
+  final bool addMember;
+  final bool removeMember;
+  final bool assignRole;
+  final bool deAssignRole;
+  final bool createRole;
+  final bool editRole;
+  final bool deleteRole;
   @override
   State<WorkspaceRoleCard> createState() => _WorkspaceRoleCardState();
 }
@@ -232,15 +234,6 @@ class _WorkspaceRoleCardState extends State<WorkspaceRoleCard> {
               color: AppColor.black,
             ),
           ),
-
-          // Text(
-          //   widget.roleName,
-          //   style: TextStyle(
-          //     color: AppColor.orange,
-          //     fontWeight: FontWeight.bold,
-          //     fontSize: 20,
-          //   ),
-          // ),
           trailing: Text(
             'Level ${widget.roleLevel}',
             style: TextStyle(
@@ -952,7 +945,7 @@ class _WorkspaceRoleCardState extends State<WorkspaceRoleCard> {
                     ),
                     //CREATE Button
                     deleteRoleLoading
-                        ? AppProgressIndicator(
+                        ? const AppProgressIndicator(
                             radius: 25,
                             size: 20,
                           )
@@ -1187,7 +1180,7 @@ class _WorkspaceRoleCardState extends State<WorkspaceRoleCard> {
                               onColorChanged: (color) {
                                 hexColorCode =
                                     '0x${color.value.toRadixString(16)}';
-                                print(hexColorCode);
+                                log(hexColorCode.toString());
                               },
                               availableColors: colorList,
                               useInShowDialog: true,
@@ -1197,7 +1190,7 @@ class _WorkspaceRoleCardState extends State<WorkspaceRoleCard> {
                       ),
                       const SizedBox(height: 25),
                       updateRoleLoading
-                          ? AppProgressIndicator(
+                          ? const AppProgressIndicator(
                               radius: 25,
                               size: 30,
                             )

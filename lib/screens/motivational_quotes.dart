@@ -1,15 +1,16 @@
 import 'dart:developer';
 
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:carousel_slider/carousel_slider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:lottie/lottie.dart';
 import 'package:readmore/readmore.dart';
-import 'package:stepbystep/api_keys/api_keys.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+
 import 'package:stepbystep/colors.dart';
+import 'package:stepbystep/api_keys/api_keys.dart';
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -63,11 +64,11 @@ class _MotivationalQuotesState extends State<MotivationalQuotes> {
         var data = json.decode(response.body);
         setState(() {
           _photos = data['photos'];
-          print(_photos);
+          log(_photos.toString());
           loading = false;
         });
       } else {
-        print('API request failed with status code ${response.statusCode}');
+        log('API request failed with status code ${response.statusCode}');
       }
     });
   }
@@ -229,7 +230,7 @@ class _MotivationalQuotesState extends State<MotivationalQuotes> {
                     color: AppColor.orange,
                   )
                 : Padding(
-                    padding: EdgeInsets.only(top: 100),
+                    padding: const EdgeInsets.only(top: 100),
                     child: CarouselSlider.builder(
                       itemCount: totalQuotes,
                       itemBuilder: (BuildContext context, int itemIndex,

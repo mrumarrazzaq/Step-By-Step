@@ -1,29 +1,30 @@
-// ignore_for_file: use_build_context_synchronously
-
-import 'dart:developer';
 import 'dart:io';
+import 'dart:convert';
+import 'dart:developer';
 
-import 'package:assets_audio_player/assets_audio_player.dart';
-import 'package:audioplayers/audioplayers.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/painting.dart';
-import 'package:flutter_audio_recorder2/flutter_audio_recorder2.dart';
-import 'package:flutter_share/flutter_share.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:image_downloader/image_downloader.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
-import 'package:date_format/date_format.dart';
+import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter_share/flutter_share.dart';
+import 'package:image_downloader/image_downloader.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_audio_recorder2/flutter_audio_recorder2.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:date_format/date_format.dart';
+
+import 'package:flutter/foundation.dart' as foundation;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart';
-import 'package:flutter/foundation.dart' as foundation;
+
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_5.dart';
 import 'package:stepbystep/apis/app_functions.dart';
@@ -31,17 +32,15 @@ import 'package:stepbystep/apis/messege_notification_api.dart';
 import 'package:stepbystep/apis/pick_file_api.dart';
 import 'package:stepbystep/colors.dart';
 import 'package:stepbystep/config.dart';
-import 'package:stepbystep/dialog_boxes/full_screen_dialog.dart';
 import 'package:stepbystep/providers/silence_operations.dart';
 import 'package:stepbystep/screens/inbox_section/audio_call.dart';
 import 'package:stepbystep/screens/inbox_section/image_message.dart';
 import 'package:stepbystep/screens/inbox_section/video_call.dart';
 import 'package:stepbystep/screens/inbox_section/voice_message.dart';
 import 'package:stepbystep/widgets/realtime_user_online_status.dart';
-import 'package:logger/logger.dart';
 
 class InboxScreen extends StatefulWidget {
-  InboxScreen({
+  const InboxScreen({
     Key? key,
     required this.name,
     required this.receiverEmail,
@@ -49,11 +48,11 @@ class InboxScreen extends StatefulWidget {
     required this.imageURL,
     required this.internetConnectionStatus,
   }) : super(key: key);
-  String name;
-  String imageURL;
-  String receiverEmail;
-  String currentStatus;
-  bool internetConnectionStatus;
+  final String name;
+  final String imageURL;
+  final String receiverEmail;
+  final String currentStatus;
+  final bool internetConnectionStatus;
   @override
   _InboxScreenState createState() => _InboxScreenState();
 }
@@ -71,15 +70,16 @@ class _InboxScreenState extends State<InboxScreen> {
   bool isKeyboardVisible = false;
   bool isEmojiVisible = false;
   final TextEditingController _massageController = TextEditingController();
-  final TextEditingController _emojiController = TextEditingController();
+  final TextEditingController _tokenController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   ScrollController scrollController = ScrollController();
   String _message = 'default';
 
+  String token = '';
+  bool isGettingToken = false;
   var rmicons = false;
   var isDialOpen = ValueNotifier<bool>(false);
   bool isImageUploading = false;
-
-  final IconData _messageStatus = Icons.access_time_sharp;
 
   bool isTextFieldEmpty = true;
   Offset _tapPosition = const Offset(0, 0);
@@ -253,9 +253,28 @@ class _InboxScreenState extends State<InboxScreen> {
 
   @override
   void dispose() {
-    super.dispose();
     _audioPlayer.dispose();
     _assetsAudioPlayer.dispose();
+    super.dispose();
+  }
+
+  Future<String> fetchToken() async {
+    log('Token is Fetching');
+    String url = 'https://real-ruby-octopus-sock.cyclic.app/api/token/';
+
+    // Send the request
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      // If the server returns an OK response, then parse the JSON.
+      Map<String, dynamic> json = jsonDecode(response.body);
+      String newToken = json['token'];
+      debugPrint('Token Received: $newToken');
+      return newToken;
+    } else {
+      throw Exception(
+          'Failed to fetch a token. Make sure that your server URL is valid');
+    }
   }
 
   @override
@@ -269,6 +288,7 @@ class _InboxScreenState extends State<InboxScreen> {
       appBar: AppBar(
         centerTitle: false,
         automaticallyImplyLeading: false,
+        // ignore: deprecated_member_use
         backwardsCompatibility: true,
         leadingWidth: 30,
         elevation: 0,
@@ -328,11 +348,10 @@ class _InboxScreenState extends State<InboxScreen> {
               size: 20,
             ),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const VideoCall(),
-                ),
+              callConfirmationDialog(
+                'Create video call',
+                'Join video call',
+                VideoCall(token: token),
               );
             },
           ),
@@ -343,11 +362,10 @@ class _InboxScreenState extends State<InboxScreen> {
               size: 20,
             ),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const AudioCall(),
-                ),
+              callConfirmationDialog(
+                'Create audio call',
+                'Join audio call',
+                AudioCall(token: token),
               );
             },
           ),
@@ -458,8 +476,9 @@ class _InboxScreenState extends State<InboxScreen> {
                     decoration: BoxDecoration(
                       color: AppColor.white,
                       borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(15.0),
-                          topRight: Radius.circular(15.0)),
+                        topLeft: Radius.circular(15.0),
+                        topRight: Radius.circular(15.0),
+                      ),
                     ),
                     child: Scrollbar(
                       radius: const Radius.circular(30.0),
@@ -748,7 +767,8 @@ class _InboxScreenState extends State<InboxScreen> {
                                                       onTapDown: (details) {
                                                         _tapPosition = details
                                                             .globalPosition;
-                                                        print(_tapPosition);
+                                                        log(_tapPosition
+                                                            .toString());
                                                       },
                                                       onLongPress: () async {
                                                         setState(() {
@@ -961,7 +981,8 @@ class _InboxScreenState extends State<InboxScreen> {
                                                               storedMassages[i][
                                                                   'Sender Email'],
                                                             );
-                                                            print(_tapPosition);
+                                                            log(_tapPosition
+                                                                .toString());
                                                           },
                                                           child: Container(
                                                             padding:
@@ -1307,10 +1328,10 @@ class _InboxScreenState extends State<InboxScreen> {
             children: [
               IconButton(
                 onPressed: () async {
+                  Navigator.pop(context);
+                  resetToRest();
                   await updateChatBubble(
                       bubbleId, '👍', receiverId, senderEmail);
-                  resetToRest();
-                  Navigator.pop(context);
                 },
                 icon: const Text(
                   '👍',
@@ -1319,10 +1340,10 @@ class _InboxScreenState extends State<InboxScreen> {
               ),
               IconButton(
                 onPressed: () async {
+                  Navigator.pop(context);
+                  resetToRest();
                   await updateChatBubble(
                       bubbleId, '❤', receiverId, senderEmail);
-                  resetToRest();
-                  Navigator.pop(context);
                 },
                 padding: EdgeInsets.zero,
                 icon: const Text(
@@ -1332,10 +1353,10 @@ class _InboxScreenState extends State<InboxScreen> {
               ),
               IconButton(
                 onPressed: () async {
+                  Navigator.pop(context);
+                  resetToRest();
                   await updateChatBubble(
                       bubbleId, '😂', receiverId, senderEmail);
-                  resetToRest();
-                  Navigator.pop(context);
                 },
                 padding: EdgeInsets.zero,
                 icon: const Text(
@@ -1345,10 +1366,10 @@ class _InboxScreenState extends State<InboxScreen> {
               ),
               IconButton(
                 onPressed: () async {
+                  Navigator.pop(context);
+                  resetToRest();
                   await updateChatBubble(
                       bubbleId, '😮', receiverId, senderEmail);
-                  resetToRest();
-                  Navigator.pop(context);
                 },
                 icon: const Text(
                   '😮',
@@ -1357,10 +1378,10 @@ class _InboxScreenState extends State<InboxScreen> {
               ),
               IconButton(
                 onPressed: () async {
+                  Navigator.pop(context);
+                  resetToRest();
                   await updateChatBubble(
                       bubbleId, '😥', receiverId, senderEmail);
-                  resetToRest();
-                  Navigator.pop(context);
                 },
                 icon: const Text(
                   '😥',
@@ -1369,10 +1390,10 @@ class _InboxScreenState extends State<InboxScreen> {
               ),
               IconButton(
                 onPressed: () async {
+                  Navigator.pop(context);
+                  resetToRest();
                   await updateChatBubble(
                       bubbleId, '🙏', receiverId, senderEmail);
-                  resetToRest();
-                  Navigator.pop(context);
                 },
                 icon: const Text(
                   '🙏',
@@ -1383,10 +1404,10 @@ class _InboxScreenState extends State<InboxScreen> {
                 padding: const EdgeInsets.only(left: 5.0),
                 child: GestureDetector(
                   onTap: () async {
+                    Navigator.pop(context);
+                    resetToRest();
                     await updateChatBubble(
                         bubbleId, '', receiverId, senderEmail);
-                    resetToRest();
-                    Navigator.pop(context);
                   },
                   child: Text(
                     'Remove',
@@ -1494,8 +1515,13 @@ class _InboxScreenState extends State<InboxScreen> {
       _filePath = filepath;
       setState(() {});
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Center(child: Text('Please enable recording permission'))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Center(
+            child: Text('Please enable recording permission'),
+          ),
+        ),
+      );
     }
   }
 
@@ -1609,6 +1635,208 @@ class _InboxScreenState extends State<InboxScreen> {
                 ),
               ],
             ),
+          ),
+        );
+      }),
+    );
+  }
+
+  callConfirmationDialog(String title1, String title2, Widget widget) {
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(builder: (context, setState) {
+        return AlertDialog(
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(10.0),
+            ),
+          ),
+          alignment: Alignment.center,
+          backgroundColor: AppColor.lightOrange,
+          title: Visibility(
+            visible: token.isNotEmpty,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                const Text(
+                  'Send this token to your fiend to join the call by use this token',
+                  style: TextStyle(
+                    fontSize: 13,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    Clipboard.setData(
+                      ClipboardData(text: token),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Token copied to clipboard'),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.copy, size: 20),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: Colors.white,
+                      width: 0.5,
+                      style: BorderStyle.solid,
+                    ),
+                  ),
+                  child: Text(
+                    token,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Visibility(
+                visible: !token.isNotEmpty,
+                child: Material(
+                  color: AppColor.orange,
+                  borderRadius: BorderRadius.circular(10.0),
+                  clipBehavior: Clip.antiAlias,
+                  child: isGettingToken
+                      ? MaterialButton(
+                          onPressed: null,
+                          height: 40,
+                          minWidth: double.infinity,
+                          color: AppColor.orange,
+                          elevation: 0.0,
+                          child: CircularProgressIndicator(
+                            color: AppColor.white,
+                          ),
+                        )
+                      : MaterialButton(
+                          onPressed: () async {
+                            setState(() {
+                              isGettingToken = true;
+                            });
+                            token = await fetchToken();
+                            setState(() {
+                              token = token;
+                              isGettingToken = false;
+                            });
+                          },
+                          height: 40,
+                          minWidth: double.infinity,
+                          color: AppColor.orange,
+                          elevation: 0.0,
+                          child: Text(
+                            title1,
+                            style: TextStyle(color: AppColor.white),
+                          ),
+                        ),
+                ),
+              ),
+              Visibility(
+                visible: token.isNotEmpty,
+                child: Material(
+                  color: AppColor.orange,
+                  borderRadius: BorderRadius.circular(10.0),
+                  clipBehavior: Clip.antiAlias,
+                  child: MaterialButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => widget),
+                      );
+                    },
+                    height: 40,
+                    minWidth: double.infinity,
+                    color: AppColor.orange,
+                    elevation: 0.0,
+                    child: Text(
+                      'Join',
+                      style: TextStyle(color: AppColor.white),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12.0),
+              Visibility(
+                visible: token.isEmpty,
+                child: Column(
+                  children: [
+                    Form(
+                      key: _formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Token',
+                            style: GoogleFonts.robotoMono(
+                              fontSize: 18,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          TextFormField(
+                            keyboardType: TextInputType.text,
+                            cursorColor: AppColor.black,
+                            style: TextStyle(color: AppColor.black),
+                            decoration: InputDecoration(
+                              isDense: true,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                                borderSide: BorderSide(
+                                    color: AppColor.black, width: 1.0),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                                borderSide: BorderSide(
+                                    color: AppColor.grey, width: 1.0),
+                              ),
+                              hintText: 'Enter token to join',
+                            ),
+                            controller: _tokenController,
+                            validator: (value) {
+                              if (value!.isEmpty) {
+                                return 'Please enter token';
+                              }
+                              return null;
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12.0),
+                    Material(
+                      color: AppColor.orange,
+                      borderRadius: BorderRadius.circular(10.0),
+                      clipBehavior: Clip.antiAlias,
+                      child: MaterialButton(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {}
+                        },
+                        height: 40,
+                        minWidth: double.infinity,
+                        color: AppColor.orange,
+                        elevation: 0.0,
+                        child: Text(
+                          title2,
+                          style: TextStyle(color: AppColor.white),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         );
       }),

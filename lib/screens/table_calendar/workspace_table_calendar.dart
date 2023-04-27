@@ -1,17 +1,17 @@
 import 'dart:collection';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
-import 'package:stepbystep/colors.dart';
-import 'package:stepbystep/sql_database/sql_helper.dart';
 import 'package:table_calendar/table_calendar.dart';
-
+import 'package:intl/intl.dart';
 import 'calendar_utils.dart';
+import 'package:stepbystep/colors.dart';
 
 class WorkspaceTableCalendar extends StatefulWidget {
-  WorkspaceTableCalendar({Key? key, required this.tasks}) : super(key: key);
-  List tasks;
+  const WorkspaceTableCalendar({Key? key, required this.tasks})
+      : super(key: key);
+  final List tasks;
   @override
   _WorkspaceTableCalendarState createState() => _WorkspaceTableCalendarState();
 }
@@ -166,13 +166,13 @@ class _WorkspaceTableCalendarState extends State<WorkspaceTableCalendar> {
                 },
                 onLeftArrowTap: () {
                   _pageController.previousPage(
-                    duration: Duration(milliseconds: 300),
+                    duration: const Duration(milliseconds: 300),
                     curve: Curves.easeOut,
                   );
                 },
                 onRightArrowTap: () {
                   _pageController.nextPage(
-                    duration: Duration(milliseconds: 300),
+                    duration: const Duration(milliseconds: 300),
                     curve: Curves.easeOut,
                   );
                 },
@@ -260,7 +260,7 @@ class _WorkspaceTableCalendarState extends State<WorkspaceTableCalendar> {
                       child: Card(
                         child: ListTile(
                           dense: true,
-                          onTap: () => print('${value[index]}'),
+                          onTap: () => log('${value[index]}'),
                           title: Text(
                             task[0],
                             style: GoogleFonts.aBeeZee(

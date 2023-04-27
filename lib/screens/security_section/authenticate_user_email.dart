@@ -1,18 +1,18 @@
 import 'dart:developer';
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
-import 'package:stepbystep/colors.dart';
-import 'package:stepbystep/screens/security_section/signIn_screen2.dert.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'package:stepbystep/screens/security_section/signIn_screen2.dart';
 
 class AuthenticateUserEmail extends StatefulWidget {
-  AuthenticateUserEmail({Key? key, required this.email}) : super(key: key);
-  String email;
+  const AuthenticateUserEmail({Key? key, required this.email})
+      : super(key: key);
+  final String email;
 
   @override
   State<AuthenticateUserEmail> createState() => _AuthenticateUserEmailState();

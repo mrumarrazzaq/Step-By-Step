@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:stepbystep/colors.dart';
@@ -10,11 +8,11 @@ import 'package:stepbystep/screens/workspace_manager/workspace_roles_handler/wor
 import 'package:stepbystep/screens/workspace_manager/workspace_view/workspace_view_home.dart';
 
 class WorkspaceScreenCombiner extends StatefulWidget {
-  String docId;
-  String workspaceCode;
-  String workspaceName;
-  String workspaceOwnerEmail;
-  WorkspaceScreenCombiner({
+  final String docId;
+  final String workspaceCode;
+  final String workspaceName;
+  final String workspaceOwnerEmail;
+  const WorkspaceScreenCombiner({
     Key? key,
     required this.workspaceCode,
     required this.docId,

@@ -4,26 +4,23 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
+import 'package:provider/provider.dart';
+import 'package:mac_address/mac_address.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:form_field_validator/form_field_validator.dart';
-import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:mac_address/mac_address.dart';
 
-import 'package:provider/provider.dart';
-import 'package:stepbystep/authentication/authentication_with_google.dart';
-import 'package:stepbystep/colors.dart';
-import 'package:stepbystep/config.dart';
-import 'package:stepbystep/screens/admin/admin_login.dart';
-import 'package:stepbystep/screens/home.dart';
-import 'package:stepbystep/screens/security_section/registeration_screen2.dart';
-import 'package:stepbystep/screens/step_by_step.dart';
 import 'forgot_password.dart';
-import 'registration_screen.dart';
+import 'package:stepbystep/config.dart';
+import 'package:stepbystep/colors.dart';
+import 'package:stepbystep/screens/step_by_step.dart';
+import 'package:stepbystep/screens/admin/admin_login.dart';
+import 'package:form_field_validator/form_field_validator.dart';
+import 'package:stepbystep/authentication/authentication_with_google.dart';
+import 'package:stepbystep/screens/security_section/registeration_screen2.dart';
 
 final user = FirebaseFirestore.instance;
 
@@ -164,8 +161,6 @@ class _SignInScreen2State extends State<SignInScreen2> {
                           decoration: InputDecoration(
                             isDense: true,
                             enabled: _isLoading ? false : true,
-                            // fillColor: tealColor,
-                            // filled: true,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10.0),
                             ),
@@ -174,7 +169,6 @@ class _SignInScreen2State extends State<SignInScreen2> {
                               borderSide:
                                   BorderSide(color: AppColor.black, width: 1.5),
                             ),
-
                             hintText: 'Enter Email Id',
                             prefixIcon: Icon(
                               Icons.alternate_email,
@@ -187,10 +181,13 @@ class _SignInScreen2State extends State<SignInScreen2> {
                                 : null,
                           ),
                           controller: emailController,
-                          validator: MultiValidator([
-                            RequiredValidator(errorText: 'Please enter email'),
-                            EmailValidator(errorText: 'Not a Valid Email'),
-                          ]),
+                          validator: MultiValidator(
+                            [
+                              RequiredValidator(
+                                  errorText: 'Please enter email'),
+                              EmailValidator(errorText: 'Not a Valid Email'),
+                            ],
+                          ),
                         ),
                       ),
                       //Password Text Field
@@ -206,7 +203,6 @@ class _SignInScreen2State extends State<SignInScreen2> {
                           top: 10.0,
                         ),
                         child: TextFormField(
-                          onTap: () {},
                           obscureText: _obscureText,
                           cursorColor: AppColor.black,
                           style: TextStyle(color: AppColor.black),
@@ -219,8 +215,6 @@ class _SignInScreen2State extends State<SignInScreen2> {
                               borderRadius: BorderRadius.circular(10.0),
                             ),
                             hintText: 'Enter Password',
-                            // hintStyle: TextStyle(color: purpleColor),
-//                        labelText: 'Password',
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10.0),
                               borderSide:
@@ -245,9 +239,11 @@ class _SignInScreen2State extends State<SignInScreen2> {
                                       color: AppColor.black,
                                     ),
                               onTap: () {
-                                setState(() {
-                                  _obscureText = !_obscureText;
-                                });
+                                setState(
+                                  () {
+                                    _obscureText = !_obscureText;
+                                  },
+                                );
                               },
                             ),
                           ),
@@ -512,18 +508,6 @@ class _SignInScreen2State extends State<SignInScreen2> {
       log('=======================================');
       log(e.toString());
       log('=======================================');
-      //   await Fluttertoast.showToast(
-      //     msg: 'Failed to Login Try Again', // message
-      //     toastLength: Toast.LENGTH_SHORT, // length
-      //     gravity: ToastGravity.BOTTOM, // location
-      //     backgroundColor: Colors.grey,
-      //   );
-      //   Navigator.pushAndRemoveUntil(
-      //       context,
-      //       MaterialPageRoute(
-      //         builder: (context) => const SignInScreen(),
-      //       ),
-      //       (route) => false);
     }
   }
 
@@ -581,15 +565,6 @@ class _SignInScreen2State extends State<SignInScreen2> {
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
         );
-        // _scaffoldKey.currentState!.showSnackBar(
-        //   const SnackBar(
-        //     backgroundColor: Colors.red,
-        //     content: Text(
-        //       "No User Found for that Email",
-        //       style: TextStyle(fontSize: 15.0, color: Colors.white),
-        //     ),
-        //   ),
-        // );
       } else if (e.code == 'wrong-password') {
         setState(() {
           _isLoading = false;
@@ -602,15 +577,6 @@ class _SignInScreen2State extends State<SignInScreen2> {
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
         );
-        // _scaffoldKey.currentState!.showSnackBar(
-        //   const SnackBar(
-        //     backgroundColor: Colors.red,
-        //     content: Text(
-        //       "Wrong Password Provided by User",
-        //       style: TextStyle(fontSize: 15.0, color: Colors.white),
-        //     ),
-        //   ),
-        // );
       }
     }
   }

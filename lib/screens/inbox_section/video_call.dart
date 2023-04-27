@@ -1,9 +1,7 @@
-import 'dart:async';
 import 'dart:developer';
 
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:stepbystep/colors.dart';
 
@@ -11,17 +9,16 @@ import 'package:stepbystep/colors.dart';
 
 // -${Random().nextInt(10000)}
 class VideoCall extends StatefulWidget {
-  const VideoCall({Key? key}) : super(key: key);
-
+  const VideoCall({Key? key, required this.token}) : super(key: key);
+  final String token;
   @override
   State<VideoCall> createState() => _VideoCallState();
 }
 
 class _VideoCallState extends State<VideoCall> {
   String appId = "f6a59f6c0f794394af3604bb174cb945";
-  String token =
-      "007eJxTYPjnofcmhvn4i5ncqoYvLBv6tyS5LDz45r1JToTXR8F13R8VGNLMEk0t08ySDdLMLU2MLU0S04zNDEySkgzNTZKTLE1MDy7QS2kIZGTYMPMJMyMDBIL4fAzBTsG6YZkpqfm6zok5OQwMAAASJAs=";
-  final channel = "SBS-Video-Call";
+
+  final channel = "sbs";
 
   int uid = 0;
   int? _remoteUid;
@@ -84,7 +81,7 @@ class _VideoCallState extends State<VideoCall> {
     await _engine.startPreview();
 
     await _engine.joinChannel(
-      token: token,
+      token: widget.token,
       channelId: channel,
       uid: uid,
       options: const ChannelMediaOptions(),
@@ -95,7 +92,6 @@ class _VideoCallState extends State<VideoCall> {
     log('************************* SUCCESSFULLY JOINED *************************');
   }
 
-  // Create UI with local view and remote view
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -103,8 +99,7 @@ class _VideoCallState extends State<VideoCall> {
         title: const Text('Video Call'),
         // leading: IconButton(
         //   onPressed: () async {
-        //     await _engine.leaveChannel();
-        //     Navigator.pop(context);
+        //     await fetchToken(uid, channel, tokenRole);
         //   },
         //   icon: Icon(Icons.arrow_back),
         // ),
@@ -190,7 +185,7 @@ class _VideoCallState extends State<VideoCall> {
     );
 
     await _engine.joinChannel(
-      token: token,
+      token: widget.token,
       channelId: channel,
       options: options,
       uid: uid,

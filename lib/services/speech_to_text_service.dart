@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
@@ -15,7 +17,7 @@ class SpeechToTextService {
 
     final isAvailable = await _speech.initialize(
       onStatus: (status) => onListening(_speech.isListening),
-      onError: (e) => print('Error: $e'),
+      onError: (e) => log('Error: $e'),
     );
 
     if (isAvailable) {

@@ -14,7 +14,7 @@ import 'package:stepbystep/screens/table_calendar/workspace_table_calendar.dart'
 import 'package:stepbystep/screens/workspace_manager/workspace_task_tile.dart';
 
 class TaskView extends StatefulWidget {
-  TaskView({
+  const TaskView({
     Key? key,
     required this.isOwner,
     required this.userEmail,
@@ -26,15 +26,15 @@ class TaskView extends StatefulWidget {
     required this.leftButton,
     required this.rightButton,
   }) : super(key: key);
-  bool isOwner;
-  String userEmail;
-  String workspaceCode;
-  String workspaceTaskCode;
-  int taskStatusValue;
-  Stream<QuerySnapshot> snapshot;
-  Color color;
-  bool leftButton;
-  bool rightButton;
+  final bool isOwner;
+  final String userEmail;
+  final String workspaceCode;
+  final String workspaceTaskCode;
+  final int taskStatusValue;
+  final Stream<QuerySnapshot> snapshot;
+  final Color color;
+  final bool leftButton;
+  final bool rightButton;
 
   @override
   State<TaskView> createState() => _TaskViewState();

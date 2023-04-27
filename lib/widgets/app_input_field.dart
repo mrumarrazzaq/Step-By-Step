@@ -1,3 +1,5 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:flutter/material.dart';
 import 'package:stepbystep/colors.dart';
 
@@ -19,11 +21,11 @@ class RoundedInputField extends StatefulWidget {
   final String label;
   final String hint;
   final IconData prefixIcon;
-  bool isFieldDisable;
-  bool enableSuffixIcon;
+  final bool isFieldDisable;
+  final bool enableSuffixIcon;
   bool obscureText;
-  double radius;
-  TextInputType textInputType;
+  final double radius;
+  final TextInputType textInputType;
   final TextEditingController controller;
   String? Function(String?)? validate;
   @override
@@ -94,7 +96,7 @@ class _RoundedInputFieldState extends State<RoundedInputField> {
 }
 
 class AppInputField extends StatefulWidget {
-  AppInputField(
+  const AppInputField(
       {Key? key,
       required this.label,
       required this.hint,
@@ -106,10 +108,10 @@ class AppInputField extends StatefulWidget {
 
   final String label;
   final String hint;
-  TextInputType textInputType;
-  int maxLines;
+  final TextInputType textInputType;
+  final int maxLines;
   final TextEditingController controller;
-  String? Function(String?)? validate;
+  final String? Function(String?)? validate;
 
   @override
   State<AppInputField> createState() => _AppInputFieldState();

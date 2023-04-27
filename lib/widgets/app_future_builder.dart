@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 class AppFutureBuilder extends StatefulWidget {
-  AppFutureBuilder({Key? key, required this.future, required this.widget})
+  const AppFutureBuilder({Key? key, required this.future, required this.widget})
       : super(key: key);
-  Future<String> future;
-  Widget widget;
+  final Future<String> future;
+  final Widget widget;
 
   @override
   State<AppFutureBuilder> createState() => _AppFutureBuilderState();

@@ -1,26 +1,23 @@
 import 'dart:developer';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_intro/flutter_intro.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
 import 'package:get/get.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 import 'package:bot_toast/bot_toast.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 
 import 'package:stepbystep/colors.dart';
-import 'package:stepbystep/config.dart';
-import 'package:stepbystep/notificationservice/local_notification_service.dart';
-import 'package:stepbystep/screens/404_error.dart';
-import 'package:stepbystep/screens/onboarding_screen/onboading_screen.dart';
 import 'package:stepbystep/screens/step_by_step.dart';
 import 'package:stepbystep/apis/notification_api.dart';
+import 'package:stepbystep/screens/admin/admin_home.dart';
 import 'package:stepbystep/screens/security_section/signIn_screen.dart';
 import 'package:stepbystep/authentication/authentication_with_google.dart';
+import 'package:stepbystep/screens/onboarding_screen/onboading_screen.dart';
+import 'package:stepbystep/notificationservice/local_notification_service.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -35,12 +32,14 @@ class _MyAppState extends State<MyApp> {
   //     FlutterLocalNotificationsPlugin();
   final _storage = const FlutterSecureStorage();
   bool _isLogin = false;
+  bool _isAdminLogin = false;
   bool _isWaiting = true;
 
   bool _internetConnectionStatus = false;
 
   Future<void> checkLoginStatus() async {
     String? value = await _storage.read(key: 'uid');
+    String? value2 = await _storage.read(key: 'isAdmin');
     if (value == null) {
       setState(() {
         _isLogin = false;
@@ -55,6 +54,22 @@ class _MyAppState extends State<MyApp> {
       });
       log('---------------');
       log('User is logIN $_isLogin');
+    }
+
+    if (value2 == null) {
+      setState(() {
+        _isAdminLogin = false;
+        _isWaiting = false;
+      });
+      log('---------------');
+      log('Admin is logIN $_isAdminLogin');
+    } else if (value2 == 'true') {
+      setState(() {
+        _isAdminLogin = true;
+        _isWaiting = false;
+      });
+      log('---------------');
+      log('Admin is logIN $_isAdminLogin');
     }
   }
 
@@ -200,10 +215,12 @@ class _MyAppState extends State<MyApp> {
                     ),
                   ),
                 )
-              : !_isLogin
-                  ? const OnBoardingScreen()
-                  // const SignInScreen()
-                  : const StepByStep(),
+              : _isAdminLogin
+                  ? const AdminHome()
+                  : !_isLogin
+                      ? const OnBoardingScreen()
+                      // const SignInScreen()
+                      : const StepByStep(),
           // : Intro(
           //     padding: const EdgeInsets.all(8),
           //     borderRadius: const BorderRadius.all(

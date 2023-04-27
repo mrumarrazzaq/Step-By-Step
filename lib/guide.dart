@@ -22,13 +22,13 @@ class _GuideState extends State<Guide> {
 
         /// Using overlayBuilder can be more customized, please refer to advanced usage in example
         overlayBuilder: (params) {
-          return Text('ABC');
+          return const Text('ABC');
         },
 
         /// You can specify configuration for individual guide here
         borderRadius: const BorderRadius.all(Radius.circular(64)),
         builder: (context, key) => Column(
-          children: [
+          children: const [
             Text('Umar'),
           ],
         ),

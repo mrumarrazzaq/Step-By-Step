@@ -4,23 +4,22 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:provider/provider.dart';
+import 'package:mac_address/mac_address.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:form_field_validator/form_field_validator.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:mac_address/mac_address.dart';
 
-import 'package:provider/provider.dart';
-import 'package:stepbystep/authentication/authentication_with_google.dart';
-import 'package:stepbystep/colors.dart';
-import 'package:stepbystep/config.dart';
-import 'package:stepbystep/screens/home.dart';
-import 'package:stepbystep/screens/step_by_step.dart';
 import 'forgot_password.dart';
 import 'registration_screen.dart';
+import 'package:stepbystep/colors.dart';
+import 'package:stepbystep/config.dart';
+import 'package:stepbystep/screens/step_by_step.dart';
+import 'package:form_field_validator/form_field_validator.dart';
+import 'package:stepbystep/authentication/authentication_with_google.dart';
 
 class SignInScreen extends StatefulWidget {
   static const String id = 'SignInScreen';
@@ -107,8 +106,6 @@ class _SignInScreenState extends State<SignInScreen> {
                         decoration: InputDecoration(
                           isDense: true,
                           enabled: _isLoading ? false : true,
-                          // fillColor: tealColor,
-                          // filled: true,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30.0),
                           ),
@@ -122,7 +119,6 @@ class _SignInScreenState extends State<SignInScreen> {
                             borderSide:
                                 BorderSide(color: AppColor.black, width: 1.0),
                           ),
-
                           hintText: 'Enter Email Id',
                           label: Text('Email Id',
                               style: TextStyle(color: AppColor.black)),
@@ -137,10 +133,12 @@ class _SignInScreenState extends State<SignInScreen> {
                               : null,
                         ),
                         controller: emailController,
-                        validator: MultiValidator([
-                          RequiredValidator(errorText: 'Please enter email'),
-                          EmailValidator(errorText: 'Not a Valid Email'),
-                        ]),
+                        validator: MultiValidator(
+                          [
+                            RequiredValidator(errorText: 'Please enter email'),
+                            EmailValidator(errorText: 'Not a Valid Email'),
+                          ],
+                        ),
                       ),
                     ),
                     //Password Text Field
@@ -148,23 +146,18 @@ class _SignInScreenState extends State<SignInScreen> {
                       padding: const EdgeInsets.only(
                           left: 25.0, right: 25.0, bottom: 20.0),
                       child: TextFormField(
-                        onTap: () {},
                         obscureText: _obscureText,
                         cursorColor: AppColor.black,
                         style: TextStyle(color: AppColor.black),
                         decoration: InputDecoration(
                           isDense: true,
                           enabled: _isLoading ? false : true,
-                          // fillColor: purpleColor,
-                          // filled: true,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30.0),
                           ),
                           hintText: 'Enter Password',
                           label: Text('Password',
                               style: TextStyle(color: AppColor.black)),
-                          // hintStyle: TextStyle(color: purpleColor),
-//                        labelText: 'Password',
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30.0),
                             borderSide:
@@ -175,7 +168,6 @@ class _SignInScreenState extends State<SignInScreen> {
                             borderSide:
                                 BorderSide(color: AppColor.black, width: 1.0),
                           ),
-//                        labelStyle: TextStyle(color: defaultUIColor),
                           prefixIcon: Icon(
                             Icons.vpn_key,
                             color: AppColor.black,
@@ -263,8 +255,10 @@ class _SignInScreenState extends State<SignInScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text("Don't have account? ",
-                            style: TextStyle(color: AppColor.black)),
+                        Text(
+                          "Don't have account? ",
+                          style: TextStyle(color: AppColor.black),
+                        ),
                         TextButton(
                             onPressed: () => {
                                   SystemChannels.textInput

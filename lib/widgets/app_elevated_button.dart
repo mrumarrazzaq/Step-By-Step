@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stepbystep/colors.dart';
 
 class AppElevatedButton extends StatelessWidget {
-  AppElevatedButton({
+  const AppElevatedButton({
     Key? key,
     required this.text,
     required this.textColor,
@@ -16,17 +15,17 @@ class AppElevatedButton extends StatelessWidget {
     this.isLoading = false,
     this.loadingColor = Colors.white,
   }) : super(key: key);
-  String text;
-  Color textColor;
-  Color foregroundColor;
-  Color backgroundColor;
-  Color borderSideColor;
-  Color loadingColor;
-  Function() function;
-  double width;
-  double height;
-  double fontSize;
-  bool isLoading;
+  final String text;
+  final Color textColor;
+  final Color foregroundColor;
+  final Color backgroundColor;
+  final Color borderSideColor;
+  final Color loadingColor;
+  final Function() function;
+  final double width;
+  final double height;
+  final double fontSize;
+  final bool isLoading;
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(

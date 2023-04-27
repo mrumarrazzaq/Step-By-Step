@@ -1,9 +1,11 @@
+import 'dart:developer';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:stepbystep/colors.dart';
 
 class VoiceMessage extends StatefulWidget {
-  VoiceMessage(
+  const VoiceMessage(
       {Key? key,
       required this.url,
       required this.messageStatus,
@@ -12,12 +14,12 @@ class VoiceMessage extends StatefulWidget {
       required this.left,
       required this.right})
       : super(key: key);
-  String url;
-  int messageStatus;
-  String time;
-  Color color;
-  double left;
-  double right;
+  final String url;
+  final int messageStatus;
+  final String time;
+  final Color color;
+  final double left;
+  final double right;
 
   @override
   VoiceMessageState createState() => VoiceMessageState();
@@ -38,15 +40,15 @@ class VoiceMessageState extends State<VoiceMessage> {
     _audioPlayer.onPlayerStateChanged.listen((state) {
       if (state.toString() == 'PlayerState.PLAYING') {
         _isPlaying = true;
-        print('$state $_isPlaying');
+        log('$state $_isPlaying');
       }
       if (state.toString() == 'PlayerState.STOPPED') {
-        print('$state $_isPlaying');
+        log('$state $_isPlaying');
       }
       if (state.toString() == 'PlayerState.COMPLETED') {
         _audioPlayer.stop();
         _isPlaying = false;
-        print('$state $_isPlaying');
+        log('$state $_isPlaying');
       }
       if (mounted) {
         setState(() {});
@@ -65,9 +67,9 @@ class VoiceMessageState extends State<VoiceMessage> {
       if (mounted) {
         setState(() {
           position = newPosition;
-          print(position);
-          print('========');
-          print(position.inSeconds);
+          log(position.toString());
+          log('========');
+          log(position.inSeconds.toString());
         });
       }
     });
@@ -87,13 +89,13 @@ class VoiceMessageState extends State<VoiceMessage> {
               IconButton(
                 onPressed: () {
                   if (!_isPlaying) {
-                    print('PLAY');
+                    log('PLAY');
                     _audioPlayer.play(widget.url);
                     _isPlaying = true;
                     _isPaused = false;
                     setState(() {});
                   } else if (!_isPaused) {
-                    print('PAUSED');
+                    log('PAUSED');
                     _audioPlayer.pause();
                     _isPlaying = false;
                     _isPaused = true;
@@ -111,9 +113,9 @@ class VoiceMessageState extends State<VoiceMessage> {
                 inactiveColor: AppColor.grey,
                 onChanged: (value) async {
                   final position = Duration(seconds: value.toInt());
-                  print(value);
-                  print('-----------');
-                  print(position);
+                  log(value.toString());
+                  log('-----------');
+                  log(position.toString());
                   await _audioPlayer.seek(position);
                   // setState(() {});
                   await _audioPlayer.resume();
@@ -144,47 +146,6 @@ class VoiceMessageState extends State<VoiceMessage> {
           ),
         ],
       ),
-      // ListTile(
-      //   dense: true,
-      //   minLeadingWidth: 0,
-      //   leading: IconButton(
-      //     onPressed: () {
-      //       if (!_isPlaying) {
-      //         _audioPlayer.play(widget.url);
-      //         _isPlaying = true;
-      //       } else {
-      //         _audioPlayer.stop();
-      //         _isPlaying = false;
-      //       }
-      //       setState(() {});
-      //     },
-      //     icon: Icon(_isPlaying ? Icons.stop : Icons.play_arrow, size: 30),
-      //   ),
-      //   title: Slider(
-      //     min: 0,
-      //     max: position.inSeconds.toDouble(),
-      //     value: position.inSeconds.toDouble(),
-      //     activeColor: widget.color,
-      //     inactiveColor: AppColor.grey,
-      //     onChanged: (value) async {
-      //       final position = Duration(seconds: value.toInt());
-      //       await _audioPlayer.seek(position);
-      //
-      //       await _audioPlayer.resume();
-      //     },
-      //   ),
-      //   // subtitle: Row(
-      //   //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      //   //   children: [
-      //   //     Text(_printDuration(position)),
-      //   //     Text(_printDuration(duration - position)),
-      //   //   ],
-      //   // ),
-      //   subtitle: Icon(
-      //       widget.messageStatus == 0 ? Icons.check : Icons.access_time_sharp,
-      //       size: 15,
-      //       color: Colors.grey[400]),
-      // ),
     );
   }
 
