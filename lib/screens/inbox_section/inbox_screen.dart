@@ -427,7 +427,7 @@ class _InboxScreenState extends State<InboxScreen> {
                               icon: Icon(Icons.copy, color: AppColor.white),
                               onPressed: () {
                                 Clipboard.setData(
-                                    ClipboardData(text: bubbleMessage));
+                                    ClipboardData(text: bubbleMessage),);
                                 setState(() {
                                   selectedChatBubbleColor = Colors.transparent;
                                   _isChatBubbleSelected = false;
@@ -772,6 +772,9 @@ class _InboxScreenState extends State<InboxScreen> {
                                                       },
                                                       onLongPress: () async {
                                                         setState(() {
+                                                          bubbleMessage =
+                                                          storedMassages[i]
+                                                          ['Message'];
                                                           _isChatBubbleSelected =
                                                               true;
                                                           chatBubbleId =

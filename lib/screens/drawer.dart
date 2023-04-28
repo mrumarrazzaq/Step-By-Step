@@ -29,7 +29,7 @@ class AppDrawer extends StatefulWidget {
 class _AppDrawerState extends State<AppDrawer> {
   final storage = const FlutterSecureStorage();
   String signInWith = 'NULL';
-
+  String siteAddress = '';
   isGoogleLogin() async {
     String? value = await storage.read(key: 'signInWith') ?? 'NULL';
     setState(() {
@@ -58,9 +58,26 @@ class _AppDrawerState extends State<AppDrawer> {
     });
   }
 
+  getSiteAddress() async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('SBSWebsite')
+          .doc('address')
+          .get()
+          .then((ds) {
+        siteAddress = ds['url'];
+        log(siteAddress);
+      });
+      setState(() {});
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
   @override
   void initState() {
     isGoogleLogin();
+    getSiteAddress();
     super.initState();
   }
 
@@ -163,7 +180,7 @@ class _AppDrawerState extends State<AppDrawer> {
                 trailing: Icon(Icons.arrow_forward, color: Colors.white),
               ),
               onPressed: () {
-                LaunchURLAPI.launchMyUrl(Uri.parse('https://flutter.dev'));
+                LaunchURLAPI.launchMyUrl(Uri.parse(siteAddress));
               },
             ),
             Divider(color: AppColor.white, indent: 15, endIndent: 15),
