@@ -17,11 +17,13 @@ class Utils {
     final text = rawText.toLowerCase();
     List<String> questions = [
       'purpose application',
+      'what is self space',
       'need create workspace',
       'Who are you',
     ];
     List<String> answers = [
       'the application is design for manage the organizations so productivity will enhance',
+      'A self-space is a personalized virtual environment that allows you to efficiently manage your daily tasks and improve your productivity. You can customize your self-space to reflect your individual needs and preferences, adding tools and resources that help you stay organized and focused. Additionally, you can link your self-space to your workspace and collaborate with others by assigning tasks and sharing information. With a self-space, you have the flexibility to tailor your workflow to suit your unique working style and optimize your productivity.',
       'You need to create workspace to handle members and task in the organization',
       'i am your assistant you can clear your queries by asking questions from me',
     ];

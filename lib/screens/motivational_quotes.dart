@@ -14,6 +14,7 @@ import 'package:stepbystep/api_keys/api_keys.dart';
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:stepbystep/dialog_boxes/app_dialog3.dart';
 
 class MotivationalQuotes extends StatefulWidget {
   const MotivationalQuotes({Key? key}) : super(key: key);
@@ -240,71 +241,83 @@ class _MotivationalQuotesState extends State<MotivationalQuotes> {
                           padding: const EdgeInsets.only(top: 20.0),
                           child: SizedBox(
                             width: double.infinity,
-                            child: Card(
-                              elevation: 2,
-                              shadowColor: AppColor.grey,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30.0),
-                              ),
-                              margin: const EdgeInsets.symmetric(vertical: 5),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  ClipRRect(
-                                    clipBehavior: Clip.antiAlias,
-                                    borderRadius: const BorderRadius.only(
-                                      topLeft: Radius.circular(30.0),
-                                      topRight: Radius.circular(30.0),
-                                    ),
-                                    child: CachedNetworkImage(
-                                      imageUrl: quoteImages[itemIndex],
-                                      width: double.infinity,
-                                      maxWidthDiskCache: 500,
-                                      maxHeightDiskCache: 500,
-                                      placeholder: (context, url) => Container(
-                                        height: 200,
+                            child: InkWell(
+                              onTap: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (_) => AppDialog3(
+                                    imageUrl: quoteImages[itemIndex],
+                                    text: quoteText[itemIndex],
+                                  ),
+                                );
+                              },
+                              child: Card(
+                                elevation: 2,
+                                shadowColor: AppColor.grey,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30.0),
+                                ),
+                                margin: const EdgeInsets.symmetric(vertical: 5),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    ClipRRect(
+                                      clipBehavior: Clip.antiAlias,
+                                      borderRadius: const BorderRadius.only(
+                                        topLeft: Radius.circular(30.0),
+                                        topRight: Radius.circular(30.0),
+                                      ),
+                                      child: CachedNetworkImage(
+                                        imageUrl: quoteImages[itemIndex],
                                         width: double.infinity,
-                                        color: AppColor.white,
+                                        maxWidthDiskCache: 500,
+                                        maxHeightDiskCache: 500,
+                                        placeholder: (context, url) =>
+                                            Container(
+                                          height: 200,
+                                          width: double.infinity,
+                                          color: AppColor.white,
+                                        ),
+                                        errorWidget: (context, url, error) =>
+                                            const Icon(Icons.error),
                                       ),
-                                      errorWidget: (context, url, error) =>
-                                          const Icon(Icons.error),
+
+                                      /*Image.network(
+                                        quoteImages[itemIndex],
+                                        width: double.infinity,
+                                      ),*/
                                     ),
+                                    Container(
+                                      margin: const EdgeInsets.symmetric(
+                                          vertical: 5, horizontal: 18),
+                                      child: ReadMoreText(
+                                        quoteText[itemIndex],
 
-                                    /*Image.network(
-                                      quoteImages[itemIndex],
-                                      width: double.infinity,
-                                    ),*/
-                                  ),
-                                  Container(
-                                    margin: const EdgeInsets.symmetric(
-                                        vertical: 5, horizontal: 18),
-                                    child: ReadMoreText(
-                                      quoteText[itemIndex],
-
-                                      trimLines: 6,
-                                      colorClickableText: AppColor.orange,
-                                      textAlign: TextAlign.justify,
-                                      trimMode: TrimMode.Line,
-                                      trimCollapsedText: '  more',
-                                      trimExpandedText: '      less',
-                                      moreStyle: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          overflow: TextOverflow.fade,
-                                          color: AppColor.black),
-                                      lessStyle: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColor.black),
-                                      //nerkoOne
-                                      style: GoogleFonts.cookie(
-                                        fontSize: 20,
-                                        fontStyle: FontStyle.italic,
+                                        trimLines: 6,
+                                        colorClickableText: AppColor.orange,
+                                        textAlign: TextAlign.justify,
+                                        trimMode: TrimMode.Line,
+                                        trimCollapsedText: '  more',
+                                        trimExpandedText: '      less',
+                                        moreStyle: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            overflow: TextOverflow.fade,
+                                            color: AppColor.black),
+                                        lessStyle: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColor.black),
+                                        //nerkoOne
+                                        style: GoogleFonts.cookie(
+                                          fontSize: 20,
+                                          fontStyle: FontStyle.italic,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           ),

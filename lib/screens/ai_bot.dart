@@ -4,9 +4,9 @@ import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:stepbystep/app_bot_utils/utils.dart';
 import 'package:stepbystep/services/scan_text_service.dart';
 import 'package:stepbystep/services/speech_to_text_service.dart';
-import 'package:stepbystep/app_utils/utils.dart';
 import 'package:stepbystep/services/text_to_speech_service.dart';
 import 'package:stepbystep/widgets/highlight_sub_string.dart';
 

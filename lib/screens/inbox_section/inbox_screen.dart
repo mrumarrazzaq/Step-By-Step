@@ -427,7 +427,8 @@ class _InboxScreenState extends State<InboxScreen> {
                               icon: Icon(Icons.copy, color: AppColor.white),
                               onPressed: () {
                                 Clipboard.setData(
-                                    ClipboardData(text: bubbleMessage),);
+                                  ClipboardData(text: bubbleMessage),
+                                );
                                 setState(() {
                                   selectedChatBubbleColor = Colors.transparent;
                                   _isChatBubbleSelected = false;
@@ -773,8 +774,8 @@ class _InboxScreenState extends State<InboxScreen> {
                                                       onLongPress: () async {
                                                         setState(() {
                                                           bubbleMessage =
-                                                          storedMassages[i]
-                                                          ['Message'];
+                                                              storedMassages[i]
+                                                                  ['Message'];
                                                           _isChatBubbleSelected =
                                                               true;
                                                           chatBubbleId =
@@ -1824,7 +1825,15 @@ class _InboxScreenState extends State<InboxScreen> {
                       clipBehavior: Clip.antiAlias,
                       child: MaterialButton(
                         onPressed: () {
-                          if (_formKey.currentState!.validate()) {}
+                          if (_formKey.currentState!.validate()) {
+                            setState(() {
+                              token = _tokenController.text;
+                            });
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => widget),
+                            );
+                          }
                         },
                         height: 40,
                         minWidth: double.infinity,

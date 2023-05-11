@@ -2,8 +2,9 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date_format/date_format.dart';
-import 'package:date_picker_timeline/date_picker_timeline.dart';
+// import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_date_picker_timeline/flutter_date_picker_timeline.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:lottie/lottie.dart';
@@ -88,6 +89,12 @@ class _TaskViewState extends State<TaskView> {
     }
   }
 
+  void setDateFilter() {
+    setState(() {
+      log('Date Filter Set');
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -100,10 +107,11 @@ class _TaskViewState extends State<TaskView> {
             }
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
-                  child: CircularProgressIndicator(
-                color: AppColor.orange,
-                strokeWidth: 2.0,
-              ));
+                child: CircularProgressIndicator(
+                  color: AppColor.orange,
+                  strokeWidth: 2.0,
+                ),
+              );
             }
             if (snapshot.hasData) {
               final List storedData = [];
@@ -181,18 +189,34 @@ class _TaskViewState extends State<TaskView> {
                     ),
                   ),
                   Lottie.asset(repeat: false, 'animations/black-divider.json'),
-                  DatePicker(
-                    initialSelectedDate,
+                  // DatePicker(
+                  //   initialSelectedDate,
+                  //   initialSelectedDate: initialSelectedDate,
+                  //   selectionColor: Colors.black,
+                  //   selectedTextColor: Colors.white,
+                  //   width: 60,
+                  //   onDateChange: (dateTime) {
+                  //     setState(() {
+                  //       dateFilter =
+                  //           formatDate(dateTime, [yyyy, '-', mm, '-', dd]);
+                  //       log(dateTime.toString());
+                  //       log(dateFilter.toString());
+                  //     });
+                  //   },
+                  // ),
+                  FlutterDatePickerTimeline(
                     initialSelectedDate: initialSelectedDate,
-                    selectionColor: Colors.black,
-                    selectedTextColor: Colors.white,
-                    width: 60,
-                    onDateChange: (dateTime) {
-                      setState(() {
-                        dateFilter =
-                            formatDate(dateTime, [yyyy, '-', mm, '-', dd]);
-                        log(dateTime.toString());
-                        log(dateFilter.toString());
+                    startDate: initialSelectedDate,
+                    endDate: DateTime(3000, 01, 30),
+                    calendarMode: CalendarMode.gregorian,
+                    onSelectedDateChange: (dateTime) {
+                      dateFilter =
+                          formatDate(dateTime!, [yyyy, '-', mm, '-', dd]);
+                      // context.read<DateCompare>().setDateFilter(dateFilter);
+                      Future.delayed(Duration.zero, () async {
+                        // setState(() {});
+                        setDateFilter();
+                        log(dateFilter);
                       });
                     },
                   ),

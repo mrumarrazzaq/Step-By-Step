@@ -22,7 +22,7 @@ import flutter_tts
 import iris_event
 import path_provider_macos
 import record_macos
-import shared_preferences_macos
+import shared_preferences_foundation
 import speech_to_text_macos
 import sqflite
 import url_launcher_macos
